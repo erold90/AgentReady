@@ -3,11 +3,28 @@
  */
 
 const Scanner = (() => {
-  const PROXY_URL = 'https://api.allorigins.win/get?url=';
-  const TIMEOUT = 15000;
+  // Multiple proxy fallbacks for reliability
+  const PROXIES = [
+    {
+      name: 'codetabs',
+      url: (target) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}`,
+      parse: (response) => response.text()
+    },
+    {
+      name: 'allorigins',
+      url: (target) => `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`,
+      parse: (response) => response.text()
+    },
+    {
+      name: 'corsproxy-org',
+      url: (target) => `https://corsproxy.org/?url=${encodeURIComponent(target)}`,
+      parse: (response) => response.text()
+    }
+  ];
+  const TIMEOUT = 20000;
 
   /**
-   * Fetch a URL through CORS proxy, return HTML string
+   * Fetch a URL through CORS proxy with fallbacks, return HTML string
    */
   async function fetchPage(url) {
     // Validate URL
@@ -22,36 +39,50 @@ const Scanner = (() => {
       throw new Error('Only HTTP/HTTPS URLs are supported.');
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), TIMEOUT);
+    let lastError = null;
 
-    try {
-      const proxyUrl = PROXY_URL + encodeURIComponent(url);
-      const response = await fetch(proxyUrl, { signal: controller.signal });
+    for (const proxy of PROXIES) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), TIMEOUT);
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: HTTP ${response.status}`);
+      try {
+        const proxyUrl = proxy.url(url);
+        const response = await fetch(proxyUrl, {
+          signal: controller.signal,
+          headers: { 'Accept': 'text/html' }
+        });
+
+        if (!response.ok) {
+          lastError = new Error(`${proxy.name}: HTTP ${response.status}`);
+          continue;
+        }
+
+        const html = await proxy.parse(response);
+
+        if (!html || html.length < 50 || html.includes('"error"')) {
+          lastError = new Error(`${proxy.name}: Empty or error response`);
+          continue;
+        }
+
+        return {
+          html: html,
+          url: url,
+          status: 200,
+          contentType: 'text/html',
+          proxy: proxy.name
+        };
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          lastError = new Error(`${proxy.name}: timed out`);
+        } else {
+          lastError = err;
+        }
+      } finally {
+        clearTimeout(timeout);
       }
-
-      const data = await response.json();
-      if (!data.contents) {
-        throw new Error('Empty response from proxy. The site may be blocking automated access.');
-      }
-
-      return {
-        html: data.contents,
-        url: url,
-        status: data.status?.http_code || 200,
-        contentType: data.status?.content_type || 'text/html'
-      };
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        throw new Error('Request timed out. The site may be slow or blocking access.');
-      }
-      throw err;
-    } finally {
-      clearTimeout(timeout);
     }
+
+    throw new Error(`Failed to fetch the URL. ${lastError?.message || 'All proxies failed.'} The site may be blocking automated access.`);
   }
 
   /**
