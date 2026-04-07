@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentReady — Is Your Website Ready for AI Agents?</title>
+  <meta name="description" content="Scan any website to check WebMCP readiness. Get your Agent Readiness Score, auto-generate WebMCP code, and preview how AI agents see your site.">
+  <meta property="og:title" content="AgentReady — WebMCP Audit & Code Generator">
+  <meta property="og:description" content="Is your website ready for AI agents? Scan, score, and fix your WebMCP implementation in seconds.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9889;</text></svg>">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon">&#9889;</span>
+        <span class="logo-text">AgentReady</span>
+      </a>
+      <nav class="header-nav">
+        <a href="#how-it-works">How it works</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon-light">&#9790;</span>
+          <span class="theme-icon-dark">&#9728;</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">WebMCP Early Preview — Chrome 146+</div>
+    <h1>Is your website ready<br>for <span class="gradient-text">AI Agents</span>?</h1>
+    <p class="hero-subtitle">Scan any URL. Get your Agent Readiness Score. Auto-generate WebMCP code. Preview how AI agents see your site.</p>
+    <div class="scan-box">
+      <div class="scan-input-wrap">
+        <span class="scan-icon">&#128269;</span>
+        <input type="url" id="url-input" class="scan-input" placeholder="https://example.com" autocomplete="url" spellcheck="false">
+        <button id="scan-btn" class="scan-btn">
+          <span class="scan-btn-text">Scan</span>
+          <span class="scan-btn-loading" hidden>
+            <span class="spinner"></span> Scanning...
+          </span>
+        </button>
+      </div>
+      <div id="scan-error" class="scan-error" hidden></div>
+    </div>
+    <div class="hero-examples">
+      Try:
+      <button class="example-btn" data-url="https://www.google.com">google.com</button>
+      <button class="example-btn" data-url="https://www.amazon.com">amazon.com</button>
+      <button class="example-btn" data-url="https://www.github.com">github.com</button>
+      <button class="example-btn" data-url="https://www.booking.com">booking.com</button>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="results" hidden>
+    <!-- Score Overview -->
+    <div class="results-header">
+      <div class="score-card">
+        <div class="score-gauge">
+          <svg viewBox="0 0 120 120" class="score-ring">
+            <circle cx="60" cy="60" r="54" class="score-ring-bg"/>
+            <circle cx="60" cy="60" r="54" class="score-ring-fill" id="score-ring-fill"/>
+          </svg>
+          <div class="score-value" id="score-value">0</div>
+        </div>
+        <div class="score-label">Agent Readiness Score</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-forms">0</div>
+          <div class="stat-label">Forms Found</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-webmcp">0</div>
+          <div class="stat-label">WebMCP Ready</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-issues">0</div>
+          <div class="stat-label">Issues</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-https">-</div>
+          <div class="stat-label">HTTPS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanned URL -->
+    <div class="scanned-url">
+      <span class="scanned-url-label">Scanned:</span>
+      <span id="scanned-url-value" class="scanned-url-value"></span>
+      <button id="rescan-btn" class="rescan-btn" title="Rescan">&#8634;</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="audit">Audit</button>
+      <button class="tab" data-tab="code">Generate Code</button>
+      <button class="tab" data-tab="agent">Agent View</button>
+      <button class="tab" data-tab="report">Report</button>
+    </div>
+
+    <!-- Tab: Audit -->
+    <div class="tab-content active" id="tab-audit">
+      <div class="section-title">
+        <h2>Audit Results</h2>
+        <p>Detailed analysis of your website's WebMCP readiness</p>
+      </div>
+
+      <!-- Category Scores -->
+      <div class="category-scores" id="category-scores"></div>
+
+      <!-- Issues List -->
+      <div class="issues-section">
+        <h3>Issues & Suggestions</h3>
+        <div id="issues-list" class="issues-list"></div>
+      </div>
+
+      <!-- Forms Found -->
+      <div class="forms-section">
+        <h3>Forms Detected</h3>
+        <div id="forms-list" class="forms-list"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Generate Code -->
+    <div class="tab-content" id="tab-code">
+      <div class="section-title">
+        <h2>Generated WebMCP Code</h2>
+        <p>Copy-paste ready code to make your forms agent-accessible</p>
+      </div>
+      <div id="code-sections" class="code-sections"></div>
+      <div id="no-forms-msg" class="empty-state" hidden>
+        <div class="empty-icon">&#128196;</div>
+        <p>No forms detected on this page. WebMCP declarative API requires HTML forms.</p>
+        <p>You can still use the <strong>imperative API</strong> to register custom tools via JavaScript.</p>
+      </div>
+    </div>
+
+    <!-- Tab: Agent View -->
+    <div class="tab-content" id="tab-agent">
+      <div class="section-title">
+        <h2>Agent Simulator</h2>
+        <p>See how an AI agent perceives your website</p>
+      </div>
+      <div class="agent-toggle">
+        <button class="agent-toggle-btn active" data-view="before">Before (Current)</button>
+        <button class="agent-toggle-btn" data-view="after">After (With WebMCP)</button>
+      </div>
+      <div id="agent-view-before" class="agent-view active">
+        <div class="agent-console">
+          <div class="agent-console-header">
+            <span class="agent-dot red"></span>
+            <span class="agent-dot yellow"></span>
+            <span class="agent-dot green"></span>
+            <span class="agent-console-title">AI Agent — Tool Discovery</span>
+          </div>
+          <div id="agent-before-content" class="agent-console-body"></div>
+        </div>
+      </div>
+      <div id="agent-view-after" class="agent-view">
+        <div class="agent-console">
+          <div class="agent-console-header">
+            <span class="agent-dot red"></span>
+            <span class="agent-dot yellow"></span>
+            <span class="agent-dot green"></span>
+            <span class="agent-console-title">AI Agent — Tool Discovery (With WebMCP)</span>
+          </div>
+          <div id="agent-after-content" class="agent-console-body"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Report -->
+    <div class="tab-content" id="tab-report">
+      <div class="section-title">
+        <h2>Export Report</h2>
+        <p>Download or share your Agent Readiness Report</p>
+      </div>
+      <div class="report-actions">
+        <button id="download-report" class="btn btn-primary">
+          &#128196; Download HTML Report
+        </button>
+        <button id="copy-report-link" class="btn btn-secondary">
+          &#128279; Copy Shareable Link
+        </button>
+      </div>
+      <div class="report-preview" id="report-preview"></div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="how-section">
+    <h2>How It Works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Scan</h3>
+        <p>Enter any URL. We analyze every form, script, and security header on the page.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Score</h3>
+        <p>Get your Agent Readiness Score (0-100) with detailed breakdown by category.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Fix</h3>
+        <p>Copy auto-generated WebMCP code — declarative HTML or imperative JavaScript.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h3>Preview</h3>
+        <p>See exactly how AI agents will discover and use your website's tools.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- What is WebMCP -->
+  <section class="info-section">
+    <div class="info-card">
+      <h2>What is WebMCP?</h2>
+      <p><strong>WebMCP</strong> is a new W3C standard (backed by Google & Microsoft) that lets websites expose structured actions to AI agents in the browser. Think of it as making your website "API-ready" for AI — without building an actual API.</p>
+      <p>With WebMCP, an AI agent can discover your site's forms, understand what they do, fill them with structured data, and receive structured results — all running locally in the user's browser.</p>
+      <div class="info-links">
+        <a href="https://developer.chrome.com/blog/webmcp-epp" target="_blank" rel="noopener">Chrome Blog</a>
+        <a href="https://webmachinelearning.github.io/webmcp/" target="_blank" rel="noopener">W3C Spec</a>
+        <a href="https://developer.chrome.com/blog/webmcp-mcp-usage" target="_blank" rel="noopener">WebMCP vs MCP</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="logo-icon">&#9889;</span> AgentReady
+        <span class="footer-sep">|</span>
+        The Lighthouse for AI Agent Readiness
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <span class="footer-sep">|</span>
+        Built with Claude Code
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="js/scanner.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/generator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
