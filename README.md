@@ -2,74 +2,113 @@
 
 **The Lighthouse for AI Agent Readiness**
 
-Scan any website to check its [WebMCP](https://developer.chrome.com/blog/webmcp-epp) readiness. Get your Agent Readiness Score, auto-generate WebMCP code, and preview how AI agents see your site.
+Scan any website for [WebMCP](https://developer.chrome.com/blog/webmcp-epp) compliance and AI discovery protocols. Get your Agent Readiness Score (0-100), auto-generate fix code, and preview how AI agents see your site.
 
-**[Try it now](https://erold90.github.io/AgentReady/)**
+**[Try it now](https://erold90.github.io/AgentReady/)** &middot; **[Install Extension](#chrome-extension)** &middot; **[CLI Scanner](#cli-scanner)**
 
-## What is WebMCP?
+## What It Checks
 
-WebMCP is a new [W3C standard](https://webmachinelearning.github.io/webmcp/) (backed by Google & Microsoft) that lets websites expose structured actions to AI agents in the browser. Think of it as making your website "API-ready" for AI — without building an actual API.
+| Protocol | Endpoint | Description |
+|---|---|---|
+| **WebMCP** | HTML forms + JS scripts | `toolname`, `tooldescription`, `registerTool()` |
+| **A2A Agent Card** | `/.well-known/agent.json` | Google's Agent-to-Agent protocol |
+| **MCP Discovery** | `/.well-known/mcp.json` | Model Context Protocol server discovery |
+| **agents.json** | `/.well-known/agents.json` | Multi-agent directory |
+| **OpenAPI** | `/openapi.json`, `/swagger.json` | API specification |
+| **llms.txt** | `/llms.txt` | LLM-readable site description |
 
-Currently in Early Preview in Chrome 146 Canary.
+Plus: HTTPS, page structure, meta tags, JSON-LD, semantic HTML, ARIA, and more.
 
-## Features
+## Score Categories (6)
 
-**Scan** — Enter any URL. AgentReady analyzes every form, script, and security header on the page.
+1. **Forms & Tools** — WebMCP form coverage + JS registrations
+2. **Descriptions** — Quality of tool/parameter descriptions
+3. **Schema Quality** — Input types, constraints, required fields
+4. **Page Structure** — Title, meta, OG tags, JSON-LD, semantic HTML, ARIA
+5. **Security** — HTTPS (required for SecureContext)
+6. **AI Protocols** — A2A, MCP, agents.json, OpenAPI, llms.txt
 
-**Score** — Get your Agent Readiness Score (0-100) with detailed breakdown across 5 categories:
-- Forms & Tools coverage
-- Description quality
-- Schema completeness
-- Tool annotations
-- Security (HTTPS)
+## Chrome Extension
 
-**Generate** — Auto-generated WebMCP code for every form:
-- **Declarative** (HTML attributes) — add `toolname`, `tooldescription`, `toolparamdescription` to existing forms
-- **Imperative** (JavaScript) — full `navigator.modelContext.registerTool()` code with JSON Schema
+One-click scan on any page. Full site crawl. Intelligent report with actionable code fixes.
 
-**Preview** — Agent Simulator shows how AI agents see your site:
-- **Before**: current state (likely: nothing discoverable)
-- **After**: with WebMCP applied (all tools exposed)
+**Features:**
+- Instant single-page scan with score ring
+- Full site crawl (sitemap discovery, progress overlay, ETA)
+- Protocol detection (5 AI discovery protocols)
+- Full report with readiness checklist (15 checks), action plan with copy-paste code, agent simulator
+- Freemium gate (3 pages free, 2 code snippets free)
 
-**Export** — Download HTML report or share via link.
+Install from the [Chrome Web Store](https://chromewebstore.google.com) (coming soon) or load unpacked from `extension/`.
 
-## Quick Start
+## CLI Scanner
 
-Visit [erold90.github.io/AgentReady](https://erold90.github.io/AgentReady/) and enter a URL.
-
-Or run locally:
+Zero-dependency terminal scanner. Node 18+.
 
 ```bash
-git clone https://github.com/erold90/AgentReady.git
-cd AgentReady
-python3 -m http.server 8080
-# Open http://localhost:8080
+npx agentready https://example.com
+npx agentready https://stripe.com --json       # JSON output for CI/CD
+npx agentready https://api.openai.com --protocols  # Protocols only
 ```
 
-## How It Works
+See [cli/README.md](cli/README.md) for full documentation.
 
-1. Your URL is fetched through a CORS proxy
-2. The HTML is parsed client-side using DOMParser
-3. All `<form>` elements are extracted with their fields
-4. WebMCP attributes (`toolname`, `tooldescription`, etc.) are detected
-5. JavaScript is scanned for `navigator.modelContext` usage
-6. A score is calculated across 5 weighted categories
-7. Code is auto-generated for each form
-8. The Agent Simulator shows the before/after view
+## Agent Skills (Auto-Fix)
+
+Drop one file in your project, tell your AI coding tool **"Make this site agent-ready"**, and it will scan + fix automatically:
+
+| Tool | Config File | Skill |
+|---|---|---|
+| **Claude Code** | `CLAUDE.md` | [claude-code.md](agent-skills/claude-code.md) |
+| **Cursor** | `.cursor/rules` | [cursor.md](agent-skills/cursor.md) |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | [copilot.md](agent-skills/copilot.md) |
+| **Windsurf** | `.windsurfrules` | [windsurf.md](agent-skills/windsurf.md) |
+| **Gemini CLI** | `GEMINI.md` | [gemini-cli.md](agent-skills/gemini-cli.md) |
+
+## Online Demo
+
+Visit [erold90.github.io/AgentReady](https://erold90.github.io/AgentReady/) and enter any URL. Scans via CORS proxy with protocol detection.
+
+## Architecture
+
+```
+AgentReady/
+├── index.html              # Landing page + online demo
+├── css/style.css           # Styles (light/dark theme)
+├── js/
+│   ├── scanner.js          # CORS proxy fetch + HTML parser
+│   ├── analyzer.js         # Score engine (6 categories)
+│   ├── protocols.js        # AI protocol detection (browser)
+│   ├── generator.js        # WebMCP code generator
+│   └── app.js              # Demo UI controller
+├── extension/
+│   ├── manifest.json       # Chrome MV3
+│   ├── js/
+│   │   ├── content.js      # DOM extractor (injected)
+│   │   ├── analyzer.js     # Score engine (extension)
+│   │   ├── protocols.js    # Protocol scanner
+│   │   ├── crawler.js      # Full site crawler
+│   │   ├── sitemap.js      # Sitemap discovery
+│   │   ├── popup.js        # Popup controller
+│   │   └── report.js       # Report renderer
+│   ├── popup.html          # Extension popup
+│   └── report.html         # Full report page
+├── cli/
+│   ├── package.json        # npm: agentready
+│   ├── bin/agentready.js   # CLI entry point
+│   ├── index.js            # Programmatic API
+│   └── lib/                # Scanner + protocol modules
+├── agent-skills/           # Auto-fix instructions (5 tools)
+└── worker/                 # Cloudflare CORS proxy
+```
 
 ## Tech Stack
 
-- Vanilla HTML + CSS + JavaScript (no frameworks, no build step)
-- CORS proxy: [allorigins.win](https://allorigins.win)
-- Hosted on GitHub Pages
-- Zero dependencies
-
-## WebMCP Resources
-
-- [Chrome Blog: WebMCP Early Preview](https://developer.chrome.com/blog/webmcp-epp)
-- [W3C Spec](https://webmachinelearning.github.io/webmcp/)
-- [WebMCP vs MCP](https://developer.chrome.com/blog/webmcp-mcp-usage)
-- [Patrick Brosset: Updates & Clarifications](https://patrickbrosset.com/articles/2026-02-23-webmcp-updates-clarifications-and-next-steps/)
+- Vanilla HTML + CSS + JavaScript (zero dependencies, no build step)
+- Chrome Extension: Manifest V3
+- CLI: Node.js 18+ (zero npm dependencies)
+- Hosting: GitHub Pages
+- CORS Proxy: allorigins.win fallback chain + optional Cloudflare Worker
 
 ## License
 

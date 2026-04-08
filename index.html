@@ -125,17 +125,25 @@
         <div class="feature-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
-        <h3>PDF Reports</h3>
-        <p>Export professional reports with scores, issues, and fixes. Share with your team or clients. White-label available.</p>
+        <h3>Export Reports</h3>
+        <p>Download HTML reports with scores, issues, and code fixes. Share with your team or clients. White-label available.</p>
         <span class="feature-badge pro">Pro</span>
       </div>
       <div class="feature-card">
         <div class="feature-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
-        <h3>Score Monitoring</h3>
-        <p>Track your score over time. Get alerts when your agent readiness changes. Never ship a regression.</p>
-        <span class="feature-badge soon">Soon</span>
+        <h3>Protocol Detection</h3>
+        <p>Detects 5 AI discovery protocols: A2A Agent Cards, MCP Discovery, agents.json, OpenAPI, and llms.txt.</p>
+        <span class="feature-badge free">Free</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        </div>
+        <h3>CLI + Agent Skills</h3>
+        <p><code>npx agentready</code> scans from terminal. Agent skills auto-fix your site from Claude Code, Cursor, or Copilot.</p>
+        <span class="feature-badge free">Free</span>
       </div>
     </div>
   </section>
@@ -183,13 +191,13 @@
         <ul class="pricing-features">
           <li class="included">Single page scan</li>
           <li class="included">3 scans per day</li>
-          <li class="included">Score + 5 categories</li>
+          <li class="included">Score + 6 categories</li>
           <li class="included">Issues & suggestions</li>
           <li class="included">Agent Simulator (before)</li>
           <li class="excluded">Full site crawl</li>
           <li class="excluded">Code generation</li>
           <li class="excluded">Agent Simulator (after)</li>
-          <li class="excluded">PDF report export</li>
+          <li class="excluded">HTML report export</li>
           <li class="excluded">Scan history</li>
         </ul>
         <a href="#install" class="btn btn-secondary btn-block">Install Free</a>
@@ -206,13 +214,13 @@
           <li class="included"><strong>Full site crawl (500 pages)</strong></li>
           <li class="included"><strong>WebMCP code generation</strong></li>
           <li class="included">Agent Simulator (before + after)</li>
-          <li class="included">PDF report export</li>
+          <li class="included">HTML report export</li>
           <li class="included">Scan history & trends</li>
           <li class="included">Priority support</li>
           <li class="excluded">API access</li>
           <li class="excluded">Team dashboard</li>
         </ul>
-        <a href="#" class="btn btn-primary btn-block">Start 7-Day Free Trial</a>
+        <button class="btn btn-primary btn-block" disabled style="opacity:0.6;cursor:default">Coming Soon</button>
       </div>
       <!-- Team -->
       <div class="pricing-card">
@@ -229,7 +237,7 @@
           <li class="included">Score monitoring & alerts</li>
           <li class="included">Dedicated support</li>
         </ul>
-        <a href="#" class="btn btn-secondary btn-block">Contact Sales</a>
+        <button class="btn btn-secondary btn-block" disabled style="opacity:0.6;cursor:default">Coming Soon</button>
       </div>
     </div>
   </section>
@@ -313,8 +321,8 @@
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-value" id="stat-forms">0</div><div class="stat-label">Forms Found</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-webmcp">0</div><div class="stat-label">WebMCP Ready</div></div>
+        <div class="stat-card"><div class="stat-value" id="stat-protocols">-</div><div class="stat-label">Protocols</div></div>
         <div class="stat-card"><div class="stat-value" id="stat-issues">0</div><div class="stat-label">Issues</div></div>
-        <div class="stat-card"><div class="stat-value" id="stat-https">-</div><div class="stat-label">HTTPS</div></div>
       </div>
     </div>
     <div class="scanned-url">
@@ -422,6 +430,23 @@
     </div>
   </section>
 
+  <!-- CLI + Agent Skills -->
+  <section class="info-section">
+    <div class="info-card">
+      <h2>CLI Scanner & Agent Skills</h2>
+      <p>Scan any site from your terminal with zero dependencies:</p>
+      <pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;font-size:14px;margin:16px 0;overflow-x:auto"><code>npx agentready https://example.com</code></pre>
+      <p>Or let your AI coding tool auto-fix your site. Drop one file and say <em>"Make this site agent-ready"</em>:</p>
+      <div class="info-links">
+        <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/claude-code.md" target="_blank" rel="noopener">Claude Code</a>
+        <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/cursor.md" target="_blank" rel="noopener">Cursor</a>
+        <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/copilot.md" target="_blank" rel="noopener">GitHub Copilot</a>
+        <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/windsurf.md" target="_blank" rel="noopener">Windsurf</a>
+        <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/gemini-cli.md" target="_blank" rel="noopener">Gemini CLI</a>
+      </div>
+    </div>
+  </section>
+
   <!-- Footer -->
   <footer class="footer">
     <div class="footer-inner">
@@ -449,6 +474,7 @@
 
   <script src="js/scanner.js"></script>
   <script src="js/analyzer.js"></script>
+  <script src="js/protocols.js"></script>
   <script src="js/generator.js"></script>
   <script src="js/app.js"></script>
   <script>

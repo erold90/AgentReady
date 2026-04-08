@@ -268,8 +268,14 @@
     setLoading(true);
 
     try {
-      currentScan = await Scanner.scan(url);
-      currentAnalysis = Analyzer.analyze(currentScan);
+      const origin = new URL(url).origin;
+      const [scanResult, protocolResults] = await Promise.all([
+        Scanner.scan(url),
+        ProtocolScanner.scan(origin).catch(() => null)
+      ]);
+      currentScan = scanResult;
+      currentScan._protocols = protocolResults;
+      currentAnalysis = Analyzer.analyze(currentScan, protocolResults);
       renderResults();
       saveToHistory(url, currentAnalysis.score);
 
@@ -314,8 +320,12 @@
     $('#stat-webmcp').textContent = webmcpForms + currentScan.scriptRegistrations.length;
     $('#stat-issues').textContent = issueCount;
     $('#stat-issues').style.color = issueCount > 0 ? 'var(--red)' : 'var(--green)';
-    $('#stat-https').textContent = currentScan.security.isHTTPS ? 'Yes' : 'No';
-    $('#stat-https').style.color = currentScan.security.isHTTPS ? 'var(--green)' : 'var(--red)';
+    const protStat = $('#stat-protocols');
+    if (protStat && currentScan._protocols) {
+      const p = currentScan._protocols.summary;
+      protStat.textContent = p.found + '/' + p.total;
+      protStat.style.color = p.found > 0 ? 'var(--green)' : 'var(--text-3)';
+    }
 
     // Scanned URL
     $('#scanned-url-value').textContent = currentScan.url;
