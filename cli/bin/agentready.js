@@ -3,12 +3,13 @@
  * AgentReady CLI — Scan any URL for AI Agent Readiness
  *
  * Usage:
- *   npx agentready https://example.com
- *   npx agentready https://example.com --json
- *   npx agentready https://example.com --protocols-only
+ *   npx webmcp-scanner https://example.com
+ *   npx webmcp-scanner https://example.com --crawl
+ *   npx webmcp-scanner https://example.com --json
+ *   npx webmcp-scanner https://example.com --protocols
  */
 
-const { scan } = require('../index');
+const { scan, crawl } = require('../index');
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter(a => a.startsWith('--')));
@@ -19,13 +20,15 @@ if (urls.length === 0 || flags.has('--help')) {
   ⚡ AgentReady — AI Agent Readiness Scanner
 
   Usage:
-    agentready <url>              Scan a URL for AI agent readiness
+    agentready <url>              Scan homepage
+    agentready <url> --crawl      Full site crawl (up to 20 pages)
     agentready <url> --json       Output raw JSON
     agentready <url> --protocols  Only check discovery protocols
     agentready --help             Show this help
 
   Examples:
     agentready https://example.com
+    agentready https://villamareblu.it --crawl
     agentready https://stripe.com --json
     agentready https://api.openai.com --protocols
   `);
@@ -33,6 +36,7 @@ if (urls.length === 0 || flags.has('--help')) {
 }
 
 const isJson = flags.has('--json');
+const isCrawl = flags.has('--crawl');
 const protocolsOnly = flags.has('--protocols') || flags.has('--protocols-only');
 
 async function main() {
@@ -41,42 +45,96 @@ async function main() {
   // Validate URL
   let parsed;
   try {
-    parsed = new URL(url);
+    parsed = new URL(url.startsWith('http') ? url : `https://${url}`);
     if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error();
   } catch {
     console.error(`Error: Invalid URL "${url}". Use format: https://example.com`);
     process.exit(1);
   }
 
+  const finalUrl = parsed.href;
+
   if (!isJson) {
     console.log(`\n  ⚡ AgentReady Scanner v1.0.0`);
-    console.log(`  Scanning ${url}...\n`);
+    console.log(`  ${isCrawl ? 'Crawling' : 'Scanning'} ${finalUrl}...\n`);
   }
 
   try {
-    const result = await scan(url);
+    if (isCrawl) {
+      const result = await crawl(finalUrl, {
+        maxPages: 20,
+        onProgress: (current, total, pageUrl) => {
+          if (!isJson) {
+            const path = new URL(pageUrl).pathname;
+            process.stdout.write(`\r  Scanning page ${current}/${total}: ${path}${''.padEnd(40)}`);
+          }
+        }
+      });
 
-    if (isJson) {
-      console.log(JSON.stringify(result, null, 2));
-      return;
-    }
+      if (!isJson) process.stdout.write('\r' + ' '.repeat(80) + '\r');
 
-    if (protocolsOnly) {
+      if (isJson) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      printCrawlResult(result);
+    } else {
+      const result = await scan(finalUrl);
+
+      if (isJson) {
+        console.log(JSON.stringify(result, null, 2));
+        return;
+      }
+
+      if (protocolsOnly) {
+        printProtocols(result.protocols);
+        return;
+      }
+
+      printScore(result);
+      printPageSignals(result.pageSignals);
+      printWebMCP(result);
       printProtocols(result.protocols);
-      return;
+      printSummary(result);
     }
-
-    // Full report
-    printScore(result);
-    printPageSignals(result.pageSignals);
-    printWebMCP(result);
-    printProtocols(result.protocols);
-    printSummary(result);
-
   } catch (err) {
     console.error(`  Error: ${err.message}`);
     process.exit(1);
   }
+}
+
+function printCrawlResult(result) {
+  const bar = scoreBar(result.score);
+  console.log(`  Full Site Scan Results`);
+  console.log(`  ─────────────────────`);
+  console.log(`  Score: ${result.score}/100 ${bar}`);
+  console.log(`  Pages: ${result.pageCount}  |  Forms: ${result.totalForms}  |  Issues: ${result.totalIssues}`);
+  console.log('');
+
+  // Per-page scores
+  console.log('  Pages');
+  result.pages.forEach(p => {
+    const path = new URL(p.url).pathname || '/';
+    const icon = p.score >= 80 ? '✓' : p.score >= 50 ? '~' : '✗';
+    const color = p.score >= 80 ? '\x1b[32m' : p.score >= 50 ? '\x1b[33m' : '\x1b[31m';
+    console.log(`    ${color}${icon}\x1b[0m ${String(p.score).padStart(3)} ${path}  (${p.forms.total} forms, ${p.issues.length} issues)`);
+  });
+  console.log('');
+
+  // Protocols
+  printProtocols(result.protocols);
+
+  // Verdict
+  let verdict;
+  if (result.score >= 80) verdict = 'Agent-Ready';
+  else if (result.score >= 50) verdict = 'Partially Ready';
+  else if (result.totalForms > 0) verdict = 'Not Agent-Ready';
+  else verdict = 'Invisible to AI Agents';
+
+  console.log(`  Verdict: ${verdict}`);
+  console.log(`  Full report: https://erold90.github.io/AgentReady`);
+  console.log('');
 }
 
 function printScore(result) {
@@ -115,11 +173,11 @@ function printWebMCP(result) {
 function printProtocols(protocols) {
   console.log('  AI Discovery Protocols');
   const checks = [
-    { key: 'a2a', label: 'A2A Agent Card', path: '/.well-known/agent.json' },
-    { key: 'mcp', label: 'MCP Discovery', path: '/.well-known/mcp.json' },
-    { key: 'agents', label: 'agents.json', path: '/.well-known/agents.json' },
-    { key: 'openapi', label: 'OpenAPI', path: '/openapi.json' },
-    { key: 'llms', label: 'llms.txt', path: '/llms.txt' },
+    { key: 'a2a', label: 'A2A Agent Card' },
+    { key: 'mcp', label: 'MCP Discovery' },
+    { key: 'agents', label: 'agents.json' },
+    { key: 'openapi', label: 'OpenAPI' },
+    { key: 'llms', label: 'llms.txt' },
   ];
 
   checks.forEach(c => {
