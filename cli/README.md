@@ -9,7 +9,7 @@ Zero dependencies. Node 18+.
 ## Install & Use
 
 ```bash
-npx @erold90/agentready https://example.com
+npx webmcp-scanner https://example.com
 ```
 
 ## Flags
@@ -58,7 +58,7 @@ agentready --help             Show help
 ## Programmatic API
 
 ```javascript
-const { scan } = require('@erold90/agentready');
+const { scan } = require('webmcp-scanner');
 
 const result = await scan('https://example.com');
 console.log(result.score);        // 0-100

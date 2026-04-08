@@ -46,9 +46,9 @@ Install from the [Chrome Web Store](https://chromewebstore.google.com) (coming s
 Zero-dependency terminal scanner. Node 18+.
 
 ```bash
-npx @erold90/agentready https://example.com
-npx @erold90/agentready https://stripe.com --json       # JSON output for CI/CD
-npx @erold90/agentready https://api.openai.com --protocols  # Protocols only
+npx webmcp-scanner https://example.com
+npx webmcp-scanner https://stripe.com --json       # JSON output for CI/CD
+npx webmcp-scanner https://api.openai.com --protocols  # Protocols only
 ```
 
 See [cli/README.md](cli/README.md) for full documentation.

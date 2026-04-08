@@ -9,7 +9,7 @@ Add this to your `.github/copilot-instructions.md` to enable AI Agent Readiness 
 
 When asked to "make this site agent-ready":
 
-1. **Scan**: Run `npx @erold90/agentready <site-url>` to get the current score
+1. **Scan**: Run `npx webmcp-scanner <site-url>` to get the current score
 2. **Fix forms**: Add `toolname`, `tooldescription` to every `<form>`, and `toolparamdescription` to every visible input
 3. **Add JS tools**: For non-form actions, use `navigator.modelContext.registerTool()` with name, description, JSON Schema parameters, and handler
 4. **Add protocols**:
@@ -19,7 +19,7 @@ When asked to "make this site agent-ready":
    - `public/.well-known/agents.json` — Agent directory listing
 5. **Add structured data**: JSON-LD in `<head>` with schema.org types
 6. **Add meta tags**: `<title>`, `<meta name="description">`, `<meta property="og:*">`
-7. **Verify**: Run `npx @erold90/agentready <site-url>` again, target >= 80/100
+7. **Verify**: Run `npx webmcp-scanner <site-url>` again, target >= 80/100
 
 ### WebMCP Form Example
 ```html
