@@ -81,11 +81,64 @@
 
     <!-- Actions -->
     <div class="actions">
-      <button id="btn-full-report" class="btn-action">Full Report on AgentReady.dev</button>
+      <button id="btn-full-site" class="btn-action btn-fullsite">Full Site Scan</button>
+      <button id="btn-full-report" class="btn-action btn-secondary">Full Report on AgentReady.dev</button>
+    </div>
+
+    <!-- Full Site Scan Section -->
+    <div id="fullsite-section" hidden>
+      <!-- Progress -->
+      <div id="fs-progress" class="fs-progress" hidden>
+        <div class="fs-progress-text" id="fs-progress-text">Discovering sitemap...</div>
+        <div class="fs-progress-bar">
+          <div class="fs-progress-fill" id="fs-progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div id="fs-summary" class="fs-summary" hidden>
+        <div class="fs-summary-title">Full Site Scan Results</div>
+        <div class="fs-stats-row">
+          <div class="fs-stat">
+            <span class="fs-stat-val" id="fs-avg-score">0</span>
+            <span class="fs-stat-lbl">Avg Score</span>
+          </div>
+          <div class="fs-stat">
+            <span class="fs-stat-val" id="fs-total-pages">0</span>
+            <span class="fs-stat-lbl">Pages</span>
+          </div>
+          <div class="fs-stat">
+            <span class="fs-stat-val" id="fs-total-forms">0</span>
+            <span class="fs-stat-lbl">Forms</span>
+          </div>
+          <div class="fs-stat">
+            <span class="fs-stat-val" id="fs-total-issues">0</span>
+            <span class="fs-stat-lbl">Issues</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page List -->
+      <div id="fs-pages" class="fs-pages"></div>
+
+      <!-- Pro Overlay -->
+      <div id="fs-pro-overlay" class="fs-pro-overlay" hidden>
+        <div class="fs-pro-content">
+          <div class="fs-pro-icon">&#128274;</div>
+          <div class="fs-pro-title">Upgrade to Pro</div>
+          <div class="fs-pro-text">Free plan shows 3 pages. Unlock full site analysis with Pro.</div>
+          <button class="fs-pro-btn" disabled>Coming Soon</button>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="fs-error" class="fs-error" hidden></div>
     </div>
   </div>
 
   <script src="js/analyzer.js"></script>
+  <script src="js/sitemap.js"></script>
+  <script src="js/crawler.js"></script>
   <script src="js/popup.js"></script>
 </body>
 </html>

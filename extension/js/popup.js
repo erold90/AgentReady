@@ -10,6 +10,8 @@
   let currentScan = null;
   let currentAnalysis = null;
 
+  let fullSiteRunning = false;
+
   // === Init ===
   document.addEventListener('DOMContentLoaded', () => {
     $('#scan-btn').addEventListener('click', runScan);
@@ -33,6 +35,9 @@
         }
       }
     });
+
+    // Full site scan
+    $('#btn-full-site').addEventListener('click', runFullSiteScan);
 
     // Auto-scan on popup open
     runScan();
@@ -248,6 +253,162 @@
     if (regs.length === 0 && (!currentScan.suggestedTools || currentScan.suggestedTools.length === 0)) {
       container.innerHTML = '<div class="empty-state">No WebMCP tools or suggestions detected.</div>';
     }
+  }
+
+  // === Full Site Scan ===
+  async function runFullSiteScan() {
+    if (fullSiteRunning) return;
+    fullSiteRunning = true;
+
+    const btn = $('#btn-full-site');
+    btn.disabled = true;
+    btn.textContent = 'Scanning Site...';
+
+    const section = $('#fullsite-section');
+    section.hidden = false;
+
+    const progress = $('#fs-progress');
+    const progressText = $('#fs-progress-text');
+    const progressFill = $('#fs-progress-fill');
+    const summary = $('#fs-summary');
+    const pagesContainer = $('#fs-pages');
+    const proOverlay = $('#fs-pro-overlay');
+    const fsError = $('#fs-error');
+
+    // Reset
+    progress.hidden = false;
+    summary.hidden = true;
+    pagesContainer.innerHTML = '';
+    proOverlay.hidden = true;
+    fsError.hidden = true;
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Discovering sitemap...';
+
+    try {
+      // Get current tab URL for origin
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.url) {
+        showFullSiteError('Cannot determine current page URL.');
+        return;
+      }
+
+      const origin = new URL(tab.url).origin;
+
+      // Discover sitemap URLs
+      progressText.textContent = 'Discovering sitemap...';
+      progressFill.style.width = '5%';
+
+      let urls = [];
+      try {
+        urls = await SitemapDiscovery.discover(origin);
+      } catch (e) {
+        // Sitemap discovery failed silently
+      }
+
+      if (urls.length === 0) {
+        // Fallback: just scan the current page URL
+        urls = [tab.url];
+        progressText.textContent = 'No sitemap found. Scanning current page...';
+      } else {
+        progressText.textContent = `Found ${urls.length} pages in sitemap. Starting scan...`;
+      }
+
+      progressFill.style.width = '10%';
+
+      // Crawl pages
+      const results = await SiteCrawler.crawl(urls, (current, total, url) => {
+        const pct = 10 + Math.round((current / total) * 85);
+        progressFill.style.width = pct + '%';
+        const shortUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
+        progressText.textContent = `Scanning page ${current}/${total}: ${shortUrl}`;
+      });
+
+      progressFill.style.width = '100%';
+      progressText.textContent = 'Scan complete!';
+
+      // Short delay then show results
+      await new Promise(r => setTimeout(r, 500));
+      progress.hidden = true;
+
+      // Render summary
+      renderFullSiteSummary(results);
+      renderFullSitePages(results);
+
+    } catch (err) {
+      showFullSiteError('Full site scan failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      fullSiteRunning = false;
+      btn.disabled = false;
+      btn.textContent = 'Full Site Scan';
+    }
+  }
+
+  function renderFullSiteSummary(results) {
+    const summary = $('#fs-summary');
+    summary.hidden = false;
+
+    const avgScoreEl = $('#fs-avg-score');
+    avgScoreEl.textContent = results.avgScore;
+    avgScoreEl.style.color = Analyzer.getScoreColor(results.avgScore);
+
+    $('#fs-total-pages').textContent = results.scannedPages;
+    $('#fs-total-forms').textContent = results.totalForms;
+
+    const issuesEl = $('#fs-total-issues');
+    issuesEl.textContent = results.totalIssues;
+    issuesEl.style.color = results.totalIssues > 0 ? '#ef4444' : '#10b981';
+  }
+
+  function renderFullSitePages(results) {
+    const container = $('#fs-pages');
+    const proOverlay = $('#fs-pro-overlay');
+    container.innerHTML = '';
+
+    const FREE_LIMIT = 3;
+    const pages = results.pages; // sorted worst-first
+
+    pages.forEach((page, i) => {
+      const row = document.createElement('div');
+      row.className = 'fs-page-row';
+      if (i >= FREE_LIMIT) row.classList.add('blurred');
+
+      const color = Analyzer.getScoreColor(page.score);
+      const shortUrl = (() => {
+        try {
+          const u = new URL(page.url);
+          return u.pathname + u.search;
+        } catch { return page.url; }
+      })();
+
+      row.innerHTML = `
+        <div class="fs-page-score" style="background:${color}">${page.score}</div>
+        <div class="fs-page-info">
+          <div class="fs-page-url" title="${esc(page.url)}">${esc(shortUrl || '/')}</div>
+          <div class="fs-page-meta">
+            <span>${page.formCount} form${page.formCount !== 1 ? 's' : ''}</span>
+            <span>${page.webmcpCount} WebMCP</span>
+            <span>${page.issueCount} issue${page.issueCount !== 1 ? 's' : ''}</span>
+            ${page.error ? '<span style="color:#ef4444">Error</span>' : ''}
+          </div>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+
+    // Show pro overlay if there are more than FREE_LIMIT pages
+    if (pages.length > FREE_LIMIT) {
+      proOverlay.hidden = false;
+    }
+  }
+
+  function showFullSiteError(msg) {
+    const fsError = $('#fs-error');
+    fsError.textContent = msg;
+    fsError.hidden = false;
+    $('#fs-progress').hidden = true;
+    fullSiteRunning = false;
+    $('#btn-full-site').disabled = false;
+    $('#btn-full-site').textContent = 'Full Site Scan';
   }
 
   // === Helpers ===

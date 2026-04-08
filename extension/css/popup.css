@@ -268,6 +268,183 @@ body {
 }
 .btn-action:hover { background: #1e293b; }
 
+/* === Full Site Scan Button === */
+.btn-fullsite {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  margin-bottom: 8px;
+}
+.btn-fullsite:hover { background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%); }
+.btn-secondary { background: #334155; }
+.btn-secondary:hover { background: #475569; }
+
+/* === Full Site Progress === */
+.fs-progress {
+  margin: 12px;
+  padding: 14px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.fs-progress-text {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fs-progress-bar {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.fs-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* === Full Site Summary === */
+.fs-summary {
+  margin: 12px;
+  padding: 14px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.fs-summary-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+.fs-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.fs-stat {
+  text-align: center;
+  padding: 8px 4px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+.fs-stat-val {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.fs-stat-lbl {
+  display: block;
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* === Full Site Page List === */
+.fs-pages {
+  margin: 0 12px 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.fs-page-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: filter 0.3s;
+}
+.fs-page-row.blurred {
+  filter: blur(4px);
+  pointer-events: none;
+  user-select: none;
+}
+.fs-page-score {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+}
+.fs-page-info {
+  flex: 1;
+  min-width: 0;
+}
+.fs-page-url {
+  font-size: 12px;
+  font-weight: 500;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fs-page-meta {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.fs-page-meta span { margin-right: 8px; }
+
+/* === Pro Overlay === */
+.fs-pro-overlay {
+  position: relative;
+  margin: -8px 12px 12px;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.05) 0%, rgba(124,58,237,0.08) 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: center;
+}
+.fs-pro-icon { font-size: 28px; margin-bottom: 8px; }
+.fs-pro-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+.fs-pro-text {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.fs-pro-btn {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 8px 24px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* === Full Site Error === */
+.fs-error {
+  margin: 12px;
+  padding: 10px 14px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
 /* === Scrollbar === */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }

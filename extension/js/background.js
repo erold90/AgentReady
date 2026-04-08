@@ -42,4 +42,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
     return true; // async response
   }
+
+  // Proxy fetch requests from popup (service worker has host_permissions)
+  if (msg.type === 'proxy-fetch') {
+    fetch(msg.url, {
+      headers: msg.headers || { 'Accept': 'text/html, application/xml, text/xml, text/plain' }
+    })
+      .then(async resp => {
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const text = await resp.text();
+        sendResponse({ success: true, text, status: resp.status });
+      })
+      .catch(err => {
+        sendResponse({ success: false, error: err.message });
+      });
+    return true; // async response
+  }
 });
