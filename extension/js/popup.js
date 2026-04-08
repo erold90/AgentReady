@@ -553,7 +553,8 @@
                 webmcpCount: p.webmcpCount, issueCount: p.issueCount,
                 error: p.error || null,
                 analysis: p.analysis,
-                forms: p.forms
+                forms: p.forms,
+                scanData: p.scanData
               };
             }
             return {
@@ -586,7 +587,8 @@
             issueCount: currentAnalysis.issues.filter(i => i.type === 'warning' || i.type === 'error').length,
             error: null,
             analysis: currentAnalysis,
-            forms: currentScan.forms
+            forms: currentScan.forms,
+            scanData: currentScan
           }]
         };
 

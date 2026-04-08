@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentReady — Full Site Report</title>
+  <title>AgentReady — Report</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -13,188 +13,162 @@
       --green: #10b981; --green-light: #d1fae5;
       --yellow: #f59e0b; --yellow-light: #fef3c7;
       --red: #ef4444; --red-light: #fee2e2;
-      --purple: #7c3aed;
+      --purple: #7c3aed; --purple-light: #ede9fe;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
-      line-height: 1.5;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; }
     .container { max-width: 900px; margin: 0 auto; padding: 24px; }
 
     /* Header */
     .report-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 24px; background: var(--text); color: white;
+      padding: 14px 24px; background: var(--text); color: white; position: sticky; top: 0; z-index: 50;
     }
-    .report-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; }
+    .report-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
     .report-actions { display: flex; gap: 8px; }
-    .btn {
-      padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
-      cursor: pointer; border: none; transition: all 0.2s;
-    }
+    .btn { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: #1d4ed8; }
     .btn-outline { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); }
     .btn-outline:hover { border-color: white; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-sm { padding: 5px 10px; font-size: 11px; }
 
-    /* Loading */
-    .loading {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 120px 24px; color: var(--text-3);
-    }
-    .spinner {
-      width: 32px; height: 32px; border: 3px solid var(--border);
-      border-top-color: var(--primary); border-radius: 50%;
-      animation: spin 0.8s linear infinite; margin-bottom: 16px;
-    }
+    /* Loading & Error */
+    .loading { display: flex; flex-direction: column; align-items: center; padding: 120px 24px; color: var(--text-3); }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .error-msg {
-      max-width: 500px; margin: 60px auto; padding: 20px;
-      background: var(--red-light); color: var(--red);
-      border-radius: 8px; text-align: center;
-    }
+    .error-msg { max-width: 500px; margin: 60px auto; padding: 20px; background: var(--red-light); color: var(--red); border-radius: 8px; text-align: center; }
+    [hidden] { display: none !important; }
 
-    /* Summary */
-    .summary-section {
-      text-align: center; padding: 40px 24px 32px;
+    /* === HERO SCORE === */
+    .hero-score {
+      text-align: center; padding: 48px 24px 24px;
+      background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
     }
-    .summary-domain {
-      font-size: 14px; color: var(--text-3); margin-bottom: 4px;
-    }
-    .summary-title {
-      font-size: 28px; font-weight: 800; margin-bottom: 24px;
-    }
-    .summary-stats {
-      display: grid; grid-template-columns: repeat(4, 1fr);
-      gap: 16px; max-width: 700px; margin: 0 auto;
-    }
-    .summary-stat {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 20px;
-    }
-    .summary-stat-val {
-      font-size: 32px; font-weight: 800;
-    }
-    .summary-stat-lbl {
-      font-size: 11px; color: var(--text-3); text-transform: uppercase;
-      font-weight: 600; margin-top: 4px; letter-spacing: 0.04em;
-    }
-
-    /* Score Ring */
-    .score-ring-wrap {
-      display: inline-block; position: relative;
-      width: 100px; height: 100px; margin-bottom: 16px;
-    }
+    .hero-domain { font-size: 13px; color: var(--text-3); margin-bottom: 8px; letter-spacing: 0.03em; }
+    .score-ring-wrap { display: inline-block; position: relative; width: 140px; height: 140px; margin-bottom: 16px; }
     .score-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
-    .score-ring-bg { fill: none; stroke: var(--border); stroke-width: 7; }
-    .score-ring-fill {
-      fill: none; stroke-width: 7; stroke-linecap: round;
-      stroke-dasharray: 282.743; stroke-dashoffset: 282.743;
-      transition: stroke-dashoffset 1s ease-out;
+    .score-ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
+    .score-ring-fill { fill: none; stroke-width: 8; stroke-linecap: round; stroke-dasharray: 339.292; stroke-dashoffset: 339.292; transition: stroke-dashoffset 1.2s ease-out; }
+    .score-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 42px; font-weight: 800; }
+    .hero-verdict { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .hero-summary { font-size: 14px; color: var(--text-2); max-width: 500px; margin: 0 auto 24px; line-height: 1.6; }
+    .hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 600px; margin: 0 auto; }
+    .hero-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+    .hero-stat-val { font-size: 24px; font-weight: 800; }
+    .hero-stat-lbl { font-size: 10px; color: var(--text-3); text-transform: uppercase; font-weight: 600; margin-top: 2px; }
+
+    /* === SECTION TITLES === */
+    .section { margin-top: 32px; }
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .section-subtitle { font-size: 13px; color: var(--text-3); margin-bottom: 16px; }
+    .section-icon { width: 22px; height: 22px; flex-shrink: 0; }
+
+    /* === READINESS CHECKLIST === */
+    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
+    .check-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .check-pass .check-icon { background: var(--green-light); color: var(--green); }
+    .check-fail .check-icon { background: var(--red-light); color: var(--red); }
+    .check-label { flex: 1; }
+    .check-fail .check-label { color: var(--text-2); }
+
+    /* === ACTION PLAN === */
+    .action-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      margin-bottom: 10px; overflow: hidden; transition: all 0.2s;
     }
-    .score-ring-val {
-      position: absolute; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 28px; font-weight: 800;
+    .action-card:hover { border-color: var(--primary); }
+    .action-header {
+      display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer;
+    }
+    .action-priority {
+      flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%;
+    }
+    .priority-high { background: var(--red); }
+    .priority-medium { background: var(--yellow); }
+    .priority-low { background: var(--green); }
+    .action-title { flex: 1; font-size: 14px; font-weight: 600; }
+    .action-badges { display: flex; gap: 6px; flex-shrink: 0; }
+    .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+    .badge-easy { background: var(--green-light); color: var(--green); }
+    .badge-medium { background: var(--yellow-light); color: var(--yellow); }
+    .badge-hard { background: var(--red-light); color: var(--red); }
+    .badge-impact { background: var(--primary-light); color: var(--primary); }
+    .action-chevron { color: var(--text-3); font-size: 16px; transition: transform 0.2s; }
+    .action-card.open .action-chevron { transform: rotate(90deg); }
+    .action-body { display: none; padding: 0 16px 16px; }
+    .action-card.open .action-body { display: block; }
+    .action-desc { font-size: 13px; color: var(--text-2); margin-bottom: 12px; line-height: 1.6; }
+    .action-code { position: relative; background: #1e293b; border-radius: 8px; padding: 14px 16px; margin-top: 8px; }
+    .action-code pre { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #e2e8f0; white-space: pre-wrap; word-break: break-all; line-height: 1.6; }
+    .action-code .copy-btn { position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.1); border: none; color: #94a3b8; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+    .action-code .copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+    .action-locked {
+      position: relative; filter: blur(3px); pointer-events: none; user-select: none;
+    }
+    .action-lock-overlay {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px; background: var(--purple-light); border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--purple); margin-top: 8px;
     }
 
-    /* Pages Table */
-    .pages-section {
-      margin-top: 32px;
-    }
-    .pages-title {
-      font-size: 18px; font-weight: 700; margin-bottom: 16px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .pages-subtitle { font-size: 13px; color: var(--text-3); font-weight: 400; }
-    .page-row {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 14px 18px; margin-bottom: 6px;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .page-row:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(37,99,235,0.1); }
-    .page-row.locked {
-      opacity: 0.45; filter: blur(3px);
-      pointer-events: none; user-select: none; cursor: default;
-    }
-    .page-score {
-      flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: white;
-    }
+    /* === AGENT SIMULATOR === */
+    .agent-console { background: #0f172a; border-radius: 10px; overflow: hidden; }
+    .agent-console-header { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #1e293b; }
+    .agent-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .agent-dot.red { background: #ef4444; }
+    .agent-dot.yellow { background: #f59e0b; }
+    .agent-dot.green { background: #10b981; }
+    .agent-console-title { font-size: 12px; color: #94a3b8; margin-left: 8px; }
+    .agent-console-body { padding: 16px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #e2e8f0; line-height: 1.8; }
+    .agent-line { margin-bottom: 2px; }
+    .agent-prompt { color: var(--green); }
+    .agent-dim { color: #64748b; }
+    .agent-warn { color: var(--yellow); }
+    .agent-err { color: var(--red); }
+    .agent-ok { color: var(--green); }
+
+    /* === CATEGORIES === */
+    .cat-card { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; }
+    .cat-bar-wrap { flex: 1; min-width: 0; }
+    .cat-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    .cat-detail { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+    .cat-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease-out; width: 0; }
+    .cat-score { font-size: 20px; font-weight: 700; min-width: 44px; text-align: right; }
+
+    /* === PAGES (full site) === */
+    .page-row { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 6px; cursor: pointer; transition: all 0.2s; }
+    .page-row:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(37,99,235,0.08); }
+    .page-row.locked { opacity: 0.4; filter: blur(3px); pointer-events: none; }
+    .page-score { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
     .page-info { flex: 1; min-width: 0; }
-    .page-url {
-      font-size: 14px; font-weight: 500; overflow: hidden;
-      text-overflow: ellipsis; white-space: nowrap;
-    }
+    .page-url { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .page-meta { font-size: 12px; color: var(--text-3); margin-top: 3px; }
     .page-meta span { margin-right: 12px; }
     .page-arrow { font-size: 20px; color: var(--text-3); }
     .page-row:hover .page-arrow { color: var(--primary); }
-    .page-lock { color: var(--text-3); }
 
-    /* Pro Overlay */
-    .pro-overlay {
-      text-align: center; padding: 40px 24px;
-      background: linear-gradient(135deg, rgba(37,99,235,0.04), rgba(124,58,237,0.06));
-      border: 1px solid var(--border); border-radius: 10px; margin-top: 16px;
-    }
-    .pro-overlay svg { margin-bottom: 12px; color: var(--primary); }
-    .pro-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    .pro-text { font-size: 14px; color: var(--text-2); margin-bottom: 20px; line-height: 1.6; }
+    /* === PRO OVERLAY === */
+    .pro-overlay { text-align: center; padding: 32px 24px; background: linear-gradient(135deg, rgba(37,99,235,0.04), rgba(124,58,237,0.06)); border: 1px solid var(--border); border-radius: 10px; margin-top: 16px; }
+    .pro-title { font-size: 18px; font-weight: 700; margin: 8px 0; }
+    .pro-text { font-size: 13px; color: var(--text-2); margin-bottom: 16px; line-height: 1.6; }
 
-    /* Page Detail */
-    .detail-panel {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 24px; margin-top: 24px;
-      animation: slideIn 0.3s ease;
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .detail-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .detail-back {
-      background: none; border: 1px solid var(--border);
-      padding: 6px 14px; border-radius: 6px; font-size: 13px;
-      font-weight: 600; color: var(--text-2); cursor: pointer;
-    }
+    /* === PAGE DETAIL === */
+    .detail-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-top: 24px; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; } }
+    .detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .detail-back { background: none; border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
     .detail-back:hover { border-color: var(--primary); color: var(--primary); }
-    .detail-score { font-size: 36px; font-weight: 800; }
-    .detail-url {
-      font-size: 14px; color: var(--text-2); margin-bottom: 20px;
-      padding-bottom: 16px; border-bottom: 1px solid var(--border);
-    }
-    .detail-section-title {
-      font-size: 12px; font-weight: 700; color: var(--text-3);
-      text-transform: uppercase; letter-spacing: 0.04em;
-      margin: 20px 0 10px;
-    }
+    .detail-score { font-size: 32px; font-weight: 800; }
+    .detail-url { font-size: 13px; color: var(--text-2); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .detail-section-title { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin: 16px 0 8px; }
 
-    /* Category Card */
-    .cat-card {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px; background: var(--bg); border-radius: 8px; margin-bottom: 6px;
-    }
-    .cat-bar-wrap { flex: 1; min-width: 0; }
-    .cat-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-    .cat-detail { font-size: 11px; color: var(--text-3); margin-top: 3px; }
-    .cat-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-    .cat-bar-fill { height: 100%; border-radius: 2px; }
-    .cat-score { font-size: 18px; font-weight: 700; min-width: 40px; text-align: right; }
-
-    /* Issue */
-    .issue {
-      display: flex; gap: 10px; padding: 10px 12px;
-      background: var(--bg); border-radius: 6px; margin-bottom: 4px;
-    }
-    .issue-badge {
-      flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; margin-top: 1px;
-    }
+    /* Issues in detail */
+    .issue { display: flex; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 6px; margin-bottom: 4px; }
+    .issue-badge { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
     .issue-badge.error { background: var(--red-light); color: var(--red); }
     .issue-badge.warning { background: var(--yellow-light); color: var(--yellow); }
     .issue-badge.success { background: var(--green-light); color: var(--green); }
@@ -203,118 +177,126 @@
     .issue-title { font-weight: 600; font-size: 13px; }
     .issue-text { font-size: 12px; color: var(--text-2); margin-top: 2px; }
 
-    /* Form Card */
-    .form-card {
-      background: var(--bg); border-radius: 8px; padding: 12px; margin-bottom: 6px;
-    }
+    /* Forms */
+    .form-card { background: var(--bg); border-radius: 8px; padding: 12px; margin-bottom: 6px; }
     .form-header { display: flex; justify-content: space-between; align-items: center; }
     .form-name { font-weight: 600; font-size: 14px; }
-    .form-badge {
-      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
-    }
+    .form-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
     .form-badge.ready { background: var(--green-light); color: var(--green); }
     .form-badge.not-ready { background: var(--red-light); color: var(--red); }
     .form-fields { margin-top: 8px; }
-    .form-field {
-      display: flex; gap: 10px; padding: 4px 0;
-      border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-2);
-    }
+    .form-field { display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
     .form-field:last-child { border: none; }
     .ff-name { font-weight: 500; color: var(--text); min-width: 100px; }
     .ff-type { color: var(--text-3); min-width: 60px; }
-
     .empty-state { text-align: center; padding: 24px; color: var(--text-3); font-size: 13px; }
 
-    .timestamp {
-      text-align: center; font-size: 12px; color: var(--text-3);
-      margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
-    }
+    .footer-ts { text-align: center; font-size: 12px; color: var(--text-3); margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); }
 
-    /* Responsive */
     @media (max-width: 640px) {
-      .summary-stats { grid-template-columns: repeat(2, 1fr); }
-      .report-header { flex-direction: column; gap: 12px; }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .checklist { grid-template-columns: 1fr; }
+      .report-header { flex-direction: column; gap: 8px; }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
   <header class="report-header">
     <div class="report-logo">
-      <svg width="20" height="20" viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="15" fill="#2563eb"/>
-        <path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        <circle cx="16" cy="16" r="2" fill="white"/>
-      </svg>
+      <svg width="18" height="18" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
       AgentReady Report
     </div>
     <div class="report-actions">
-      <button class="btn btn-outline" id="btn-download">Download HTML</button>
-      <button class="btn btn-primary" id="btn-new-scan" style="display:none">New Scan</button>
+      <button class="btn btn-outline" id="btn-download">Download Report</button>
     </div>
   </header>
 
-  <!-- Loading -->
-  <div id="loading" class="loading">
-    <div class="spinner"></div>
-    <p>Loading report data...</p>
-  </div>
+  <div id="loading" class="loading"><div class="spinner"></div><p>Loading report...</p></div>
+  <div id="error" class="error-msg" hidden></div>
 
-  <!-- Error -->
-  <div id="error" class="error-msg" style="display:none"></div>
-
-  <!-- Report Content -->
-  <div id="report" class="container" style="display:none">
-    <!-- Summary -->
-    <div class="summary-section">
-      <div class="summary-domain" id="r-domain"></div>
+  <div id="report" hidden>
+    <!-- Hero Score -->
+    <div class="hero-score">
+      <div class="hero-domain" id="r-domain"></div>
       <div class="score-ring-wrap">
         <svg viewBox="0 0 120 120" class="score-ring">
-          <circle cx="60" cy="60" r="45" class="score-ring-bg"/>
-          <circle cx="60" cy="60" r="45" class="score-ring-fill" id="r-ring"/>
+          <circle cx="60" cy="60" r="54" class="score-ring-bg"/>
+          <circle cx="60" cy="60" r="54" class="score-ring-fill" id="r-ring"/>
         </svg>
-        <div class="score-ring-val" id="r-score">0</div>
+        <div class="score-val" id="r-score">0</div>
       </div>
-      <div class="summary-title">Full Site Scan Report</div>
-      <div class="summary-stats">
-        <div class="summary-stat">
-          <div class="summary-stat-val" id="r-avg">0</div>
-          <div class="summary-stat-lbl">Avg Score</div>
-        </div>
-        <div class="summary-stat">
-          <div class="summary-stat-val" id="r-pages">0</div>
-          <div class="summary-stat-lbl">Pages</div>
-        </div>
-        <div class="summary-stat">
-          <div class="summary-stat-val" id="r-forms">0</div>
-          <div class="summary-stat-lbl">Forms</div>
-        </div>
-        <div class="summary-stat">
-          <div class="summary-stat-val" id="r-issues">0</div>
-          <div class="summary-stat-lbl">Issues</div>
-        </div>
+      <div class="hero-verdict" id="r-verdict"></div>
+      <div class="hero-summary" id="r-summary"></div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-val" id="r-pages">0</div><div class="hero-stat-lbl">Pages</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="r-forms">0</div><div class="hero-stat-lbl">Forms</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="r-webmcp">0</div><div class="hero-stat-lbl">WebMCP</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="r-issues">0</div><div class="hero-stat-lbl">Issues</div></div>
       </div>
     </div>
 
-    <!-- Pages -->
-    <div class="pages-section">
-      <div class="pages-title">
-        <span>Pages</span>
-        <span class="pages-subtitle" id="r-pages-sub"></span>
+    <div class="container">
+      <!-- Readiness Checklist -->
+      <div class="section" id="sec-checklist">
+        <div class="section-title">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Readiness Checklist
+        </div>
+        <div class="section-subtitle">What AI agents need to interact with your site</div>
+        <div class="checklist" id="r-checklist"></div>
       </div>
-      <div id="r-page-list"></div>
-      <div id="r-pro-overlay" class="pro-overlay" style="display:none">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <div class="pro-title">Unlock Full Report</div>
-        <div class="pro-text">Free plan shows detailed analysis for 3 pages.<br>Upgrade to Pro to unlock all pages with categories, issues, and code generation.</div>
-        <a href="https://erold90.github.io/AgentReady/#pricing" target="_blank" class="btn btn-primary">See Pro Plans</a>
+
+      <!-- Action Plan -->
+      <div class="section" id="sec-actions">
+        <div class="section-title">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Action Plan
+        </div>
+        <div class="section-subtitle">Prioritized steps to make your site agent-ready</div>
+        <div id="r-actions"></div>
       </div>
+
+      <!-- Agent Simulator -->
+      <div class="section" id="sec-agent">
+        <div class="section-title">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          How AI Agents See Your Site
+        </div>
+        <div class="section-subtitle">This is what an AI agent discovers when it visits your page</div>
+        <div id="r-agent"></div>
+      </div>
+
+      <!-- Score Breakdown -->
+      <div class="section" id="sec-categories">
+        <div class="section-title">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Score Breakdown
+        </div>
+        <div class="section-subtitle">How your score is calculated across 5 categories</div>
+        <div id="r-categories"></div>
+      </div>
+
+      <!-- Pages (full site only) -->
+      <div class="section" id="sec-pages" hidden>
+        <div class="section-title">
+          <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          All Pages
+        </div>
+        <div class="section-subtitle" id="r-pages-sub"></div>
+        <div id="r-page-list"></div>
+        <div id="r-pro-overlay" class="pro-overlay" hidden>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div class="pro-title">Unlock All Pages</div>
+          <div class="pro-text">Free plan shows 3 pages with full detail.<br>Upgrade to Pro for all pages + code generation for every form.</div>
+          <a href="https://erold90.github.io/AgentReady/#pricing" target="_blank" class="btn btn-primary">See Pro Plans</a>
+        </div>
+      </div>
+
+      <!-- Page Detail -->
+      <div id="r-detail" class="detail-panel" hidden></div>
+
+      <div class="footer-ts" id="r-timestamp"></div>
     </div>
-
-    <!-- Page Detail -->
-    <div id="r-detail" class="detail-panel" style="display:none"></div>
-
-    <div class="timestamp" id="r-timestamp"></div>
   </div>
 
   <script src="js/analyzer.js"></script>
