@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgentReady</title>
+  <link rel="stylesheet" href="css/popup.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">&#9889;</span>
+      <span class="logo-text">AgentReady</span>
+    </div>
+    <button id="scan-btn" class="scan-btn">Scan Page</button>
+  </header>
+
+  <!-- Loading -->
+  <div id="loading" class="loading" hidden>
+    <div class="spinner"></div>
+    <p>Analyzing page...</p>
+  </div>
+
+  <!-- Error -->
+  <div id="error" class="error-msg" hidden></div>
+
+  <!-- Welcome -->
+  <div id="welcome" class="welcome">
+    <div class="welcome-icon">&#128269;</div>
+    <h2>Scan any page</h2>
+    <p>Click "Scan Page" to analyze this website's AI Agent Readiness.</p>
+  </div>
+
+  <!-- Results -->
+  <div id="results" hidden>
+    <!-- Score -->
+    <div class="score-section">
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 120 120" class="score-ring">
+          <circle cx="60" cy="60" r="54" class="score-ring-bg"/>
+          <circle cx="60" cy="60" r="54" class="score-ring-fill" id="score-ring-fill"/>
+        </svg>
+        <div class="score-value" id="score-value">0</div>
+      </div>
+      <div class="score-info">
+        <div class="score-label">Agent Readiness Score</div>
+        <div class="score-url" id="score-url"></div>
+        <div class="score-summary" id="score-summary"></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat"><span class="stat-val" id="s-forms">0</span><span class="stat-lbl">Forms</span></div>
+      <div class="stat"><span class="stat-val" id="s-webmcp">0</span><span class="stat-lbl">WebMCP</span></div>
+      <div class="stat"><span class="stat-val" id="s-issues">0</span><span class="stat-lbl">Issues</span></div>
+      <div class="stat"><span class="stat-val" id="s-https">-</span><span class="stat-lbl">HTTPS</span></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="categories">Score</button>
+      <button class="tab" data-tab="issues">Issues</button>
+      <button class="tab" data-tab="forms">Forms</button>
+      <button class="tab" data-tab="tools">Tools</button>
+    </div>
+
+    <!-- Tab: Categories -->
+    <div class="tab-content active" id="tab-categories">
+      <div id="categories-list"></div>
+    </div>
+
+    <!-- Tab: Issues -->
+    <div class="tab-content" id="tab-issues">
+      <div id="issues-list"></div>
+    </div>
+
+    <!-- Tab: Forms -->
+    <div class="tab-content" id="tab-forms">
+      <div id="forms-list"></div>
+    </div>
+
+    <!-- Tab: Suggested Tools -->
+    <div class="tab-content" id="tab-tools">
+      <div id="tools-list"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button id="btn-full-report" class="btn-action">Full Report on AgentReady.dev</button>
+    </div>
+  </div>
+
+  <script src="js/analyzer.js"></script>
+  <script src="js/popup.js"></script>
+</body>
+</html>
