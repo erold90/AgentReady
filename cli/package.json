@@ -1,0 +1,36 @@
+{
+  "name": "agentready",
+  "version": "1.0.0",
+  "description": "Scan any website for AI Agent Readiness — WebMCP, A2A, MCP Discovery, OpenAPI, agents.json, llms.txt",
+  "main": "index.js",
+  "bin": {
+    "agentready": "./bin/agentready.js"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "webmcp",
+    "a2a",
+    "mcp",
+    "openapi",
+    "llms-txt",
+    "scanner",
+    "audit",
+    "seo"
+  ],
+  "author": "AgentReady",
+  "license": "BSL-1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/erold90/AgentReady"
+  },
+  "homepage": "https://erold90.github.io/AgentReady",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "index.js"
+  ]
+}
