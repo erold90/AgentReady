@@ -90,14 +90,20 @@
 
     $('#r-pages-sub').textContent = `Sorted by score (worst first)`;
 
+    // Adjust title for single page
+    if (data.type === 'singlescan') {
+      $('.summary-title').textContent = 'Page Scan Report';
+      $('.pages-title span:first-child').textContent = 'Page Detail';
+    }
+
     // Pages
-    renderPages(data.pages);
+    renderPages(data.pages, data.type);
 
     // Timestamp
     $('#r-timestamp').textContent = `Report generated on ${new Date().toLocaleString()} by AgentReady`;
   }
 
-  function renderPages(pages) {
+  function renderPages(pages, type) {
     const container = $('#r-page-list');
     container.innerHTML = '';
 
@@ -137,9 +143,14 @@
       container.appendChild(row);
     });
 
-    // Pro overlay
-    if (pages.length > FREE_LIMIT) {
+    // Pro overlay (only for full site scans with more than FREE_LIMIT pages)
+    if (type !== 'singlescan' && pages.length > FREE_LIMIT) {
       $('#r-pro-overlay').style.display = 'block';
+    }
+
+    // For single page, auto-expand the detail
+    if (type === 'singlescan' && pages.length === 1 && pages[0].analysis) {
+      showDetail(pages[0]);
     }
   }
 

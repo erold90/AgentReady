@@ -533,49 +533,68 @@
 
   // === Full Report ===
   async function openFullReport() {
-    const FREE_PAGE_LIMIT = 3;
+    try {
+      const FREE_PAGE_LIMIT = 3;
 
-    if (fullSiteResults && fullSiteResults.pages.length > 0) {
-      // Full site report — store in chrome.storage.local, open report.html
-      const payload = {
-        type: 'sitescan',
-        avgScore: fullSiteResults.avgScore,
-        totalPages: fullSiteResults.scannedPages,
-        totalForms: fullSiteResults.totalForms,
-        totalIssues: fullSiteResults.totalIssues,
-        failedPages: fullSiteResults.failedPages,
-        timestamp: new Date().toISOString(),
-        pages: fullSiteResults.pages.map((p, i) => {
-          if (i < FREE_PAGE_LIMIT) {
+      if (fullSiteResults && fullSiteResults.pages.length > 0) {
+        // Full site report
+        const payload = {
+          type: 'sitescan',
+          avgScore: fullSiteResults.avgScore,
+          totalPages: fullSiteResults.scannedPages,
+          totalForms: fullSiteResults.totalForms,
+          totalIssues: fullSiteResults.totalIssues,
+          failedPages: fullSiteResults.failedPages,
+          timestamp: new Date().toISOString(),
+          pages: fullSiteResults.pages.map((p, i) => {
+            if (i < FREE_PAGE_LIMIT) {
+              return {
+                url: p.url, score: p.score, formCount: p.formCount,
+                webmcpCount: p.webmcpCount, issueCount: p.issueCount,
+                error: p.error || null,
+                analysis: p.analysis,
+                forms: p.forms
+              };
+            }
             return {
               url: p.url, score: p.score, formCount: p.formCount,
               webmcpCount: p.webmcpCount, issueCount: p.issueCount,
               error: p.error || null,
-              analysis: p.analysis,
-              forms: p.forms
+              locked: true
             };
-          }
-          return {
-            url: p.url, score: p.score, formCount: p.formCount,
-            webmcpCount: p.webmcpCount, issueCount: p.issueCount,
-            error: p.error || null,
-            locked: true
-          };
-        })
-      };
+          })
+        };
 
-      await chrome.storage.local.set({ agentready_report: payload });
-      chrome.tabs.create({ url: chrome.runtime.getURL('report.html') });
+        await chrome.storage.local.set({ agentready_report: payload });
+        chrome.tabs.create({ url: chrome.runtime.getURL('report.html') });
 
-    } else if (currentScan) {
-      // Single page — open AgentReady.dev with scan data
-      const BASE = 'https://erold90.github.io/AgentReady/';
-      const encoded = encodeURIComponent(JSON.stringify(currentScan));
-      if (encoded.length < 7000) {
-        chrome.tabs.create({ url: BASE + '?scan=' + encoded });
-      } else {
-        chrome.tabs.create({ url: BASE });
+      } else if (currentScan && currentAnalysis) {
+        // Single page report — also use storage + report.html
+        const payload = {
+          type: 'singlescan',
+          avgScore: currentAnalysis.score,
+          totalPages: 1,
+          totalForms: currentScan.forms.length,
+          totalIssues: currentAnalysis.issues.filter(i => i.type === 'warning' || i.type === 'error').length,
+          failedPages: 0,
+          timestamp: new Date().toISOString(),
+          pages: [{
+            url: currentScan.url,
+            score: currentAnalysis.score,
+            formCount: currentScan.forms.length,
+            webmcpCount: currentScan.forms.filter(f => f.hasWebMCP).length + currentScan.scriptRegistrations.length,
+            issueCount: currentAnalysis.issues.filter(i => i.type === 'warning' || i.type === 'error').length,
+            error: null,
+            analysis: currentAnalysis,
+            forms: currentScan.forms
+          }]
+        };
+
+        await chrome.storage.local.set({ agentready_report: payload });
+        chrome.tabs.create({ url: chrome.runtime.getURL('report.html') });
       }
+    } catch (err) {
+      console.error('openFullReport error:', err);
     }
   }
 
