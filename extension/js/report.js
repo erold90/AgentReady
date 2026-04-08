@@ -402,17 +402,7 @@
         title: 'Add llms.txt',
         priority: 'low', difficulty: 'easy', impact: '+10 score',
         description: 'llms.txt is a simple Markdown file at /llms.txt that tells LLMs what your site is about, what resources are available, and how to interact with your content. Think of it as robots.txt for AI.',
-        code: `# ${esc(ps.title || domain)}
-
-> Brief description of your site and what it offers.
-
-## Documentation
-- [API Docs](/api-docs): API reference
-- [Getting Started](/docs/start): How to get started
-
-## Features
-- Feature 1: description
-- Feature 2: description`
+        code: generateLlmsTxt(ps, domain)
       });
     }
 
@@ -606,6 +596,48 @@ if (navigator.modelContext) {
     }
   });
 }`;
+  }
+
+  function generateLlmsTxt(ps, domain) {
+    const title = ps.title || domain;
+    if (/hotel|villa|b&b|apartment|vacanz|holiday|lodge|resort/i.test(title)) {
+      return `# ${esc(title)}
+
+> Accommodation and vacation rental in ${esc(domain)}. Book your stay, check availability, explore rooms and local attractions.
+
+## Pages
+- [Home](https://${esc(domain)}/): Overview and featured rooms
+- [Rooms](https://${esc(domain)}/rooms): All available accommodations
+- [Booking](https://${esc(domain)}/booking): Check availability and book
+- [Contact](https://${esc(domain)}/contact): Get in touch
+
+## Key Information
+- Location: [Your location]
+- Check-in: 3:00 PM | Check-out: 10:00 AM
+- Languages: Italian, English`;
+    }
+    if (/shop|store|ecommerce|product|negozio/i.test(title)) {
+      return `# ${esc(title)}
+
+> Online store at ${esc(domain)}. Browse products, search catalog, and place orders.
+
+## Pages
+- [Home](https://${esc(domain)}/): Featured products
+- [Products](https://${esc(domain)}/products): Full catalog
+- [Cart](https://${esc(domain)}/cart): Shopping cart
+- [Contact](https://${esc(domain)}/contact): Customer support`;
+    }
+    return `# ${esc(title)}
+
+> ${esc(domain)} — describe what your site offers and what users can do here.
+
+## Pages
+- [Home](https://${esc(domain)}/): Main page
+- [About](https://${esc(domain)}/about): About us
+- [Contact](https://${esc(domain)}/contact): Get in touch
+
+## Features
+- Describe your main features here`;
   }
 
   function generateJsonLd(page, domain, ps) {
@@ -847,6 +879,11 @@ if (navigator.modelContext) {
     const verdict = getVerdict(reportData.avgScore, reportData.totalForms, page0);
     const actions = generateActions(page0, analysis, reportData);
 
+    const protocols = reportData.protocols;
+    const protocolCount = protocols?.summary?.found || 0;
+    const protocolTotal = protocols?.summary?.total || 5;
+    const planLabel = { free: 'Free', pro: 'Pro', team: 'Team' }[currentPlan] || 'Free';
+
     let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AgentReady Report — ${domain}</title>
 <style>
 body{font-family:-apple-system,sans-serif;max-width:800px;margin:40px auto;padding:0 24px;color:#0f172a;line-height:1.6}
@@ -854,7 +891,8 @@ h1{font-size:24px;margin-bottom:4px}h2{font-size:18px;margin:32px 0 12px;border-
 .score{font-size:56px;font-weight:800;color:${c2}}
 .verdict{font-size:18px;font-weight:600;margin:4px 0}
 .summary{color:#475569;font-size:14px;margin-bottom:24px}
-.stats{display:flex;gap:24px;margin:16px 0;font-size:14px}.stats span{color:#475569}.stats strong{color:#0f172a}
+.stats{display:flex;gap:24px;margin:16px 0;font-size:14px;flex-wrap:wrap}.stats span{color:#475569}.stats strong{color:#0f172a}
+.plan-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;color:#fff;margin-left:8px}
 .check{padding:6px 0;font-size:14px}.check-pass{color:#10b981}.check-fail{color:#ef4444}
 .action{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:8px 0}
 .action-title{font-weight:600;font-size:14px;margin-bottom:6px}
@@ -863,9 +901,11 @@ pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:12
 table{width:100%;border-collapse:collapse;margin:16px 0}
 th,td{text-align:left;padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:13px}
 th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
+.protocol-row{display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px}
+.protocol-found{color:#10b981}.protocol-missing{color:#ef4444}
 .footer{margin-top:48px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:16px}
 </style></head><body>
-<h1>AgentReady Report</h1>
+<h1>AgentReady Report <span class="plan-badge" style="background:${{ free: '#94a3b8', pro: '#2563eb', team: '#7c3aed' }[currentPlan]}">${planLabel}</span></h1>
 <p style="color:#475569;font-size:14px">${domain}</p>
 <div class="score">${reportData.avgScore}/100</div>
 <div class="verdict">${verdict.title}</div>
@@ -873,10 +913,24 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 <div class="stats">
 <span><strong>${reportData.totalPages}</strong> pages</span>
 <span><strong>${reportData.totalForms}</strong> forms</span>
+<span><strong>${protocolCount}/${protocolTotal}</strong> protocols</span>
 <span><strong>${reportData.totalIssues}</strong> issues</span>
-</div>
+</div>`;
 
-<h2>Action Plan</h2>`;
+    // Protocols section
+    if (protocols) {
+      html += '<h2>AI Discovery Protocols</h2>';
+      const pLabels = { a2a: 'A2A Agent Card', mcp: 'MCP Discovery', agents: 'agents.json', openapi: 'OpenAPI', llms: 'llms.txt' };
+      ['a2a', 'mcp', 'agents', 'openapi', 'llms'].forEach(key => {
+        const r = protocols[key];
+        const found = r?.found;
+        html += `<div class="protocol-row"><span class="${found ? 'protocol-found' : 'protocol-missing'}">${found ? '&#10003;' : '&#10007;'}</span> <span>${pLabels[key]}</span>`;
+        if (found && r.url) html += ` <span style="color:#94a3b8;font-size:11px">— ${esc(r.url)}</span>`;
+        html += '</div>';
+      });
+    }
+
+    html += '<h2>Action Plan</h2>';
 
     actions.forEach((a, i) => {
       html += `<div class="action"><div class="action-title">${i + 1}. ${a.title} <span style="font-size:11px;color:#94a3b8">[${a.priority} priority, ${a.difficulty}]</span></div>`;
@@ -888,22 +942,31 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 
     if (analysis?.categories) {
       html += '<h2>Score Breakdown</h2><table><tr><th>Category</th><th>Score</th><th>Detail</th></tr>';
-      Object.values(analysis.categories).forEach(cat => {
+      // Ordered categories
+      const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols'];
+      catOrder.forEach(key => {
+        const cat = analysis.categories[key];
+        if (!cat) return;
         html += `<tr><td>${cat.label}</td><td style="font-weight:600;color:${color(cat.score)}">${cat.score}/100</td><td style="color:#475569">${cat.detail}</td></tr>`;
       });
       html += '</table>';
     }
 
     if (reportData.pages.length > 1) {
+      const pagesToShow = reportData.pages.slice(0, PAGE_LIMIT);
+      const remaining = reportData.pages.length - pagesToShow.length;
       html += '<h2>Pages</h2><table><tr><th>Score</th><th>Page</th><th>Forms</th><th>Issues</th></tr>';
-      reportData.pages.forEach(p => {
+      pagesToShow.forEach(p => {
         let su = p.url; try { su = new URL(p.url).pathname || '/'; } catch {}
         html += `<tr><td style="font-weight:700;color:${color(p.score)}">${p.score}</td><td>${su}</td><td>${p.formCount}</td><td>${p.issueCount}</td></tr>`;
       });
       html += '</table>';
+      if (remaining > 0) {
+        html += `<p style="color:#7c3aed;font-size:13px;font-weight:600">+ ${remaining} more page${remaining > 1 ? 's' : ''} available with Pro plan</p>`;
+      }
     }
 
-    html += `<div class="footer">Generated by AgentReady | ${new Date().toISOString()} | agentready.dev</div></body></html>`;
+    html += `<div class="footer">Generated by AgentReady (${planLabel}) | ${new Date().toISOString()} | erold90.github.io/AgentReady</div></body></html>`;
 
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
