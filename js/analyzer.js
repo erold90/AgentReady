@@ -372,9 +372,14 @@ const Analyzer = (() => {
       }
     });
 
-    // Missing annotations suggestion
+    // Missing annotations suggestion (only relevant when WebMCP tools exist)
     if (webmcpForms.length > 0 || scriptRegistrations.length > 0) {
-      const hasAnnotations = categories.pageStructure ? false : false; // annotations removed as separate category
+      let hasAnnotations = false;
+      scriptRegistrations.forEach(reg => {
+        if (reg.raw && (reg.raw.includes('readOnlyHint') || reg.raw.includes('destructiveHint') ||
+            reg.raw.includes('idempotentHint'))) hasAnnotations = true;
+      });
+      webmcpForms.forEach(form => { if (form.toolautosubmit) hasAnnotations = true; });
       if (!hasAnnotations) {
         issues.push({
           type: 'info',
