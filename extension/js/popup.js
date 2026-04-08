@@ -532,12 +532,11 @@
   }
 
   // === Full Report ===
-  function openFullReport() {
-    const BASE = 'https://erold90.github.io/AgentReady/';
+  async function openFullReport() {
     const FREE_PAGE_LIMIT = 3;
 
     if (fullSiteResults && fullSiteResults.pages.length > 0) {
-      // Full site report — always use postMessage (data too large for URL)
+      // Full site report — store in chrome.storage.local, open report.html
       const payload = {
         type: 'sitescan',
         avgScore: fullSiteResults.avgScore,
@@ -545,6 +544,7 @@
         totalForms: fullSiteResults.totalForms,
         totalIssues: fullSiteResults.totalIssues,
         failedPages: fullSiteResults.failedPages,
+        timestamp: new Date().toISOString(),
         pages: fullSiteResults.pages.map((p, i) => {
           if (i < FREE_PAGE_LIMIT) {
             return {
@@ -552,8 +552,7 @@
               webmcpCount: p.webmcpCount, issueCount: p.issueCount,
               error: p.error || null,
               analysis: p.analysis,
-              forms: p.forms,
-              scanData: p.scanData
+              forms: p.forms
             };
           }
           return {
@@ -565,43 +564,17 @@
         })
       };
 
-      chrome.tabs.create({ url: BASE + '?mode=sitescan' }, (tab) => {
-        const listener = (tabId, info) => {
-          if (tabId === tab.id && info.status === 'complete') {
-            chrome.tabs.onUpdated.removeListener(listener);
-            chrome.scripting.executeScript({
-              target: { tabId: tab.id },
-              func: (data) => {
-                window.postMessage({ type: 'agentready-sitescan', data }, '*');
-              },
-              args: [payload]
-            });
-          }
-        };
-        chrome.tabs.onUpdated.addListener(listener);
-      });
+      await chrome.storage.local.set({ agentready_report: payload });
+      chrome.tabs.create({ url: chrome.runtime.getURL('report.html') });
+
     } else if (currentScan) {
-      // Single page report — use URL param only if small enough
+      // Single page — open AgentReady.dev with scan data
+      const BASE = 'https://erold90.github.io/AgentReady/';
       const encoded = encodeURIComponent(JSON.stringify(currentScan));
       if (encoded.length < 7000) {
         chrome.tabs.create({ url: BASE + '?scan=' + encoded });
       } else {
-        // Too large — use postMessage
-        chrome.tabs.create({ url: BASE + '?mode=scan' }, (tab) => {
-          const listener = (tabId, info) => {
-            if (tabId === tab.id && info.status === 'complete') {
-              chrome.tabs.onUpdated.removeListener(listener);
-              chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: (data) => {
-                  window.postMessage({ type: 'agentready-scan', data }, '*');
-                },
-                args: [currentScan]
-              });
-            }
-          };
-          chrome.tabs.onUpdated.addListener(listener);
-        });
+        chrome.tabs.create({ url: BASE });
       }
     }
   }
