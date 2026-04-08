@@ -156,6 +156,6 @@
     source: 'extension'
   };
 
-  // Return data to executeScript caller
-  scanData;
+  // Store for retrieval by popup
+  document.documentElement.dataset.agentready = JSON.stringify(scanData);
 })();

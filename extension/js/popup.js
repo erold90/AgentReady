@@ -55,15 +55,25 @@
         return;
       }
 
-      // Inject content script and get result directly
-      const results = await chrome.scripting.executeScript({
+      // Inject content script
+      await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ['js/content.js']
       });
 
-      const scanData = results?.[0]?.result;
-      if (scanData && scanData.url) {
-        currentScan = scanData;
+      // Retrieve stored data
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          const raw = document.documentElement.dataset.agentready;
+          delete document.documentElement.dataset.agentready;
+          return raw;
+        }
+      });
+
+      const raw = results?.[0]?.result;
+      if (raw) {
+        currentScan = JSON.parse(raw);
         currentAnalysis = Analyzer.analyze(currentScan);
         hideLoading();
         renderResults();
@@ -77,7 +87,9 @@
   }
 
   function showError(msg) {
-    hideLoading();
+    $('#loading').hidden = true;
+    $('#scan-btn').disabled = false;
+    $('#scan-btn').textContent = 'Rescan';
     $('#error').textContent = msg;
     $('#error').hidden = false;
   }
