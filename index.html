@@ -30,8 +30,10 @@
       </a>
       <nav class="header-nav">
         <a href="#features">Features</a>
+        <a href="#compare">Compare</a>
         <a href="#pricing">Pricing</a>
         <a href="#demo">Try Demo</a>
+        <a href="blog/">Blog</a>
         <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
           <span class="theme-icon-light">&#9790;</span>
@@ -169,6 +171,55 @@
         <h3>Verify & Monitor</h3>
         <p>Rescan to confirm. Track your score over time. Full site crawl catches every page.</p>
       </div>
+    </div>
+  </section>
+
+  <!-- Compare -->
+  <section id="compare" class="compare-section">
+    <div class="section-header">
+      <h2>Compare Two Sites</h2>
+      <p>See how two websites stack up for AI agent readiness</p>
+    </div>
+    <div class="compare-inputs">
+      <div class="compare-input-wrap">
+        <label for="compare-url-1">Site A</label>
+        <input type="url" id="compare-url-1" class="scan-input" placeholder="https://example.com" autocomplete="url" spellcheck="false">
+      </div>
+      <div class="compare-vs">VS</div>
+      <div class="compare-input-wrap">
+        <label for="compare-url-2">Site B</label>
+        <input type="url" id="compare-url-2" class="scan-input" placeholder="https://competitor.com" autocomplete="url" spellcheck="false">
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:16px">
+      <button id="compare-btn" class="btn btn-primary btn-lg">
+        <span class="compare-btn-text">Compare</span>
+        <span class="compare-btn-loading" hidden><span class="spinner"></span> Comparing...</span>
+      </button>
+    </div>
+    <div id="compare-error" class="scan-error" hidden style="max-width:600px;margin:12px auto 0"></div>
+    <div id="compare-results" class="compare-results" hidden>
+      <div class="compare-cards">
+        <div class="compare-card" id="compare-card-a">
+          <div class="compare-card-domain" id="compare-domain-a"></div>
+          <div class="compare-card-score" id="compare-score-a">0</div>
+          <div class="compare-card-label">/ 100</div>
+          <div class="compare-bar-wrap">
+            <div class="compare-bar" id="compare-bar-a" style="width:0%"></div>
+          </div>
+          <div class="compare-stats" id="compare-stats-a"></div>
+        </div>
+        <div class="compare-card" id="compare-card-b">
+          <div class="compare-card-domain" id="compare-domain-b"></div>
+          <div class="compare-card-score" id="compare-score-b">0</div>
+          <div class="compare-card-label">/ 100</div>
+          <div class="compare-bar-wrap">
+            <div class="compare-bar" id="compare-bar-b" style="width:0%"></div>
+          </div>
+          <div class="compare-stats" id="compare-stats-b"></div>
+        </div>
+      </div>
+      <div class="compare-winner" id="compare-winner"></div>
     </div>
   </section>
 

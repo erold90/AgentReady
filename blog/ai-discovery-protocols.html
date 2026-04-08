@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5 AI Discovery Protocols Every Website Should Implement — CrawlAudit</title>
+  <meta name="description" content="A2A Agent Cards, MCP Discovery, agents.json, OpenAPI, and llms.txt — learn what each AI discovery protocol does and how to add them to your website.">
+  <meta property="og:title" content="5 AI Discovery Protocols Every Website Should Implement">
+  <meta property="og:description" content="Complete guide to AI discovery protocols: A2A, MCP, agents.json, OpenAPI, and llms.txt with implementation examples.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/ai-discovery-protocols.html">
+  <meta property="article:published_time" content="2026-04-08">
+  <meta property="article:author" content="CrawlAudit Team">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="5 AI Discovery Protocols Every Website Should Implement">
+  <meta name="twitter:description" content="A2A, MCP, agents.json, OpenAPI, llms.txt — the complete implementation guide.">
+  <link rel="canonical" href="https://erold90.github.io/AgentReady/blog/ai-discovery-protocols.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --surface: #ffffff;
+      --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+      --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #dbeafe;
+      --green: #10b981; --green-light: #d1fae5;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --transition: 0.2s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --surface: #1e293b;
+      --border: #334155; --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+      --primary-light: #1e3a5f; --green-light: #064e3b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-3); padding: 2px 6px; border-radius: 4px; }
+
+    .header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); }
+    [data-theme="dark"] .header { background: rgba(15,23,42,0.85); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+    .header-nav a { color: var(--text-2); font-weight: 500; }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+
+    .article { max-width: 720px; margin: 0 auto; padding: 60px 24px 80px; }
+    .article-meta { font-size: 13px; color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .article-tag { background: var(--primary-light); color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .article h1 { font-size: 36px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 24px; }
+    .article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 16px; }
+    .article h3 { font-size: 18px; font-weight: 600; margin: 28px 0 12px; }
+    .article p { font-size: 16px; color: var(--text-2); margin-bottom: 16px; line-height: 1.75; }
+    .article ul, .article ol { margin: 0 0 16px 24px; color: var(--text-2); }
+    .article li { margin-bottom: 8px; font-size: 16px; line-height: 1.6; }
+    .article strong { color: var(--text); }
+
+    .code-block {
+      background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      overflow-x: auto; margin: 16px 0 24px; white-space: pre;
+    }
+    .code-block code { background: none; padding: 0; font-size: 13px; }
+    .code-label { font-size: 12px; font-weight: 600; color: var(--text-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .callout {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 16px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 24px 0; font-size: 15px;
+    }
+    .callout p { color: var(--text); margin: 0; }
+
+    .protocol-card {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; margin: 20px 0;
+    }
+    .protocol-card h3 { margin-top: 0; }
+
+    .cta-box {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; text-align: center; margin: 48px 0 0;
+    }
+    .cta-box h3 { margin: 0 0 8px; font-size: 20px; }
+    .cta-box p { margin: 0 0 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: white; padding: 12px 24px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 15px;
+      border: none; text-decoration: none; transition: background var(--transition);
+    }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; }
+
+    .related { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .related h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-3); }
+    .related ul { list-style: none; margin: 0; padding: 0; }
+    .related li { margin-bottom: 8px; }
+    .related a { font-weight: 500; }
+
+    .footer { border-top: 1px solid var(--border); padding: 20px 24px; font-size: 13px; color: var(--text-3); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-left { display: flex; align-items: center; gap: 8px; }
+    .footer a { color: var(--text-3); }
+
+    @media (max-width: 640px) {
+      .article h1 { font-size: 26px; }
+      .article { padding: 40px 16px 60px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "5 AI Discovery Protocols Every Website Should Implement",
+    "datePublished": "2026-04-08",
+    "author": { "@type": "Organization", "name": "CrawlAudit" },
+    "publisher": { "@type": "Organization", "name": "CrawlAudit" },
+    "description": "A2A Agent Cards, MCP Discovery, agents.json, OpenAPI, and llms.txt — what each AI discovery protocol does and how to add it to your website.",
+    "mainEntityOfPage": "https://erold90.github.io/AgentReady/blog/ai-discovery-protocols.html"
+  }
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../" class="logo">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        <span>CrawlAudit</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../">Scanner</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <article class="article">
+    <div class="article-meta">
+      <span>April 8, 2026</span>
+      <span class="article-tag">Protocols</span>
+    </div>
+
+    <h1>5 AI Discovery Protocols Every Website Should Implement</h1>
+
+    <p>AI agents don't just visit your website — they need to <em>understand</em> it. Before an agent can book a flight, search your inventory, or fill a form, it needs to discover what your site can do. This discovery happens through standardized protocols that act as signposts for AI systems.</p>
+
+    <p>Here are the five protocols that matter most in 2026, how to implement each one, and why they collectively make your site AI-native.</p>
+
+    <h2>1. A2A Agent Cards</h2>
+
+    <p>Google's <strong>Agent-to-Agent (A2A)</strong> protocol defines an "Agent Card" — a JSON file at <code>/.well-known/agent.json</code> that describes what your agent or service can do. Think of it as a business card for AI systems.</p>
+
+    <div class="code-label">/.well-known/agent.json</div>
+    <div class="code-block"><code>{
+  "name": "Acme Travel Agent",
+  "description": "Book flights, hotels, and car rentals",
+  "url": "https://acme-travel.com",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "id": "flight-search",
+      "name": "Search Flights",
+      "description": "Find available flights between two cities",
+      "tags": ["travel", "flights"]
+    },
+    {
+      "id": "hotel-booking",
+      "name": "Book Hotels",
+      "description": "Search and reserve hotel rooms",
+      "tags": ["travel", "hotels"]
+    }
+  ]
+}</code></div>
+
+    <p><strong>How to add it:</strong> Create the file at <code>/.well-known/agent.json</code> on your web server. No special server configuration needed beyond serving static JSON. A2A Agent Cards are fetched by Google's AI systems and other A2A-compatible agents to understand your service before initiating any interaction.</p>
+
+    <h2>2. MCP Discovery</h2>
+
+    <p>The <strong>Model Context Protocol (MCP)</strong>, originally from Anthropic, defines a server discovery endpoint at <code>/.well-known/mcp.json</code>. This tells AI systems where your MCP server is and what tools it offers.</p>
+
+    <div class="code-label">/.well-known/mcp.json</div>
+    <div class="code-block"><code>{
+  "mcpServers": {
+    "acme-api": {
+      "url": "https://acme-travel.com/mcp",
+      "transport": "streamable-http",
+      "description": "Acme Travel booking and search API",
+      "tools": [
+        "search-flights",
+        "search-hotels",
+        "book-reservation"
+      ]
+    }
+  }
+}</code></div>
+
+    <p><strong>How to add it:</strong> If you have an MCP server (or plan to build one), this discovery file lets clients like Claude Desktop, Cursor, and other MCP-compatible tools auto-discover it. Even if you don't have an MCP server yet, listing the file shows AI agents that your site is MCP-aware.</p>
+
+    <h2>3. agents.json</h2>
+
+    <p><strong>agents.json</strong> is a lightweight manifest at your site root that declares agent permissions, capabilities, and contact information. It's the emerging standard for websites to communicate their AI agent policy.</p>
+
+    <div class="code-label">/agents.json</div>
+    <div class="code-block"><code>{
+  "agentPolicy": {
+    "allowAgents": true,
+    "allowedOperations": ["read", "search", "form-fill"],
+    "authentication": "none",
+    "rateLimit": "60/minute"
+  },
+  "contact": {
+    "email": "ai-support@acme-travel.com",
+    "documentation": "https://acme-travel.com/docs/ai-integration"
+  },
+  "tools": [
+    {
+      "name": "search",
+      "endpoint": "/api/search",
+      "method": "GET",
+      "parameters": {
+        "q": "Search query string",
+        "type": "flights|hotels|cars"
+      }
+    }
+  ]
+}</code></div>
+
+    <p><strong>How to add it:</strong> Create <code>agents.json</code> in your website's root directory. This file is increasingly checked by AI agents and browser extensions as a first signal of whether a site welcomes automated interaction. It's simple to maintain and costs nothing to implement.</p>
+
+    <h2>4. OpenAPI Specification</h2>
+
+    <p>If your site has an API, an <strong>OpenAPI</strong> (formerly Swagger) specification is essential. AI agents use OpenAPI specs to understand your API endpoints, parameters, authentication requirements, and response formats.</p>
+
+    <div class="code-label">/openapi.json (excerpt)</div>
+    <div class="code-block"><code>{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Acme Travel API",
+    "version": "2.0.0",
+    "description": "Search and book travel services"
+  },
+  "paths": {
+    "/api/flights/search": {
+      "get": {
+        "summary": "Search available flights",
+        "operationId": "searchFlights",
+        "parameters": [
+          {
+            "name": "origin",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Origin airport IATA code"
+          },
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Destination airport IATA code"
+          }
+        ]
+      }
+    }
+  }
+}</code></div>
+
+    <p><strong>How to add it:</strong> Most API frameworks (Express, FastAPI, Rails, Django REST) can auto-generate OpenAPI specs. Serve it at <code>/openapi.json</code> or <code>/api/openapi.yaml</code>. AI coding assistants and ChatGPT plugins already consume OpenAPI specs natively. Link to it from your HTML with <code>&lt;link rel="service-desc" href="/openapi.json"&gt;</code>.</p>
+
+    <h2>5. llms.txt</h2>
+
+    <p><strong>llms.txt</strong> is a plain-text file at your site root that provides LLMs with a human-readable summary of your site's content and structure. It's like a README for AI — concise, structured, and designed to fit in a context window.</p>
+
+    <div class="code-label">/llms.txt</div>
+    <div class="code-block"><code># Acme Travel
+
+## About
+Acme Travel is an online travel agency offering flights,
+hotels, and car rentals in 50+ countries.
+
+## Key Pages
+- /flights — Flight search and booking
+- /hotels — Hotel search and booking
+- /deals — Current promotional offers
+
+## API
+- OpenAPI spec: /openapi.json
+- Authentication: API key required for write operations
+- Rate limit: 60 requests/minute
+
+## Contact
+- Support: support@acme-travel.com
+- AI Integration: ai-support@acme-travel.com</code></div>
+
+    <p><strong>How to add it:</strong> Create a plain text file called <code>llms.txt</code> in your site root. Keep it under 2,000 words. Focus on what your site does, its main pages, available APIs, and how AI systems should interact with it. Some sites also provide <code>llms-full.txt</code> with more detailed content for agents that want deeper context.</p>
+
+    <h2>How These Protocols Work Together</h2>
+
+    <div class="callout">
+      <p><strong>Think of it in layers:</strong> <code>llms.txt</code> provides the overview, <code>agents.json</code> declares permissions, <code>OpenAPI</code> describes your API, <code>mcp.json</code> enables MCP tool discovery, and <code>agent.json</code> enables agent-to-agent coordination. Each serves a different audience of AI systems.</p>
+    </div>
+
+    <p>No single protocol covers everything. An AI coding assistant might check your OpenAPI spec. A browser-based agent might look for A2A Agent Cards. An LLM doing research might read your llms.txt. By implementing all five, you ensure maximum discoverability across the entire AI ecosystem.</p>
+
+    <h2>Implementation Priority</h2>
+
+    <ol>
+      <li><strong>llms.txt</strong> — 5 minutes to create, immediately useful for all LLMs</li>
+      <li><strong>agents.json</strong> — 10 minutes, declares your AI policy clearly</li>
+      <li><strong>OpenAPI</strong> — If you have an API, this should already exist; if not, generate it</li>
+      <li><strong>A2A Agent Card</strong> — 15 minutes for the JSON file, positions you for Google's AI ecosystem</li>
+      <li><strong>MCP Discovery</strong> — Requires an MCP server, but the discovery file itself is trivial</li>
+    </ol>
+
+    <p>CrawlAudit detects all five protocols automatically during a scan and tells you exactly which ones are missing and how to add them.</p>
+
+    <div class="cta-box">
+      <h3>Which protocols are you missing?</h3>
+      <p>Run a free scan and find out in seconds. CrawlAudit checks all 5 AI discovery protocols.</p>
+      <a href="../#demo" class="btn-primary">Scan Your Site Free</a>
+    </div>
+
+    <div class="related">
+      <h3>Related Articles</h3>
+      <ul>
+        <li><a href="what-is-webmcp.html">What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready</a></li>
+        <li><a href="how-to-score-100.html">How to Score 100/100 on CrawlAudit: Complete Guide</a></li>
+        <li><a href="robots-txt-ai-bots.html">robots.txt for AI: Which Bots to Allow and Why</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        &middot; &copy; 2026 CrawlAudit
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

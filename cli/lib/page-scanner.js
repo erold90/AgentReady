@@ -24,6 +24,15 @@ async function scanPage(url) {
       forms: extractForms(html),
       scriptRegistrations: extractScriptRegs(html),
       pageSignals: extractPageSignals(html),
+      securityHeaders: {
+        hsts: resp.headers.get('strict-transport-security') || null,
+        csp: resp.headers.get('content-security-policy') || null,
+        xContentType: resp.headers.get('x-content-type-options') || null,
+        xFrame: resp.headers.get('x-frame-options') || null,
+        referrerPolicy: resp.headers.get('referrer-policy') || null,
+        cors: resp.headers.get('access-control-allow-origin') || null,
+        permissions: resp.headers.get('permissions-policy') || null
+      },
       timestamp: new Date().toISOString()
     };
   } finally {

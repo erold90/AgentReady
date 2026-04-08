@@ -35,6 +35,12 @@
     $('#download-report').addEventListener('click', downloadReport);
     $('#copy-report-link').addEventListener('click', copyReportLink);
 
+    // Compare
+    const compareBtn = $('#compare-btn');
+    if (compareBtn) {
+      compareBtn.addEventListener('click', handleCompare);
+    }
+
     // Tabs
     $$('.tab').forEach(tab => {
       tab.addEventListener('click', () => switchTab(tab.dataset.tab));
@@ -710,6 +716,25 @@
   <div class="score">${score}/100</div>
   <div class="summary">${currentAnalysis.summary}</div>
 
+  ${score >= 75 ? `
+  <div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
+    <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
+    <div style="margin-bottom:16px">
+      <img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge" style="height:28px">
+    </div>
+    <div style="font-size:13px;color:#475569;margin-bottom:8px">Add this badge to your site:</div>
+    <pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:11px;overflow-x:auto;white-space:pre-wrap;text-align:left">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
+  </div>
+  ` : `
+  <div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
+    <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>
+    <div style="margin-bottom:16px">
+      <img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-f59e0b?style=for-the-badge" alt="Work in Progress Badge" style="height:28px">
+    </div>
+    <div style="font-size:13px;color:#475569">Score 75+ to unlock the Agent-Ready certification badge.</div>
+  </div>
+  `}
+
   <h2>Category Breakdown</h2>
   <table>
     <tr><th>Category</th><th>Score</th><th>Detail</th></tr>
@@ -843,6 +868,99 @@
   function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // === Compare Handler ===
+  async function handleCompare() {
+    const url1Input = $('#compare-url-1');
+    const url2Input = $('#compare-url-2');
+    const compareBtn = $('#compare-btn');
+    const compareError = $('#compare-error');
+    const compareResults = $('#compare-results');
+
+    let url1 = url1Input.value.trim();
+    let url2 = url2Input.value.trim();
+
+    if (!url1 || !url2) {
+      compareError.textContent = 'Please enter both URLs to compare.';
+      compareError.hidden = false;
+      return;
+    }
+
+    if (!url1.startsWith('http://') && !url1.startsWith('https://')) { url1 = 'https://' + url1; url1Input.value = url1; }
+    if (!url2.startsWith('http://') && !url2.startsWith('https://')) { url2 = 'https://' + url2; url2Input.value = url2; }
+
+    compareError.hidden = true;
+    compareBtn.querySelector('.compare-btn-text').hidden = true;
+    compareBtn.querySelector('.compare-btn-loading').hidden = false;
+    compareBtn.disabled = true;
+
+    try {
+      const origin1 = new URL(url1).origin;
+      const origin2 = new URL(url2).origin;
+
+      const [scan1, scan2, proto1, proto2] = await Promise.all([
+        Scanner.scan(url1),
+        Scanner.scan(url2),
+        ProtocolScanner.scan(origin1).catch(() => null),
+        ProtocolScanner.scan(origin2).catch(() => null)
+      ]);
+
+      const analysis1 = Analyzer.analyze(scan1, proto1);
+      const analysis2 = Analyzer.analyze(scan2, proto2);
+
+      const scoreColor = (s) => s >= 80 ? '#10b981' : s >= 50 ? '#f59e0b' : '#ef4444';
+
+      let domain1 = ''; try { domain1 = new URL(url1).hostname; } catch {}
+      let domain2 = ''; try { domain2 = new URL(url2).hostname; } catch {}
+
+      // Render results
+      $('#compare-domain-a').textContent = domain1;
+      $('#compare-domain-b').textContent = domain2;
+
+      const s1 = analysis1.score;
+      const s2 = analysis2.score;
+
+      $('#compare-score-a').textContent = s1;
+      $('#compare-score-a').style.color = scoreColor(s1);
+      $('#compare-score-b').textContent = s2;
+      $('#compare-score-b').style.color = scoreColor(s2);
+
+      const barA = $('#compare-bar-a');
+      const barB = $('#compare-bar-b');
+      barA.style.background = scoreColor(s1);
+      barB.style.background = scoreColor(s2);
+      setTimeout(() => { barA.style.width = s1 + '%'; barB.style.width = s2 + '%'; }, 50);
+
+      const forms1 = scan1.forms?.length || 0;
+      const forms2 = scan2.forms?.length || 0;
+      const wm1 = scan1.forms?.filter(f => f.hasWebMCP).length || 0;
+      const wm2 = scan2.forms?.filter(f => f.hasWebMCP).length || 0;
+      const proto1Count = proto1?.summary?.found || 0;
+      const proto2Count = proto2?.summary?.found || 0;
+
+      $('#compare-stats-a').innerHTML = `<span>${forms1} forms</span><span>${wm1} WebMCP</span><span>${proto1Count} protocols</span>`;
+      $('#compare-stats-b').innerHTML = `<span>${forms2} forms</span><span>${wm2} WebMCP</span><span>${proto2Count} protocols</span>`;
+
+      const winner = $('#compare-winner');
+      if (s1 > s2) {
+        winner.innerHTML = `<span style="color:${scoreColor(s1)}">${escapeHTML(domain1)}</span> wins by ${s1 - s2} points`;
+      } else if (s2 > s1) {
+        winner.innerHTML = `<span style="color:${scoreColor(s2)}">${escapeHTML(domain2)}</span> wins by ${s2 - s1} points`;
+      } else {
+        winner.textContent = "It's a tie!";
+      }
+
+      compareResults.hidden = false;
+      compareResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      compareError.textContent = err.message || 'Failed to scan one or both URLs. Please check and try again.';
+      compareError.hidden = false;
+    } finally {
+      compareBtn.querySelector('.compare-btn-text').hidden = false;
+      compareBtn.querySelector('.compare-btn-loading').hidden = true;
+      compareBtn.disabled = false;
+    }
   }
 
   // === Start ===

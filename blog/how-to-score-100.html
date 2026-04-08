@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Score 100/100 on CrawlAudit: Complete Guide — CrawlAudit</title>
+  <meta name="description" content="Step-by-step guide to achieving a perfect 100/100 AI readiness score on CrawlAudit. Code examples, before/after comparisons, and fixes for every category.">
+  <meta property="og:title" content="How to Score 100/100 on CrawlAudit: Complete Guide">
+  <meta property="og:description" content="Walk through every scoring category with code examples and before/after comparisons to achieve a perfect AI readiness score.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/how-to-score-100.html">
+  <meta property="article:published_time" content="2026-04-08">
+  <meta property="article:author" content="CrawlAudit Team">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How to Score 100/100 on CrawlAudit: Complete Guide">
+  <meta name="twitter:description" content="Step-by-step guide to a perfect AI readiness score with code examples.">
+  <link rel="canonical" href="https://erold90.github.io/AgentReady/blog/how-to-score-100.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --surface: #ffffff;
+      --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+      --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #dbeafe;
+      --green: #10b981; --green-light: #d1fae5;
+      --red: #ef4444; --red-light: #fee2e2;
+      --yellow: #f59e0b; --yellow-light: #fef3c7;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --transition: 0.2s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --surface: #1e293b;
+      --border: #334155; --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+      --primary-light: #1e3a5f; --green-light: #064e3b; --red-light: #7f1d1d; --yellow-light: #78350f;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-3); padding: 2px 6px; border-radius: 4px; }
+
+    .header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); }
+    [data-theme="dark"] .header { background: rgba(15,23,42,0.85); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+    .header-nav a { color: var(--text-2); font-weight: 500; }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+
+    .article { max-width: 720px; margin: 0 auto; padding: 60px 24px 80px; }
+    .article-meta { font-size: 13px; color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .article-tag { background: var(--primary-light); color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .article h1 { font-size: 36px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 24px; }
+    .article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 16px; }
+    .article h3 { font-size: 18px; font-weight: 600; margin: 28px 0 12px; }
+    .article p { font-size: 16px; color: var(--text-2); margin-bottom: 16px; line-height: 1.75; }
+    .article ul, .article ol { margin: 0 0 16px 24px; color: var(--text-2); }
+    .article li { margin-bottom: 8px; font-size: 16px; line-height: 1.6; }
+    .article strong { color: var(--text); }
+
+    .code-block {
+      background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      overflow-x: auto; margin: 16px 0 24px; white-space: pre;
+    }
+    .code-block code { background: none; padding: 0; font-size: 13px; }
+    .code-label { font-size: 12px; font-weight: 600; color: var(--text-3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .callout {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 16px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 24px 0; font-size: 15px;
+    }
+    .callout p { color: var(--text); margin: 0; }
+
+    .score-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    }
+    .score-red { background: var(--red-light); color: var(--red); }
+    .score-yellow { background: var(--yellow-light); color: var(--yellow); }
+    .score-green { background: var(--green-light); color: var(--green); }
+
+    .before-after {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0;
+    }
+    .before-after-card {
+      border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .before-after-label {
+      padding: 8px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .label-before { background: var(--red-light); color: var(--red); }
+    .label-after { background: var(--green-light); color: var(--green); }
+    .before-after-code {
+      background: #1e293b; color: #e2e8f0; padding: 16px;
+      font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto;
+    }
+
+    .category-header {
+      display: flex; align-items: center; gap: 12px; margin: 40px 0 16px;
+    }
+    .category-weight {
+      font-size: 13px; font-weight: 600; color: var(--text-3);
+      background: var(--bg-3); padding: 4px 10px; border-radius: 20px;
+    }
+
+    .cta-box {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; text-align: center; margin: 48px 0 0;
+    }
+    .cta-box h3 { margin: 0 0 8px; font-size: 20px; }
+    .cta-box p { margin: 0 0 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: white; padding: 12px 24px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 15px;
+      border: none; text-decoration: none; transition: background var(--transition);
+    }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; }
+
+    .related { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .related h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-3); }
+    .related ul { list-style: none; margin: 0; padding: 0; }
+    .related li { margin-bottom: 8px; }
+    .related a { font-weight: 500; }
+
+    .footer { border-top: 1px solid var(--border); padding: 20px 24px; font-size: 13px; color: var(--text-3); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-left { display: flex; align-items: center; gap: 8px; }
+    .footer a { color: var(--text-3); }
+
+    @media (max-width: 640px) {
+      .article h1 { font-size: 26px; }
+      .article { padding: 40px 16px 60px; }
+      .before-after { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Score 100/100 on CrawlAudit",
+    "description": "Step-by-step guide to achieving a perfect AI readiness score on CrawlAudit.",
+    "datePublished": "2026-04-08",
+    "author": { "@type": "Organization", "name": "CrawlAudit" },
+    "step": [
+      { "@type": "HowToStep", "name": "Add WebMCP attributes to forms", "text": "Add tool-name, tool-description, and tool-param-description attributes to HTML forms." },
+      { "@type": "HowToStep", "name": "Implement AI discovery protocols", "text": "Add llms.txt, agents.json, A2A Agent Card, MCP Discovery, and OpenAPI spec files." },
+      { "@type": "HowToStep", "name": "Fix semantic HTML structure", "text": "Ensure proper headings, labels, ARIA attributes, and semantic elements." },
+      { "@type": "HowToStep", "name": "Configure robots.txt and meta tags", "text": "Allow AI crawlers and add proper structured data." },
+      { "@type": "HowToStep", "name": "Register tools via JavaScript API", "text": "Use navigator.modelContext.registerTool() for complex interactions." },
+      { "@type": "HowToStep", "name": "Add structured data", "text": "Implement JSON-LD schema markup for your content type." }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../" class="logo">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        <span>CrawlAudit</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../">Scanner</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <article class="article">
+    <div class="article-meta">
+      <span>April 8, 2026</span>
+      <span class="article-tag">Guide</span>
+    </div>
+
+    <h1>How to Score 100/100 on CrawlAudit: Complete Guide</h1>
+
+    <p>CrawlAudit scores your website's AI agent readiness on a scale of 0 to 100 across six categories. Most websites score between 5 and 25 on their first scan. This guide walks you through every category, explains what's checked, and provides the exact code to fix each issue.</p>
+
+    <div class="callout">
+      <p><strong>Time estimate:</strong> A typical website can go from ~15/100 to 100/100 in 1-2 hours. Static sites and SPAs are the fastest to fix. WordPress sites may need a plugin or theme edit.</p>
+    </div>
+
+    <!-- Category 1 -->
+    <div class="category-header">
+      <h2>1. WebMCP Compliance</h2>
+      <span class="category-weight">Weight: 30%</span>
+    </div>
+
+    <p>This is the largest scoring category. CrawlAudit checks whether your forms have WebMCP attributes (declarative) and whether you register tools via the JavaScript API (imperative).</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li>Forms have <code>tool-name</code> and <code>tool-description</code> attributes</li>
+      <li>Form inputs have <code>tool-param-description</code> attributes</li>
+      <li>The page calls <code>navigator.modelContext.registerTool()</code></li>
+      <li>Tool definitions include proper JSON Schema parameters</li>
+      <li>Tools have descriptive names (not generic like "form1")</li>
+    </ul>
+
+    <h3>Fix: Declarative approach</h3>
+
+    <div class="before-after">
+      <div class="before-after-card">
+        <div class="before-after-label label-before">Before (0 points)</div>
+        <div class="before-after-code"><code>&lt;form action="/search"&gt;
+  &lt;input name="q" type="text"&gt;
+  &lt;button type="submit"&gt;
+    Search
+  &lt;/button&gt;
+&lt;/form&gt;</code></div>
+      </div>
+      <div class="before-after-card">
+        <div class="before-after-label label-after">After (full points)</div>
+        <div class="before-after-code"><code>&lt;form action="/search"
+  tool-name="site-search"
+  tool-description="Search
+  products by keyword"&gt;
+  &lt;input name="q" type="text"
+    tool-param-description=
+    "Search query text"&gt;
+  &lt;button type="submit"&gt;
+    Search
+  &lt;/button&gt;
+&lt;/form&gt;</code></div>
+      </div>
+    </div>
+
+    <h3>Fix: Imperative approach</h3>
+
+    <div class="code-block"><code>if (navigator.modelContext) {
+  navigator.modelContext.registerTool({
+    name: "site-search",
+    description: "Search products by keyword, category, or price range",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search keywords" },
+        category: { type: "string", description: "Product category filter" },
+        maxPrice: { type: "number", description: "Maximum price in USD" }
+      },
+      required: ["query"]
+    },
+    handler: async ({ query, category, maxPrice }) => {
+      const results = await fetch(`/api/search?q=${query}&cat=${category || ''}&max=${maxPrice || ''}`);
+      return results.json();
+    }
+  });
+}</code></div>
+
+    <!-- Category 2 -->
+    <div class="category-header">
+      <h2>2. AI Discovery Protocols</h2>
+      <span class="category-weight">Weight: 20%</span>
+    </div>
+
+    <p>CrawlAudit checks for the five standard AI discovery files. Each detected protocol adds points.</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li><code>/.well-known/agent.json</code> — A2A Agent Card</li>
+      <li><code>/.well-known/mcp.json</code> — MCP Discovery</li>
+      <li><code>/agents.json</code> — Agent policy manifest</li>
+      <li><code>/openapi.json</code> or linked OpenAPI spec</li>
+      <li><code>/llms.txt</code> — LLM-readable site summary</li>
+    </ul>
+
+    <p>You don't need all five for a good score, but having all five gets you maximum points. See our <a href="ai-discovery-protocols.html">detailed guide on AI discovery protocols</a> for implementation instructions.</p>
+
+    <h3>Quick win: llms.txt</h3>
+
+    <div class="code-block"><code># Your Site Name
+
+## About
+Brief description of your website and its purpose.
+
+## Key Pages
+- / — Homepage
+- /products — Product catalog
+- /contact — Contact form
+- /api — Developer API documentation
+
+## API
+- OpenAPI spec: /openapi.json
+- Base URL: https://yoursite.com/api/v1
+
+## Contact
+- Email: hello@yoursite.com</code></div>
+
+    <p>Place this at your site root as <code>llms.txt</code>. Takes under 5 minutes.</p>
+
+    <!-- Category 3 -->
+    <div class="category-header">
+      <h2>3. Semantic HTML Structure</h2>
+      <span class="category-weight">Weight: 15%</span>
+    </div>
+
+    <p>Even without WebMCP, good semantic HTML helps AI agents understand your page. CrawlAudit checks your HTML quality from an AI-readability perspective.</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li>Form inputs have associated <code>&lt;label&gt;</code> elements</li>
+      <li>Inputs have <code>name</code>, <code>type</code>, and <code>placeholder</code> attributes</li>
+      <li>Required fields are marked with <code>required</code> attribute</li>
+      <li>Forms use semantic elements (<code>&lt;fieldset&gt;</code>, <code>&lt;legend&gt;</code>)</li>
+      <li>Page has a logical heading hierarchy (h1 > h2 > h3)</li>
+      <li>ARIA labels and roles are used where appropriate</li>
+    </ul>
+
+    <div class="before-after">
+      <div class="before-after-card">
+        <div class="before-after-label label-before">Before</div>
+        <div class="before-after-code"><code>&lt;div class="form"&gt;
+  &lt;div&gt;Email&lt;/div&gt;
+  &lt;input class="input-1"&gt;
+  &lt;div&gt;Message&lt;/div&gt;
+  &lt;textarea&gt;&lt;/textarea&gt;
+  &lt;div class="btn"
+    onclick="send()"&gt;
+    Send
+  &lt;/div&gt;
+&lt;/div&gt;</code></div>
+      </div>
+      <div class="before-after-card">
+        <div class="before-after-label label-after">After</div>
+        <div class="before-after-code"><code>&lt;form action="/contact"
+  method="POST"
+  tool-name="contact"
+  tool-description="Send a
+  message to our team"&gt;
+  &lt;label for="email"&gt;
+    Email
+  &lt;/label&gt;
+  &lt;input id="email"
+    name="email" type="email"
+    required
+    tool-param-description=
+    "Your email address"&gt;
+  &lt;label for="msg"&gt;
+    Message
+  &lt;/label&gt;
+  &lt;textarea id="msg"
+    name="message" required
+    tool-param-description=
+    "Your message"&gt;
+  &lt;/textarea&gt;
+  &lt;button type="submit"&gt;
+    Send
+  &lt;/button&gt;
+&lt;/form&gt;</code></div>
+      </div>
+    </div>
+
+    <!-- Category 4 -->
+    <div class="category-header">
+      <h2>4. Crawlability & Robots</h2>
+      <span class="category-weight">Weight: 15%</span>
+    </div>
+
+    <p>AI agents need permission to access your site. This category checks whether your robots.txt and meta tags welcome AI crawlers.</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li><code>robots.txt</code> exists and is accessible</li>
+      <li>AI-specific bots (GPTBot, ClaudeBot, etc.) are not blocked</li>
+      <li>No <code>&lt;meta name="robots" content="noindex, nofollow"&gt;</code> blocking agents</li>
+      <li>Sitemap is referenced in robots.txt</li>
+      <li>Pages load without JavaScript-only rendering issues</li>
+    </ul>
+
+    <h3>Optimal robots.txt</h3>
+
+    <div class="code-block"><code>User-agent: *
+Allow: /
+
+# AI Crawlers — explicitly welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://yoursite.com/sitemap.xml</code></div>
+
+    <p>See our <a href="robots-txt-ai-bots.html">complete guide to robots.txt for AI bots</a> for details on each crawler.</p>
+
+    <!-- Category 5 -->
+    <div class="category-header">
+      <h2>5. Structured Data</h2>
+      <span class="category-weight">Weight: 10%</span>
+    </div>
+
+    <p>JSON-LD structured data helps AI agents understand the type and context of your content.</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li>Page contains JSON-LD structured data (<code>&lt;script type="application/ld+json"&gt;</code>)</li>
+      <li>Schema.org types are used correctly</li>
+      <li>Key properties are populated (name, description, url)</li>
+      <li>No JSON parsing errors in structured data blocks</li>
+    </ul>
+
+    <div class="code-block"><code>&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Your App Name",
+  "description": "What your app does in one sentence",
+  "url": "https://yoursite.com",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+&lt;/script&gt;</code></div>
+
+    <!-- Category 6 -->
+    <div class="category-header">
+      <h2>6. Meta & OpenGraph</h2>
+      <span class="category-weight">Weight: 10%</span>
+    </div>
+
+    <p>Proper meta tags give AI agents context about your page before they even parse the DOM.</p>
+
+    <h3>What's checked</h3>
+    <ul>
+      <li><code>&lt;title&gt;</code> is present and descriptive</li>
+      <li><code>&lt;meta name="description"&gt;</code> exists and is meaningful</li>
+      <li>OpenGraph tags (<code>og:title</code>, <code>og:description</code>, <code>og:type</code>, <code>og:url</code>)</li>
+      <li>Twitter card meta tags</li>
+      <li>Canonical URL is set</li>
+      <li>Language is declared (<code>lang</code> attribute on <code>&lt;html&gt;</code>)</li>
+    </ul>
+
+    <div class="code-block"><code>&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+  &lt;title&gt;Your Page Title — Your Brand&lt;/title&gt;
+  &lt;meta name="description" content="Clear, concise description
+    of what this page does. 150-160 characters."&gt;
+  &lt;meta property="og:title" content="Your Page Title"&gt;
+  &lt;meta property="og:description" content="Same or similar description."&gt;
+  &lt;meta property="og:type" content="website"&gt;
+  &lt;meta property="og:url" content="https://yoursite.com/page"&gt;
+  &lt;meta name="twitter:card" content="summary_large_image"&gt;
+  &lt;link rel="canonical" href="https://yoursite.com/page"&gt;
+&lt;/head&gt;</code></div>
+
+    <h2>Putting It All Together: The 100/100 Checklist</h2>
+
+    <ol>
+      <li><strong>Add WebMCP attributes</strong> to every <code>&lt;form&gt;</code> and <code>&lt;input&gt;</code> on your pages</li>
+      <li><strong>Register tools</strong> via <code>navigator.modelContext.registerTool()</code> for complex interactions</li>
+      <li><strong>Create llms.txt</strong> and <strong>agents.json</strong> at your site root</li>
+      <li><strong>Add A2A Agent Card</strong> at <code>/.well-known/agent.json</code></li>
+      <li><strong>Add MCP Discovery</strong> at <code>/.well-known/mcp.json</code> (if applicable)</li>
+      <li><strong>Generate or link OpenAPI spec</strong> (if you have an API)</li>
+      <li><strong>Fix semantic HTML</strong> — labels, names, types, required attributes</li>
+      <li><strong>Configure robots.txt</strong> — allow AI crawlers, reference sitemap</li>
+      <li><strong>Add JSON-LD structured data</strong> with appropriate Schema.org types</li>
+      <li><strong>Complete meta tags</strong> — title, description, OG tags, canonical URL</li>
+    </ol>
+
+    <div class="callout">
+      <p><strong>Pro tip:</strong> After making changes, use CrawlAudit's rescan feature to verify your score immediately. The Agent Simulator tab shows exactly how an AI agent sees your page before and after your fixes.</p>
+    </div>
+
+    <h2>Common Mistakes That Cost Points</h2>
+
+    <ul>
+      <li><strong>Generic tool names</strong> — "form1" or "submit-form" lose points. Use descriptive names like "product-search" or "newsletter-signup".</li>
+      <li><strong>Missing parameter descriptions</strong> — Every input needs a <code>tool-param-description</code>. Agents need to know what each field expects.</li>
+      <li><strong>Blocking AI bots in robots.txt</strong> — Some default robots.txt configs block everything. Check for blanket <code>Disallow: /</code> rules.</li>
+      <li><strong>JavaScript-only forms</strong> — Forms rendered entirely by JavaScript may not be detected by some scanners. Always include WebMCP tool registration in your JS.</li>
+      <li><strong>Empty or placeholder meta descriptions</strong> — "Welcome to our website" or "Page description" are flagged as low quality.</li>
+    </ul>
+
+    <div class="cta-box">
+      <h3>Ready to hit 100?</h3>
+      <p>Scan your site now and see exactly which fixes you need. CrawlAudit generates the code for you.</p>
+      <a href="../#demo" class="btn-primary">Scan Your Site Free</a>
+    </div>
+
+    <div class="related">
+      <h3>Related Articles</h3>
+      <ul>
+        <li><a href="what-is-webmcp.html">What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready</a></li>
+        <li><a href="ai-discovery-protocols.html">5 AI Discovery Protocols Every Website Should Implement</a></li>
+        <li><a href="robots-txt-ai-bots.html">robots.txt for AI: Which Bots to Allow and Why</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        &middot; &copy; 2026 CrawlAudit
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

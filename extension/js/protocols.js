@@ -45,7 +45,93 @@ const ProtocolScanner = (() => {
     if (results.llms.found) protocols.push('llms.txt');
     results.summary = { found: protocols.length, total: 5, protocols };
 
+    // robots.txt AI bot check (separate from protocol count)
+    try {
+      results.robotsTxt = await checkRobotsTxt(origin);
+    } catch {
+      results.robotsTxt = { found: false, blockedBots: [], allowedBots: AI_BOTS.map(b => b.agent), totalBots: AI_BOTS.length, blockedCount: 0 };
+    }
+
     return results;
+  }
+
+  const AI_BOTS = [
+    { agent: 'GPTBot', owner: 'OpenAI' },
+    { agent: 'ChatGPT-User', owner: 'OpenAI' },
+    { agent: 'ClaudeBot', owner: 'Anthropic' },
+    { agent: 'Claude-Web', owner: 'Anthropic' },
+    { agent: 'Bytespider', owner: 'ByteDance' },
+    { agent: 'CCBot', owner: 'Common Crawl' },
+    { agent: 'Google-Extended', owner: 'Google AI' },
+    { agent: 'Bingbot', owner: 'Microsoft' },
+    { agent: 'PerplexityBot', owner: 'Perplexity' },
+    { agent: 'Applebot-Extended', owner: 'Apple' },
+    { agent: 'FacebookBot', owner: 'Meta' },
+    { agent: 'cohere-ai', owner: 'Cohere' },
+    { agent: 'Amazonbot', owner: 'Amazon' },
+  ];
+
+  async function checkRobotsTxt(origin) {
+    try {
+      const resp = await fetchWithTimeout(origin + '/robots.txt');
+      if (!resp.ok) {
+        return {
+          found: false,
+          blockedBots: [],
+          allowedBots: AI_BOTS.map(b => b.agent),
+          totalBots: AI_BOTS.length,
+          blockedCount: 0
+        };
+      }
+      const text = await resp.text();
+      const blocked = new Set();
+
+      const lines = text.split('\n');
+      let currentAgents = [];
+      for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line || line.startsWith('#')) {
+          if (!line) currentAgents = [];
+          continue;
+        }
+        const uaMatch = line.match(/^User-agent\s*:\s*(.+)/i);
+        if (uaMatch) {
+          currentAgents.push(uaMatch[1].trim());
+          continue;
+        }
+        const disallowMatch = line.match(/^Disallow\s*:\s*(.+)/i);
+        if (disallowMatch) {
+          const path = disallowMatch[1].trim();
+          if (path === '/' || path === '/*') {
+            const isWildcard = currentAgents.some(a => a === '*');
+            for (const bot of AI_BOTS) {
+              if (isWildcard || currentAgents.some(a => a.toLowerCase() === bot.agent.toLowerCase())) {
+                blocked.add(bot.agent);
+              }
+            }
+          }
+        }
+      }
+
+      const blockedBots = AI_BOTS.filter(b => blocked.has(b.agent)).map(b => b.agent);
+      const allowedBots = AI_BOTS.filter(b => !blocked.has(b.agent)).map(b => b.agent);
+
+      return {
+        found: true,
+        blockedBots,
+        allowedBots,
+        totalBots: AI_BOTS.length,
+        blockedCount: blockedBots.length
+      };
+    } catch {
+      return {
+        found: false,
+        blockedBots: [],
+        allowedBots: AI_BOTS.map(b => b.agent),
+        totalBots: AI_BOTS.length,
+        blockedCount: 0
+      };
+    }
   }
 
   // === A2A Agent Card ===

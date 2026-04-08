@@ -181,12 +181,53 @@
       { pass: protocols?.llms?.found, label: 'llms.txt' },
     ];
 
+    // Add bot access summary to checklist
+    const rt = protocols?.robotsTxt;
+    if (rt) {
+      const allAllowed = rt.blockedCount === 0;
+      checks.push({ pass: allAllowed, label: `AI Bot Access (${rt.totalBots - rt.blockedCount}/${rt.totalBots} bots allowed)` });
+    }
+
     container.innerHTML = checks.map(ch => `
       <div class="check-item ${ch.pass ? 'check-pass' : 'check-fail'}">
         <div class="check-icon">${ch.pass ? '\u2713' : '\u2717'}</div>
         <div class="check-label">${ch.label}</div>
       </div>
     `).join('');
+
+    // Render detailed bot access section
+    if (rt) {
+      const botList = [
+        { agent: 'GPTBot', owner: 'OpenAI' },
+        { agent: 'ChatGPT-User', owner: 'OpenAI' },
+        { agent: 'ClaudeBot', owner: 'Anthropic' },
+        { agent: 'Claude-Web', owner: 'Anthropic' },
+        { agent: 'Bytespider', owner: 'ByteDance' },
+        { agent: 'CCBot', owner: 'Common Crawl' },
+        { agent: 'Google-Extended', owner: 'Google AI' },
+        { agent: 'Bingbot', owner: 'Microsoft' },
+        { agent: 'PerplexityBot', owner: 'Perplexity' },
+        { agent: 'Applebot-Extended', owner: 'Apple' },
+        { agent: 'FacebookBot', owner: 'Meta' },
+        { agent: 'cohere-ai', owner: 'Cohere' },
+        { agent: 'Amazonbot', owner: 'Amazon' },
+      ];
+      let botHtml = '<h3 style="margin:24px 0 12px;font-size:15px">AI Bot Access (robots.txt)</h3>';
+      if (!rt.found) {
+        botHtml += '<p style="color:#94a3b8;font-size:12px">No robots.txt found — all bots allowed</p>';
+      } else {
+        botHtml += botList.map(b => {
+          const isBlocked = rt.blockedBots.includes(b.agent);
+          return `<div class="check-item ${isBlocked ? 'check-fail' : 'check-pass'}">
+            <div class="check-icon">${isBlocked ? '\u2717' : '\u2713'}</div>
+            <div class="check-label">${b.agent} <span style="color:#94a3b8;font-size:10px">(${b.owner})</span> — ${isBlocked ? 'blocked' : 'allowed'}</div>
+          </div>`;
+        }).join('');
+        const allowed = rt.totalBots - rt.blockedCount;
+        botHtml += `<p style="font-size:12px;color:#94a3b8;margin-top:8px">${allowed}/${rt.totalBots} AI bots allowed</p>`;
+      }
+      container.insertAdjacentHTML('beforeend', botHtml);
+    }
   }
 
   // =============================================
@@ -935,6 +976,30 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 <span><strong>${protocolCount}/${protocolTotal}</strong> protocols</span>
 <span><strong>${reportData.totalIssues}</strong> issues</span>
 </div>`;
+
+    // Badge section
+    if (reportData.avgScore >= 75) {
+      const badgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${reportData.avgScore}%2F100-10b981?style=for-the-badge`;
+      html += `
+<div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
+  <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
+  <div style="margin-bottom:16px">
+    <img src="${badgeUrl}" alt="Agent-Ready Badge" style="height:28px">
+  </div>
+  <div style="font-size:13px;color:#475569;margin-bottom:8px">Add this badge to your site:</div>
+  <pre style="text-align:left;font-size:11px">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="${badgeUrl}" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
+</div>`;
+    } else {
+      const wipBadgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${reportData.avgScore}%2F100-f59e0b?style=for-the-badge`;
+      html += `
+<div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
+  <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>
+  <div style="margin-bottom:16px">
+    <img src="${wipBadgeUrl}" alt="Work in Progress Badge" style="height:28px">
+  </div>
+  <div style="font-size:13px;color:#475569">Score 75+ to unlock the Agent-Ready certification badge.</div>
+</div>`;
+    }
 
     // Protocols section
     if (protocols) {

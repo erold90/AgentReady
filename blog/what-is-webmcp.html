@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready — CrawlAudit</title>
+  <meta name="description" content="Learn about WebMCP (Web Model Context Protocol), the W3C standard in Chrome 146+ that lets AI agents interact with your website's forms and tools via navigator.modelContext.">
+  <meta property="og:title" content="What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready">
+  <meta property="og:description" content="WebMCP lets AI agents discover and use your website's tools. Learn the declarative and imperative approaches to making your site AI-native.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/what-is-webmcp.html">
+  <meta property="article:published_time" content="2026-04-08">
+  <meta property="article:author" content="CrawlAudit Team">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready">
+  <meta name="twitter:description" content="WebMCP lets AI agents discover and use your website's tools. Learn the declarative and imperative approaches.">
+  <link rel="canonical" href="https://erold90.github.io/AgentReady/blog/what-is-webmcp.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --surface: #ffffff;
+      --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+      --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #dbeafe;
+      --green: #10b981; --green-light: #d1fae5;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --transition: 0.2s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --surface: #1e293b;
+      --border: #334155; --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+      --primary-light: #1e3a5f; --green-light: #064e3b;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-3); padding: 2px 6px; border-radius: 4px; }
+
+    .header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); }
+    [data-theme="dark"] .header { background: rgba(15,23,42,0.85); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+    .header-nav a { color: var(--text-2); font-weight: 500; }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+
+    .article { max-width: 720px; margin: 0 auto; padding: 60px 24px 80px; }
+    .article-meta { font-size: 13px; color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .article-tag { background: var(--primary-light); color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .article h1 { font-size: 36px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 24px; }
+    .article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 16px; }
+    .article h3 { font-size: 18px; font-weight: 600; margin: 28px 0 12px; }
+    .article p { font-size: 16px; color: var(--text-2); margin-bottom: 16px; line-height: 1.75; }
+    .article ul, .article ol { margin: 0 0 16px 24px; color: var(--text-2); }
+    .article li { margin-bottom: 8px; font-size: 16px; line-height: 1.6; }
+    .article strong { color: var(--text); }
+
+    .code-block {
+      background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      overflow-x: auto; margin: 16px 0 24px; white-space: pre;
+    }
+    .code-block code { background: none; padding: 0; font-size: 13px; }
+
+    .callout {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 16px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 24px 0; font-size: 15px;
+    }
+    .callout p { color: var(--text); margin: 0; }
+
+    .cta-box {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; text-align: center; margin: 48px 0 0;
+    }
+    .cta-box h3 { margin: 0 0 8px; font-size: 20px; }
+    .cta-box p { margin: 0 0 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: white; padding: 12px 24px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 15px;
+      border: none; text-decoration: none; transition: background var(--transition);
+    }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; }
+
+    .related { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .related h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-3); }
+    .related ul { list-style: none; margin: 0; padding: 0; }
+    .related li { margin-bottom: 8px; }
+    .related a { font-weight: 500; }
+
+    .footer { border-top: 1px solid var(--border); padding: 20px 24px; font-size: 13px; color: var(--text-3); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-left { display: flex; align-items: center; gap: 8px; }
+    .footer a { color: var(--text-3); }
+
+    @media (max-width: 640px) {
+      .article h1 { font-size: 26px; }
+      .article { padding: 40px 16px 60px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready",
+    "datePublished": "2026-04-08",
+    "author": { "@type": "Organization", "name": "CrawlAudit" },
+    "publisher": { "@type": "Organization", "name": "CrawlAudit" },
+    "description": "Learn about WebMCP, the W3C standard in Chrome 146+ that lets AI agents interact with your website's forms and tools.",
+    "mainEntityOfPage": "https://erold90.github.io/AgentReady/blog/what-is-webmcp.html"
+  }
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../" class="logo">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        <span>CrawlAudit</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../">Scanner</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <article class="article">
+    <div class="article-meta">
+      <span>April 8, 2026</span>
+      <span class="article-tag">WebMCP</span>
+    </div>
+
+    <h1>What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready</h1>
+
+    <p>The web was designed for humans. Forms, buttons, and links all assume a person is clicking, typing, and reading. But AI agents are now browsing the web on behalf of users — booking flights, filling out applications, comparing prices. And the vast majority of websites are completely opaque to them.</p>
+
+    <p><strong>WebMCP</strong> (Web Model Context Protocol) is the W3C standard that changes this. Shipped in Chrome 146 Canary in February 2026 and backed by Google and Microsoft, WebMCP gives websites a native browser API to expose their interactive capabilities to AI agents in a structured, permission-controlled way.</p>
+
+    <h2>The Problem: AI Agents Are Blind</h2>
+
+    <p>When an AI agent visits a website today, it sees raw HTML. A search form is just an <code>&lt;input&gt;</code> element with no clear indication of what it does, what parameters it accepts, or what will happen when it's submitted. The agent has to guess — and guessing means errors, hallucinations, and failed tasks.</p>
+
+    <p>Consider a hotel booking form. A human sees labels, date pickers, and a "Book Now" button. An AI agent sees a soup of DOM nodes. It doesn't know which field is the check-in date, which is check-out, or that the form requires both before submission.</p>
+
+    <h2>The Solution: navigator.modelContext</h2>
+
+    <p>WebMCP introduces the <code>navigator.modelContext</code> API. This is a browser-native interface that lets websites declare what tools, actions, and resources they offer — in a format AI agents understand natively. Think of it as a menu for robots: structured, typed, and discoverable.</p>
+
+    <p>There are two ways to implement WebMCP: <strong>declarative</strong> (HTML attributes) and <strong>imperative</strong> (JavaScript API).</p>
+
+    <h2>Approach 1: Declarative (HTML Attributes)</h2>
+
+    <p>The simplest approach. Add attributes directly to your existing HTML form elements:</p>
+
+    <div class="code-block"><code>&lt;form tool-name="hotel-search"
+      tool-description="Search for available hotel rooms"&gt;
+  &lt;input name="destination"
+         tool-param-description="City or hotel name"
+         type="text" required&gt;
+  &lt;input name="checkin"
+         tool-param-description="Check-in date (YYYY-MM-DD)"
+         type="date" required&gt;
+  &lt;input name="checkout"
+         tool-param-description="Check-out date (YYYY-MM-DD)"
+         type="date" required&gt;
+  &lt;select name="guests"
+          tool-param-description="Number of guests (1-10)"&gt;
+    &lt;option value="1"&gt;1&lt;/option&gt;
+    &lt;option value="2"&gt;2 (default)&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;button type="submit"&gt;Search&lt;/button&gt;
+&lt;/form&gt;</code></div>
+
+    <p>The key attributes are <code>tool-name</code>, <code>tool-description</code>, and <code>tool-param-description</code>. These tell AI agents exactly what each form and field does. No JavaScript required — it works with server-rendered HTML, WordPress sites, and static pages.</p>
+
+    <h2>Approach 2: Imperative (JavaScript API)</h2>
+
+    <p>For more complex interactions — multi-step workflows, dynamic actions, or tools that don't map to a form — use the JavaScript API:</p>
+
+    <div class="code-block"><code>navigator.modelContext.registerTool({
+  name: "book-hotel-room",
+  description: "Book a hotel room with specified dates and guests",
+  parameters: {
+    type: "object",
+    properties: {
+      destination: {
+        type: "string",
+        description: "City or hotel name"
+      },
+      checkin: {
+        type: "string",
+        description: "Check-in date in YYYY-MM-DD format"
+      },
+      checkout: {
+        type: "string",
+        description: "Check-out date in YYYY-MM-DD format"
+      },
+      guests: {
+        type: "number",
+        description: "Number of guests",
+        minimum: 1,
+        maximum: 10
+      }
+    },
+    required: ["destination", "checkin", "checkout"]
+  },
+  handler: async (params) =&gt; {
+    // Your booking logic here
+    const result = await bookRoom(params);
+    return { confirmation: result.id };
+  }
+});</code></div>
+
+    <p>The imperative API uses JSON Schema for parameter definitions — the same format used by OpenAI function calling, MCP servers, and most AI tool ecosystems. This means AI agents already know how to work with it.</p>
+
+    <h2>Declarative vs. Imperative: When to Use Each</h2>
+
+    <ul>
+      <li><strong>Declarative</strong> — Best for existing HTML forms. Zero JavaScript. Works with SSR, CMS, and static sites. Quick to implement. Limited to form-based interactions.</li>
+      <li><strong>Imperative</strong> — Best for complex tools, multi-step workflows, and dynamic actions. Requires JavaScript. More powerful and flexible. Supports custom return values.</li>
+      <li><strong>Both</strong> — You can use both on the same page. Declarative for forms, imperative for custom tools. The agent sees all registered tools together.</li>
+    </ul>
+
+    <h2>How AI Agents Discover Your Tools</h2>
+
+    <p>When an AI agent (like one built into Chrome, or a browser extension) loads your page, it checks <code>navigator.modelContext</code> for registered tools. The browser exposes:</p>
+
+    <ol>
+      <li><strong>Tool names and descriptions</strong> — so the agent knows what's available</li>
+      <li><strong>Parameter schemas</strong> — so the agent knows what data to provide</li>
+      <li><strong>Execution handlers</strong> — so the agent can call tools with proper parameters</li>
+    </ol>
+
+    <p>The agent then matches user intent ("book me a hotel in Paris for next weekend") to the available tools, fills in the parameters, and executes — all without screen-scraping or DOM guessing.</p>
+
+    <h2>Why This Matters for Website Owners</h2>
+
+    <p>AI agents are rapidly becoming a primary way users interact with the web. Google's Project Mariner, OpenAI's Operator, and Anthropic's computer use feature all browse the web on behalf of users. If your site isn't WebMCP-ready, these agents will struggle with it — and users will choose competitors whose sites work seamlessly.</p>
+
+    <div class="callout">
+      <p><strong>Key insight:</strong> WebMCP is to AI agents what semantic HTML was to screen readers. It's an accessibility layer that makes your site usable by a new class of users — automated ones.</p>
+    </div>
+
+    <p>Early adopters gain a significant advantage. As browser-native AI features roll out through 2026 and 2027, websites with WebMCP support will be the ones AI agents recommend, use, and send traffic to.</p>
+
+    <h2>Getting Started</h2>
+
+    <p>The fastest way to assess your current WebMCP readiness is to run an audit. CrawlAudit scans your pages, identifies forms that lack WebMCP attributes, and generates the exact code you need — both declarative HTML and imperative JavaScript.</p>
+
+    <p>For most sites, adding WebMCP support takes under an hour. For a WordPress site with a contact form, it can take five minutes.</p>
+
+    <div class="cta-box">
+      <h3>Check your WebMCP readiness</h3>
+      <p>Scan your website and get a detailed report with auto-generated fix code.</p>
+      <a href="../#demo" class="btn-primary">Scan Your Site Free</a>
+    </div>
+
+    <div class="related">
+      <h3>Related Articles</h3>
+      <ul>
+        <li><a href="ai-discovery-protocols.html">5 AI Discovery Protocols Every Website Should Implement</a></li>
+        <li><a href="how-to-score-100.html">How to Score 100/100 on CrawlAudit: Complete Guide</a></li>
+        <li><a href="robots-txt-ai-bots.html">robots.txt for AI: Which Bots to Allow and Why</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        &middot; &copy; 2026 CrawlAudit
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

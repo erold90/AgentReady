@@ -136,11 +136,30 @@ function analyzePage(page, protocolResults) {
   if (ps.formCount > 0) { pageStructureScore += 10; details.push(`${ps.formCount} forms`); }
   pageStructureScore = Math.min(100, pageStructureScore);
 
-  // 5. Security
-  const securityScore = page.isHTTPS ? 100 : 0;
+  // 5. Security (HTTPS + security headers)
+  const sh = page.securityHeaders || {};
+  let securityScore = 0;
+  const securityDetails = [];
+  if (page.isHTTPS) { securityScore += 40; securityDetails.push('HTTPS'); }
+  if (sh.hsts) { securityScore += 15; securityDetails.push('HSTS'); }
+  if (sh.csp) { securityScore += 15; securityDetails.push('CSP'); }
+  if (sh.xContentType) { securityScore += 10; securityDetails.push('X-Content-Type-Options'); }
+  if (sh.xFrame) { securityScore += 10; securityDetails.push('X-Frame-Options'); }
+  if (sh.referrerPolicy) { securityScore += 10; securityDetails.push('Referrer-Policy'); }
 
   // 6. Protocols
   const protocolScore = protocolResults?.summary ? Math.min(100, protocolResults.summary.found * 20) : 0;
+
+  // 7. Bot Access (robots.txt AI bot blocking)
+  const rt = protocolResults?.robotsTxt;
+  let botAccessScore = 100; // default: all allowed
+  let botAccessDetail = 'No robots.txt — all bots allowed';
+  if (rt && rt.found) {
+    botAccessScore = rt.totalBots > 0 ? Math.round(((rt.totalBots - rt.blockedCount) / rt.totalBots) * 100) : 100;
+    botAccessDetail = rt.blockedCount > 0
+      ? `${rt.blockedCount}/${rt.totalBots} bots blocked: ${rt.blockedBots.join(', ')}`
+      : `All ${rt.totalBots} bots allowed`;
+  }
 
   // --- Weighted total (same weights as extension) ---
   const categories = {
@@ -148,17 +167,18 @@ function analyzePage(page, protocolResults) {
     descriptions: { score: descScore, label: 'Descriptions' },
     schema: { score: schemaScore, label: 'Schema Quality' },
     pageStructure: { score: pageStructureScore, label: 'Page Structure', detail: details.join(', ') },
-    security: { score: securityScore, label: 'Security' },
-    protocols: { score: protocolScore, label: 'AI Protocols' }
+    security: { score: securityScore, label: 'Security', detail: securityDetails.join(', ') || 'No security headers' },
+    protocols: { score: protocolScore, label: 'AI Protocols' },
+    botAccess: { score: botAccessScore, label: 'Bot Access', detail: botAccessDetail }
   };
 
   let weights;
   if (hasWebMCP) {
-    weights = { forms: 25, descriptions: 20, schema: 12, pageStructure: 13, security: 12, protocols: 18 };
+    weights = { forms: 23, descriptions: 18, schema: 10, pageStructure: 12, security: 10, protocols: 17, botAccess: 10 };
   } else if (forms.length > 0) {
-    weights = { forms: 22, descriptions: 8, schema: 8, pageStructure: 30, security: 17, protocols: 15 };
+    weights = { forms: 20, descriptions: 7, schema: 7, pageStructure: 27, security: 15, protocols: 14, botAccess: 10 };
   } else {
-    weights = { forms: 8, descriptions: 4, schema: 4, pageStructure: 52, security: 17, protocols: 15 };
+    weights = { forms: 7, descriptions: 3, schema: 3, pageStructure: 47, security: 15, protocols: 14, botAccess: 11 };
   }
 
   let totalScore = 0;
@@ -185,6 +205,7 @@ function analyzePage(page, protocolResults) {
     },
     scriptRegistrations: scriptRegs,
     webmcpCount: forms.filter(f => f.hasWebMCP).length + scriptRegs.length,
+    securityHeaders: page.securityHeaders || {},
     pageSignals: ps,
     categories,
     issues,

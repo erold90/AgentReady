@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>robots.txt for AI: Which Bots to Allow and Why — CrawlAudit</title>
+  <meta name="description" content="Complete guide to AI crawlers in robots.txt: GPTBot, ClaudeBot, GoogleOther, PerplexityBot, and more. Learn which to allow, which to block, and best practices.">
+  <meta property="og:title" content="robots.txt for AI: Which Bots to Allow and Why">
+  <meta property="og:description" content="GPTBot, ClaudeBot, GoogleOther — a complete reference of AI crawlers and how to configure robots.txt for the AI era.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/robots-txt-ai-bots.html">
+  <meta property="article:published_time" content="2026-04-08">
+  <meta property="article:author" content="CrawlAudit Team">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="robots.txt for AI: Which Bots to Allow and Why">
+  <meta name="twitter:description" content="Complete reference of AI crawlers and robots.txt best practices for 2026.">
+  <link rel="canonical" href="https://erold90.github.io/AgentReady/blog/robots-txt-ai-bots.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg: #ffffff; --bg-2: #f8fafc; --bg-3: #f1f5f9; --surface: #ffffff;
+      --border: #e2e8f0; --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+      --primary: #2563eb; --primary-hover: #1d4ed8; --primary-light: #dbeafe;
+      --green: #10b981; --green-light: #d1fae5;
+      --red: #ef4444; --red-light: #fee2e2;
+      --yellow: #f59e0b; --yellow-light: #fef3c7;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px; --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --transition: 0.2s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a; --bg-2: #1e293b; --bg-3: #334155; --surface: #1e293b;
+      --border: #334155; --text: #f1f5f9; --text-2: #94a3b8; --text-3: #64748b;
+      --primary-light: #1e3a5f; --green-light: #064e3b; --red-light: #7f1d1d; --yellow-light: #78350f;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 0.9em; background: var(--bg-3); padding: 2px 6px; border-radius: 4px; }
+
+    .header { position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); }
+    [data-theme="dark"] .header { background: rgba(15,23,42,0.85); }
+    .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; }
+    .header-nav { display: flex; align-items: center; gap: 20px; font-size: 14px; }
+    .header-nav a { color: var(--text-2); font-weight: 500; }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+
+    .article { max-width: 720px; margin: 0 auto; padding: 60px 24px 80px; }
+    .article-meta { font-size: 13px; color: var(--text-3); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .article-tag { background: var(--primary-light); color: var(--primary); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .article h1 { font-size: 36px; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 24px; }
+    .article h2 { font-size: 24px; font-weight: 700; margin: 40px 0 16px; }
+    .article h3 { font-size: 18px; font-weight: 600; margin: 28px 0 12px; }
+    .article p { font-size: 16px; color: var(--text-2); margin-bottom: 16px; line-height: 1.75; }
+    .article ul, .article ol { margin: 0 0 16px 24px; color: var(--text-2); }
+    .article li { margin-bottom: 8px; font-size: 16px; line-height: 1.6; }
+    .article strong { color: var(--text); }
+
+    .code-block {
+      background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: var(--radius-sm);
+      font-family: var(--mono); font-size: 13px; line-height: 1.6;
+      overflow-x: auto; margin: 16px 0 24px; white-space: pre;
+    }
+    .code-block code { background: none; padding: 0; font-size: 13px; }
+
+    .callout {
+      background: var(--primary-light); border-left: 4px solid var(--primary);
+      padding: 16px 20px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 24px 0; font-size: 15px;
+    }
+    .callout p { color: var(--text); margin: 0; }
+
+    .bot-table {
+      width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;
+    }
+    .bot-table th {
+      text-align: left; padding: 12px 16px; border-bottom: 2px solid var(--border);
+      font-weight: 600; color: var(--text); font-size: 13px; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .bot-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-2);
+    }
+    .bot-table tr:last-child td { border-bottom: none; }
+    .bot-table code { font-size: 12px; }
+    .rec-allow { color: var(--green); font-weight: 600; }
+    .rec-block { color: var(--red); font-weight: 600; }
+    .rec-optional { color: var(--yellow); font-weight: 600; }
+
+    .cta-box {
+      background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 32px; text-align: center; margin: 48px 0 0;
+    }
+    .cta-box h3 { margin: 0 0 8px; font-size: 20px; }
+    .cta-box p { margin: 0 0 16px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: white; padding: 12px 24px;
+      border-radius: var(--radius-sm); font-weight: 600; font-size: 15px;
+      border: none; text-decoration: none; transition: background var(--transition);
+    }
+    .btn-primary:hover { background: var(--primary-hover); text-decoration: none; }
+
+    .related { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .related h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-3); }
+    .related ul { list-style: none; margin: 0; padding: 0; }
+    .related li { margin-bottom: 8px; }
+    .related a { font-weight: 500; }
+
+    .footer { border-top: 1px solid var(--border); padding: 20px 24px; font-size: 13px; color: var(--text-3); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-left { display: flex; align-items: center; gap: 8px; }
+    .footer a { color: var(--text-3); }
+
+    @media (max-width: 640px) {
+      .article h1 { font-size: 26px; }
+      .article { padding: 40px 16px 60px; }
+      .bot-table { font-size: 12px; }
+      .bot-table th, .bot-table td { padding: 8px 10px; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "robots.txt for AI: Which Bots to Allow and Why",
+    "datePublished": "2026-04-08",
+    "author": { "@type": "Organization", "name": "CrawlAudit" },
+    "publisher": { "@type": "Organization", "name": "CrawlAudit" },
+    "description": "Complete guide to AI crawlers in robots.txt: GPTBot, ClaudeBot, GoogleOther, PerplexityBot, and more.",
+    "mainEntityOfPage": "https://erold90.github.io/AgentReady/blog/robots-txt-ai-bots.html"
+  }
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="../" class="logo">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        <span>CrawlAudit</span>
+      </a>
+      <nav class="header-nav">
+        <a href="../">Scanner</a>
+        <a href="./">Blog</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <article class="article">
+    <div class="article-meta">
+      <span>April 8, 2026</span>
+      <span class="article-tag">robots.txt</span>
+    </div>
+
+    <h1>robots.txt for AI: Which Bots to Allow and Why</h1>
+
+    <p>Your <code>robots.txt</code> file was designed for search engine crawlers. But in 2026, a growing fleet of AI-specific bots is crawling the web — training models, powering AI search engines, and running autonomous agents. Each has different purposes, different behaviors, and different implications for your site.</p>
+
+    <p>This guide covers every major AI crawler, what it does, whether you should allow it, and how to configure your robots.txt for maximum AI visibility without sacrificing control.</p>
+
+    <h2>The AI Bot Landscape</h2>
+
+    <table class="bot-table">
+      <thead>
+        <tr>
+          <th>Bot</th>
+          <th>Company</th>
+          <th>Purpose</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>GPTBot</code></td>
+          <td>OpenAI</td>
+          <td>Training data + ChatGPT browsing</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>ChatGPT-User</code></td>
+          <td>OpenAI</td>
+          <td>Real-time browsing in ChatGPT</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>ClaudeBot</code></td>
+          <td>Anthropic</td>
+          <td>Training data for Claude models</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>anthropic-ai</code></td>
+          <td>Anthropic</td>
+          <td>Claude's web browsing feature</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>GoogleOther</code></td>
+          <td>Google</td>
+          <td>AI/ML training (separate from search)</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>Google-Extended</code></td>
+          <td>Google</td>
+          <td>Gemini training data</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>PerplexityBot</code></td>
+          <td>Perplexity</td>
+          <td>AI search engine indexing</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>Applebot-Extended</code></td>
+          <td>Apple</td>
+          <td>Apple Intelligence training</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>Bytespider</code></td>
+          <td>ByteDance</td>
+          <td>TikTok/Douyin AI training</td>
+          <td><span class="rec-optional">Optional</span></td>
+        </tr>
+        <tr>
+          <td><code>CCBot</code></td>
+          <td>Common Crawl</td>
+          <td>Open dataset used by many AI labs</td>
+          <td><span class="rec-optional">Optional</span></td>
+        </tr>
+        <tr>
+          <td><code>cohere-ai</code></td>
+          <td>Cohere</td>
+          <td>Enterprise AI model training</td>
+          <td><span class="rec-optional">Optional</span></td>
+        </tr>
+        <tr>
+          <td><code>Amazonbot</code></td>
+          <td>Amazon</td>
+          <td>Alexa AI answers</td>
+          <td><span class="rec-allow">Allow</span></td>
+        </tr>
+        <tr>
+          <td><code>Meta-ExternalAgent</code></td>
+          <td>Meta</td>
+          <td>AI training for Llama models</td>
+          <td><span class="rec-optional">Optional</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Why Allow AI Bots?</h2>
+
+    <p>Blocking AI crawlers feels like protecting your content, but it comes with real costs:</p>
+
+    <ul>
+      <li><strong>Lost AI search visibility</strong> — Perplexity, ChatGPT, and Google's AI Overviews cite sources. If they can't crawl you, they can't cite you. Your competitors get the traffic instead.</li>
+      <li><strong>Agent incompatibility</strong> — AI agents that browse on behalf of users check robots.txt. If you block them, users can't interact with your site through their preferred AI assistant.</li>
+      <li><strong>Model training benefits</strong> — When AI models are trained on your content, they learn about your brand, products, and expertise. This means they're more likely to recommend you in conversations.</li>
+      <li><strong>No real content protection</strong> — Blocking crawlers doesn't prevent content copying. Determined scrapers ignore robots.txt. Real protection comes from legal frameworks, not text files.</li>
+    </ul>
+
+    <h2>When to Block AI Bots</h2>
+
+    <p>There are legitimate reasons to block specific AI crawlers:</p>
+
+    <ul>
+      <li><strong>Paywalled content</strong> — If your business model relies on paid access, you may want to block training-only bots while allowing browsing bots (which respect access controls).</li>
+      <li><strong>Sensitive content</strong> — Legal, medical, or financial content that could be taken out of context when reproduced by AI.</li>
+      <li><strong>Bandwidth concerns</strong> — High-volume crawlers like CCBot and Bytespider can consume significant bandwidth. Rate limiting or blocking may be necessary for smaller sites.</li>
+      <li><strong>Licensing restrictions</strong> — Content licensed from third parties may prohibit AI training use.</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>Key distinction:</strong> Training bots (GPTBot, ClaudeBot, Google-Extended) collect data for model training. Browsing bots (ChatGPT-User, anthropic-ai) access pages in real-time for user queries. You can allow one while blocking the other.</p>
+    </div>
+
+    <h2>The Recommended robots.txt Configuration</h2>
+
+    <p>For most websites that want maximum AI visibility:</p>
+
+    <div class="code-block"><code># Standard search engines
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+# AI Browsing Agents — allow real-time access
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# AI Training Crawlers — allow for model training
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: GoogleOther
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+# Optional — allow or block based on your preference
+# User-agent: Bytespider
+# Disallow: /
+
+# User-agent: CCBot
+# Disallow: /
+
+# User-agent: Meta-ExternalAgent
+# Disallow: /
+
+Sitemap: https://yoursite.com/sitemap.xml</code></div>
+
+    <h2>For Paywalled or Premium Content Sites</h2>
+
+    <p>If you have a mix of free and premium content:</p>
+
+    <div class="code-block"><code># Allow browsing agents (they respect auth)
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Allow training bots on free content only
+User-agent: GPTBot
+Allow: /blog/
+Allow: /docs/
+Disallow: /premium/
+Disallow: /members/
+
+User-agent: ClaudeBot
+Allow: /blog/
+Allow: /docs/
+Disallow: /premium/
+Disallow: /members/
+
+Sitemap: https://yoursite.com/sitemap.xml</code></div>
+
+    <h2>Common Mistakes</h2>
+
+    <ul>
+      <li><strong>Blanket blocking with <code>User-agent: *</code> / <code>Disallow: /</code></strong> — This blocks ALL bots, including search engines. Never do this unless you genuinely want zero indexing.</li>
+      <li><strong>Forgetting the sitemap reference</strong> — AI crawlers use your sitemap to discover pages efficiently. Always include <code>Sitemap: https://yoursite.com/sitemap.xml</code>.</li>
+      <li><strong>Not testing your robots.txt</strong> — Syntax errors in robots.txt can inadvertently block or allow the wrong bots. Use Google's robots.txt tester or CrawlAudit to verify.</li>
+      <li><strong>Using meta robots instead of robots.txt</strong> — <code>&lt;meta name="robots" content="noai"&gt;</code> is not a standard directive. Some AI companies have proposed it, but adherence is inconsistent. Stick to robots.txt for reliable control.</li>
+    </ul>
+
+    <h2>How CrawlAudit Checks Your robots.txt</h2>
+
+    <p>When you scan a site with CrawlAudit, the Crawlability & Robots category checks:</p>
+
+    <ol>
+      <li>Whether <code>robots.txt</code> exists and is accessible</li>
+      <li>Whether major AI bots are explicitly allowed or blocked</li>
+      <li>Whether a sitemap is referenced</li>
+      <li>Whether any meta robots tags conflict with robots.txt rules</li>
+    </ol>
+
+    <p>Sites that explicitly allow AI crawlers score higher than those that rely on default behavior, because explicit rules demonstrate intentional AI strategy.</p>
+
+    <div class="cta-box">
+      <h3>Is your robots.txt AI-ready?</h3>
+      <p>Scan your site to see which AI bots can access your content and which are blocked.</p>
+      <a href="../#demo" class="btn-primary">Scan Your Site Free</a>
+    </div>
+
+    <div class="related">
+      <h3>Related Articles</h3>
+      <ul>
+        <li><a href="what-is-webmcp.html">What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready</a></li>
+        <li><a href="ai-discovery-protocols.html">5 AI Discovery Protocols Every Website Should Implement</a></li>
+        <li><a href="how-to-score-100.html">How to Score 100/100 on CrawlAudit: Complete Guide</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
+        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        &middot; &copy; 2026 CrawlAudit
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

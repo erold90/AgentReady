@@ -102,8 +102,10 @@ async function main() {
 
       printScore(result);
       printPageSignals(result.pageSignals);
+      printSecurityHeaders(result);
       printWebMCP(result);
       printProtocols(result.protocols);
+      printBotAccess(result.protocols);
       printSummary(result);
 
       if (isReport) openReport(result, false);
@@ -135,6 +137,9 @@ function printCrawlResult(result) {
   // Protocols
   printProtocols(result.protocols);
 
+  // Bot Access
+  printBotAccess(result.protocols);
+
   // Verdict
   let verdict;
   if (result.score >= 80) verdict = 'Agent-Ready';
@@ -162,6 +167,18 @@ function printPageSignals(ps) {
   console.log(`    JSON-LD:          ${ps.hasJsonLd ? '✓' : '✗'}`);
   console.log(`    Semantic HTML:    ${ps.hasSemanticHTML ? '✓' : '✗'}`);
   console.log(`    ARIA:             ${ps.hasARIA ? '✓' : '✗'}`);
+  console.log('');
+}
+
+function printSecurityHeaders(result) {
+  const sh = result.securityHeaders || {};
+  console.log('  Security');
+  console.log(`    HTTPS:              ${result.isHTTPS ? '✓' : '✗'}`);
+  console.log(`    HSTS:               ${sh.hsts ? '✓' : '✗'}`);
+  console.log(`    CSP:                ${sh.csp ? '✓' : '✗'}`);
+  console.log(`    X-Content-Type:     ${sh.xContentType ? '✓' : '✗'}`);
+  console.log(`    X-Frame-Options:    ${sh.xFrame ? '✓' : '✗'}`);
+  console.log(`    Referrer-Policy:    ${sh.referrerPolicy ? '✓' : '✗'}`);
   console.log('');
 }
 
@@ -204,6 +221,40 @@ function printProtocols(protocols) {
     console.log(`    ${icon} ${c.label}${detail}`);
   });
   console.log(`\n    ${protocols.summary.found}/${protocols.summary.total} protocols detected`);
+  console.log('');
+}
+
+function printBotAccess(protocols) {
+  const rt = protocols?.robotsTxt;
+  if (!rt) return;
+  console.log('  AI Bot Access (robots.txt)');
+  if (!rt.found) {
+    console.log('    No robots.txt found — all bots allowed');
+  } else {
+    const bots = [
+      { agent: 'GPTBot', owner: 'OpenAI' },
+      { agent: 'ChatGPT-User', owner: 'OpenAI' },
+      { agent: 'ClaudeBot', owner: 'Anthropic' },
+      { agent: 'Claude-Web', owner: 'Anthropic' },
+      { agent: 'Bytespider', owner: 'ByteDance' },
+      { agent: 'CCBot', owner: 'Common Crawl' },
+      { agent: 'Google-Extended', owner: 'Google AI' },
+      { agent: 'Bingbot', owner: 'Microsoft' },
+      { agent: 'PerplexityBot', owner: 'Perplexity' },
+      { agent: 'Applebot-Extended', owner: 'Apple' },
+      { agent: 'FacebookBot', owner: 'Meta' },
+      { agent: 'cohere-ai', owner: 'Cohere' },
+      { agent: 'Amazonbot', owner: 'Amazon' },
+    ];
+    bots.forEach(b => {
+      const isBlocked = rt.blockedBots.includes(b.agent);
+      const icon = isBlocked ? '\x1b[31m✗\x1b[0m' : '\x1b[32m✓\x1b[0m';
+      const status = isBlocked ? 'blocked' : 'allowed';
+      console.log(`    ${icon} ${b.agent} — ${status}`);
+    });
+    const allowed = rt.totalBots - rt.blockedCount;
+    console.log(`\n    ${allowed}/${rt.totalBots} bots allowed`);
+  }
   console.log('');
 }
 

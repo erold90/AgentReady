@@ -188,6 +188,30 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 <span><strong>${totalIssues}</strong> issues</span>
 </div>`;
 
+  // Badge section
+  if (score >= 75) {
+    const badgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge`;
+    html += `
+<div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
+  <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
+  <div style="margin-bottom:16px">
+    <img src="${badgeUrl}" alt="Agent-Ready Badge" style="height:28px">
+  </div>
+  <div style="font-size:13px;color:#475569;margin-bottom:8px">Add this badge to your site:</div>
+  <pre style="text-align:left;font-size:11px">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="${badgeUrl}" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
+</div>`;
+  } else {
+    const wipBadgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-f59e0b?style=for-the-badge`;
+    html += `
+<div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
+  <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>
+  <div style="margin-bottom:16px">
+    <img src="${wipBadgeUrl}" alt="Work in Progress Badge" style="height:28px">
+  </div>
+  <div style="font-size:13px;color:#475569">Score 75+ to unlock the Agent-Ready certification badge.</div>
+</div>`;
+  }
+
   // Protocols section
   if (protocols) {
     html += '<h2>AI Discovery Protocols</h2>';
@@ -201,11 +225,48 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
     });
   }
 
+  // Bot Access section
+  const robotsTxt = protocols?.robotsTxt;
+  if (robotsTxt) {
+    html += '<h2>AI Bot Access (robots.txt)</h2>';
+    if (!robotsTxt.found) {
+      html += '<p style="color:#475569;font-size:13px">No robots.txt found — all AI bots are allowed to crawl this site.</p>';
+    } else {
+      const botList = [
+        { agent: 'GPTBot', owner: 'OpenAI' },
+        { agent: 'ChatGPT-User', owner: 'OpenAI' },
+        { agent: 'ClaudeBot', owner: 'Anthropic' },
+        { agent: 'Claude-Web', owner: 'Anthropic' },
+        { agent: 'Bytespider', owner: 'ByteDance' },
+        { agent: 'CCBot', owner: 'Common Crawl' },
+        { agent: 'Google-Extended', owner: 'Google AI' },
+        { agent: 'Bingbot', owner: 'Microsoft' },
+        { agent: 'PerplexityBot', owner: 'Perplexity' },
+        { agent: 'Applebot-Extended', owner: 'Apple' },
+        { agent: 'FacebookBot', owner: 'Meta' },
+        { agent: 'cohere-ai', owner: 'Cohere' },
+        { agent: 'Amazonbot', owner: 'Amazon' },
+      ];
+      botList.forEach(b => {
+        const isBlocked = robotsTxt.blockedBots.includes(b.agent);
+        html += `<div class="check check-${isBlocked ? 'fail' : 'pass'}">${isBlocked ? '&#10007;' : '&#10003;'} ${esc(b.agent)} <span style="color:#94a3b8;font-size:11px">(${esc(b.owner)})</span> — ${isBlocked ? 'blocked' : 'allowed'}</div>`;
+      });
+      const allowed = robotsTxt.totalBots - robotsTxt.blockedCount;
+      html += `<p style="font-size:13px;color:#475569;margin-top:8px"><strong>${allowed}/${robotsTxt.totalBots}</strong> AI bots allowed</p>`;
+    }
+  }
+
   // Checklist
   html += '<h2>Readiness Checklist</h2>';
   const ps = firstPage.pageSignals || {};
+  const sh = firstPage.securityHeaders || {};
   const checks = [
     { pass: firstPage.isHTTPS, label: 'HTTPS enabled' },
+    { pass: !!sh.hsts, label: 'HSTS (Strict-Transport-Security)' },
+    { pass: !!sh.csp, label: 'Content-Security-Policy' },
+    { pass: !!sh.xContentType, label: 'X-Content-Type-Options' },
+    { pass: !!sh.xFrame, label: 'X-Frame-Options' },
+    { pass: !!sh.referrerPolicy, label: 'Referrer-Policy' },
     { pass: ps.hasTitle, label: 'Page title present' },
     { pass: ps.hasMetaDescription, label: 'Meta description' },
     { pass: ps.hasOgTags, label: 'Open Graph tags' },
@@ -237,7 +298,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
   // Score Breakdown
   if (firstPage.categories) {
     html += '<h2>Score Breakdown</h2><table><tr><th>Category</th><th>Score</th><th>Detail</th></tr>';
-    const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols'];
+    const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols', 'botAccess'];
     catOrder.forEach(key => {
       let cat = firstPage.categories[key];
       if (!cat) return;
