@@ -138,8 +138,7 @@
     $('#s-webmcp').textContent = currentScan.forms.filter(f => f.hasWebMCP).length + currentScan.scriptRegistrations.length;
     $('#s-issues').textContent = issueCount;
     $('#s-issues').style.color = issueCount > 0 ? '#ef4444' : '#10b981';
-    $('#s-https').textContent = currentScan.security.isHTTPS ? 'Yes' : 'No';
-    $('#s-https').style.color = currentScan.security.isHTTPS ? '#10b981' : '#ef4444';
+    // Protocols stat updated asynchronously via renderProtocolStats()
 
     renderCategories();
     renderIssues();
