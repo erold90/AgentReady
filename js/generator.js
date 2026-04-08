@@ -397,11 +397,11 @@ const Generator = (() => {
   /**
    * Generate "After" view — what tools WOULD exist with WebMCP
    */
-  function generateAfterView(forms) {
-    return forms.map(form => ({
+  function generateAfterView(forms, suggestedTools) {
+    const tools = forms.map(form => ({
       name: inferToolName(form),
       description: inferToolDescription(form),
-      source: 'suggested',
+      source: 'from form',
       params: form.fields.map(f => ({
         name: f.name || f.id || 'unknown',
         type: fieldToSchemaType(f),
@@ -409,6 +409,74 @@ const Generator = (() => {
         required: f.required
       }))
     }));
+
+    // Add suggested tools for sites without forms
+    if (suggestedTools && suggestedTools.length > 0) {
+      suggestedTools.forEach(tool => {
+        tools.push({
+          name: tool.name,
+          description: tool.description,
+          source: 'suggested (based on page content)',
+          params: (tool.params || []).map(p => ({
+            name: p.name,
+            type: p.type,
+            description: p.description,
+            required: true
+          }))
+        });
+      });
+    }
+
+    return tools;
+  }
+
+  /**
+   * Generate imperative JS code for a suggested tool (no form)
+   */
+  function generateSuggestedCode(tool) {
+    const properties = {};
+    const required = [];
+
+    (tool.params || []).forEach(p => {
+      const prop = { type: p.type, description: p.description };
+      if (p.format) prop.format = p.format;
+      properties[p.name] = prop;
+      required.push(p.name);
+    });
+
+    const schema = { type: 'object', properties };
+    if (required.length > 0) schema.required = required;
+
+    const schemaStr = JSON.stringify(schema, null, 4);
+
+    let code = '';
+    code += '// Feature detection\n';
+    code += 'if ("modelContext" in navigator) {\n';
+    code += `  navigator.modelContext.registerTool({\n`;
+    code += `    name: "${tool.name}",\n`;
+    code += `    description: "${escapeJS(tool.description)}",\n`;
+    code += `    inputSchema: ${schemaStr.replace(/\n/g, '\n    ')},\n`;
+    code += `    annotations: {\n`;
+    code += `      readOnlyHint: true,\n`;
+    code += `      destructiveHint: false,\n`;
+    code += `      idempotentHint: true\n`;
+    code += `    },\n`;
+    code += `    async execute(input, agent) {\n`;
+    code += `      // TODO: Implement your "${tool.name}" logic here\n`;
+    code += `      // The 'input' object contains: ${(tool.params || []).map(p => p.name).join(', ')}\n`;
+    code += `      \n`;
+    code += `      // Example: return structured data\n`;
+    code += `      return {\n`;
+    code += `        content: [{\n`;
+    code += `          type: "text",\n`;
+    code += `          text: JSON.stringify({ status: "success", ...input })\n`;
+    code += `        }]\n`;
+    code += `      };\n`;
+    code += `    }\n`;
+    code += `  });\n`;
+    code += '}\n';
+
+    return code;
   }
 
   // === Utility functions ===
@@ -443,6 +511,7 @@ const Generator = (() => {
   return {
     generateDeclarative,
     generateImperative,
+    generateSuggestedCode,
     generateAgentView,
     generateAfterView,
     inferToolName,

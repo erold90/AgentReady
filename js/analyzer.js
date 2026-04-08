@@ -250,9 +250,9 @@ const Analyzer = (() => {
     // No forms at all
     if (forms.length === 0 && scriptRegistrations.length === 0) {
       issues.push({
-        type: 'info',
-        title: 'No Forms Detected',
-        text: 'This page has no HTML forms. You can still use the imperative JavaScript API to register custom tools via navigator.modelContext.registerTool().'
+        type: 'warning',
+        title: 'No Forms or Tools Detected',
+        text: 'This page has no HTML forms and no WebMCP tools. AI agents cannot interact with this site. Use the imperative JavaScript API (navigator.modelContext.registerTool) to expose custom actions.'
       });
     }
 
@@ -295,16 +295,18 @@ const Analyzer = (() => {
    * Generate human-readable summary
    */
   function generateSummary(score, forms, scriptRegs) {
-    if (score >= 80) {
+    const hasWebMCP = forms.some(f => f.hasWebMCP) || scriptRegs.length > 0;
+
+    if (score >= 80 && hasWebMCP) {
       return 'Excellent! Your website is well-prepared for AI agents.';
-    } else if (score >= 50) {
+    } else if (score >= 50 && hasWebMCP) {
       return 'Good start. Some forms are agent-ready, but there is room for improvement.';
-    } else if (score > 0) {
-      return 'Basic WebMCP detected, but significant improvements needed.';
+    } else if (hasWebMCP) {
+      return 'WebMCP detected but needs significant improvements.';
     } else if (forms.length > 0) {
       return 'Forms detected but no WebMCP implementation. Add WebMCP attributes to make your site agent-ready.';
     } else {
-      return 'No forms or WebMCP tools detected on this page.';
+      return 'No forms or WebMCP tools detected. Use the imperative API to register custom tools for this site.';
     }
   }
 

@@ -125,6 +125,7 @@
     $('#stat-forms').textContent = totalForms;
     $('#stat-webmcp').textContent = webmcpForms + currentScan.scriptRegistrations.length;
     $('#stat-issues').textContent = issueCount;
+    $('#stat-issues').style.color = issueCount > 0 ? 'var(--red)' : 'var(--green)';
     $('#stat-https').textContent = currentScan.security.isHTTPS ? 'Yes' : 'No';
     $('#stat-https').style.color = currentScan.security.isHTTPS ? 'var(--green)' : 'var(--red)';
 
@@ -232,13 +233,9 @@
     const container = $('#code-sections');
     const noFormsMsg = $('#no-forms-msg');
     container.innerHTML = '';
-
-    if (currentScan.forms.length === 0) {
-      noFormsMsg.hidden = false;
-      return;
-    }
     noFormsMsg.hidden = true;
 
+    // Generate code for existing forms
     currentScan.forms.forEach(form => {
       const declarativeCode = Generator.generateDeclarative(form);
       const imperativeCode = Generator.generateImperative(form);
@@ -260,7 +257,6 @@
         </div>
       `);
 
-      // Tab switching
       const tabs = block.querySelectorAll('.code-tab');
       const codeContent = block.querySelector('.code-content');
       const copyBtn = block.querySelector('.code-copy-btn');
@@ -275,20 +271,64 @@
         });
       });
 
-      // Copy button
       copyBtn.addEventListener('click', async () => {
         const code = currentType === 'declarative' ? declarativeCode : imperativeCode;
         await navigator.clipboard.writeText(code);
         copyBtn.textContent = 'Copied!';
         copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy';
-          copyBtn.classList.remove('copied');
-        }, 2000);
+        setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
       });
 
       container.appendChild(block);
     });
+
+    // Generate suggested tools code for sites without forms
+    if (currentScan.suggestedTools && currentScan.suggestedTools.length > 0) {
+      if (currentScan.forms.length === 0) {
+        const headerEl = createElement('div', '', `
+          <div style="background:var(--primary-light);border:1px solid var(--primary);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:16px;">
+            <strong style="color:var(--primary);">Suggested Tools</strong>
+            <span style="color:var(--text-2);"> — Based on your page content, we recommend implementing these WebMCP tools:</span>
+          </div>
+        `);
+        container.appendChild(headerEl);
+      }
+
+      currentScan.suggestedTools.forEach(tool => {
+        const code = Generator.generateSuggestedCode(tool);
+
+        const block = createElement('div', 'code-block', `
+          <div class="code-block-header">
+            <div class="code-block-title">
+              ${escapeHTML(tool.name)}
+              <span style="font-size:11px;font-weight:400;color:var(--text-3);margin-left:8px;">suggested</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-3);">JavaScript (imperative API)</span>
+              <button class="code-copy-btn">Copy</button>
+            </div>
+          </div>
+          <div class="code-block-body">
+            <pre class="code-content">${escapeHTML(code)}</pre>
+          </div>
+        `);
+
+        const copyBtn = block.querySelector('.code-copy-btn');
+        copyBtn.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(code);
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+        });
+
+        container.appendChild(block);
+      });
+    }
+
+    // Show empty state only if no forms AND no suggestions
+    if (currentScan.forms.length === 0 && (!currentScan.suggestedTools || currentScan.suggestedTools.length === 0)) {
+      noFormsMsg.hidden = false;
+    }
   }
 
   // === Agent View ===
@@ -341,7 +381,7 @@
 
   function renderAfterView() {
     const container = $('#agent-after-content');
-    const tools = Generator.generateAfterView(currentScan.forms);
+    const tools = Generator.generateAfterView(currentScan.forms, currentScan.suggestedTools);
 
     let html = '';
     html += '<div class="agent-line"><span class="agent-prompt">&gt;</span> <span class="agent-dim">Navigating to</span> ' + escapeHTML(currentScan.url) + '</div>';

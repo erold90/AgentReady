@@ -235,6 +235,103 @@ const Scanner = (() => {
   }
 
   /**
+   * Analyze page content to suggest potential tools (for sites without forms)
+   */
+  function analyzPageContent(doc, url) {
+    const suggestions = [];
+    const text = (doc.body?.textContent || '').toLowerCase();
+    const html = doc.body?.innerHTML || '';
+    const hostname = new URL(url).hostname.toLowerCase();
+
+    // Detect page type and suggest relevant tools
+    const patterns = [
+      {
+        keywords: ['book', 'reserv', 'prenota', 'check-in', 'check-out', 'availability', 'disponibil'],
+        tool: { name: 'check_availability', description: 'Check availability for specific dates', params: [
+          { name: 'check_in', type: 'string', format: 'date', description: 'Check-in date' },
+          { name: 'check_out', type: 'string', format: 'date', description: 'Check-out date' },
+          { name: 'guests', type: 'number', description: 'Number of guests' }
+        ]}
+      },
+      {
+        keywords: ['contact', 'contatt', 'email', 'phone', 'telefon', 'message', 'messaggio', 'write us', 'scrivici'],
+        tool: { name: 'send_message', description: 'Send a contact message', params: [
+          { name: 'name', type: 'string', description: 'Sender name' },
+          { name: 'email', type: 'string', format: 'email', description: 'Sender email' },
+          { name: 'message', type: 'string', description: 'Message content' }
+        ]}
+      },
+      {
+        keywords: ['search', 'cerca', 'find', 'trova', 'filter', 'filtr'],
+        tool: { name: 'search_content', description: 'Search site content', params: [
+          { name: 'query', type: 'string', description: 'Search query' }
+        ]}
+      },
+      {
+        keywords: ['price', 'prezz', 'cost', 'rate', 'tariff', 'pricing'],
+        tool: { name: 'get_pricing', description: 'Get pricing information', params: [
+          { name: 'category', type: 'string', description: 'Category or service type' }
+        ]}
+      },
+      {
+        keywords: ['cart', 'carrello', 'shop', 'buy', 'acquist', 'add to', 'aggiungi'],
+        tool: { name: 'add_to_cart', description: 'Add item to shopping cart', params: [
+          { name: 'product_id', type: 'string', description: 'Product identifier' },
+          { name: 'quantity', type: 'number', description: 'Quantity' }
+        ]}
+      },
+      {
+        keywords: ['login', 'sign in', 'accedi', 'log in'],
+        tool: { name: 'user_login', description: 'Authenticate user', params: [
+          { name: 'username', type: 'string', description: 'Username or email' },
+          { name: 'password', type: 'string', description: 'Password' }
+        ]}
+      },
+      {
+        keywords: ['subscribe', 'newsletter', 'iscriviti', 'notif'],
+        tool: { name: 'subscribe_newsletter', description: 'Subscribe to newsletter', params: [
+          { name: 'email', type: 'string', format: 'email', description: 'Email address' }
+        ]}
+      },
+      {
+        keywords: ['map', 'mappa', 'direction', 'location', 'dove siamo', 'indicazion', 'address', 'indirizzo'],
+        tool: { name: 'get_directions', description: 'Get directions to this location', params: [
+          { name: 'from', type: 'string', description: 'Starting location' }
+        ]}
+      },
+      {
+        keywords: ['gallery', 'galleria', 'photo', 'foto', 'image', 'immagin'],
+        tool: { name: 'browse_gallery', description: 'Browse photo gallery', params: [
+          { name: 'category', type: 'string', description: 'Gallery category (optional)' }
+        ]}
+      },
+      {
+        keywords: ['review', 'recension', 'testimonial', 'feedback', 'rating', 'valutazion'],
+        tool: { name: 'get_reviews', description: 'Get customer reviews', params: [
+          { name: 'sort', type: 'string', description: 'Sort order (recent, rating)' }
+        ]}
+      }
+    ];
+
+    // Check links for more signals
+    const links = Array.from(doc.querySelectorAll('a[href]')).map(a => (a.href + ' ' + a.textContent).toLowerCase());
+    const allText = text + ' ' + links.join(' ');
+
+    patterns.forEach(pattern => {
+      const matchCount = pattern.keywords.filter(kw => allText.includes(kw)).length;
+      if (matchCount >= 1) {
+        suggestions.push({ ...pattern.tool, confidence: Math.min(1, matchCount / 2) });
+      }
+    });
+
+    // Sort by confidence
+    suggestions.sort((a, b) => b.confidence - a.confidence);
+
+    // Return top 5 most relevant
+    return suggestions.slice(0, 5);
+  }
+
+  /**
    * Full scan: fetch + parse + extract
    */
   async function scan(url) {
@@ -243,12 +340,14 @@ const Scanner = (() => {
     const forms = extractForms(doc);
     const scriptRegistrations = extractScriptRegistrations(doc);
     const security = checkSecurity(url);
+    const suggestedTools = analyzPageContent(doc, url);
 
     return {
       url,
       status,
       forms,
       scriptRegistrations,
+      suggestedTools,
       security,
       htmlLength: html.length,
       timestamp: new Date().toISOString()
