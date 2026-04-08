@@ -132,6 +132,19 @@
     // Scanned URL
     $('#scanned-url-value').textContent = currentScan.url;
 
+    // Proxy quality warning
+    const warningEl = $('#proxy-warning');
+    if (warningEl) warningEl.remove();
+    if (currentScan.responseQuality && currentScan.responseQuality.quality !== 'good') {
+      const warning = createElement('div', 'proxy-warning', `
+        <span style="font-size:16px;">${currentScan.responseQuality.isCaptcha ? '&#9888;' : currentScan.responseQuality.isBlocked ? '&#128683;' : '&#9881;'}</span>
+        <span>${currentScan.responseQuality.message}</span>
+      `);
+      warning.id = 'proxy-warning';
+      const header = $('.results-header');
+      if (header) header.parentNode.insertBefore(warning, header.nextSibling);
+    }
+
     // Render all tabs
     renderCategoryScores();
     renderIssues();

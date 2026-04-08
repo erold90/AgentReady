@@ -492,6 +492,25 @@ input { font-family: var(--font); }
 .issue-text { flex: 1; }
 .issue-text strong { font-weight: 600; }
 
+/* ===== PROXY WARNING ===== */
+.proxy-warning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  margin: 16px 0;
+  background: var(--yellow-light);
+  border: 1px solid var(--yellow);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+}
+[data-theme="dark"] .proxy-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
 /* ===== FORMS LIST ===== */
 .forms-list { display: flex; flex-direction: column; gap: 12px; }
 .form-card {

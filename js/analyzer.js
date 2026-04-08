@@ -8,18 +8,27 @@ const Analyzer = (() => {
    * Calculate Agent Readiness Score (0-100) with category breakdown
    */
   function analyze(scanResult) {
-    const { forms, scriptRegistrations, security } = scanResult;
+    const { forms, scriptRegistrations, security, pageSignals, responseQuality } = scanResult;
+    const hasWebMCP = forms.some(f => f.hasWebMCP) || scriptRegistrations.length > 0;
 
     const categories = {
       forms: analyzeFormCoverage(forms, scriptRegistrations),
       descriptions: analyzeDescriptions(forms, scriptRegistrations),
       schema: analyzeSchemaQuality(forms),
-      annotations: analyzeAnnotations(forms, scriptRegistrations),
+      pageStructure: analyzePageStructure(pageSignals, responseQuality),
       security: analyzeSecurity(security)
     };
 
-    // Weighted score
-    const weights = { forms: 35, descriptions: 25, schema: 15, annotations: 10, security: 15 };
+    // Dynamic weights — when no WebMCP, page structure matters more
+    let weights;
+    if (hasWebMCP) {
+      weights = { forms: 30, descriptions: 25, schema: 15, pageStructure: 15, security: 15 };
+    } else if (forms.length > 0) {
+      weights = { forms: 25, descriptions: 10, schema: 10, pageStructure: 35, security: 20 };
+    } else {
+      weights = { forms: 10, descriptions: 5, schema: 5, pageStructure: 60, security: 20 };
+    }
+
     let totalScore = 0;
     for (const [key, cat] of Object.entries(categories)) {
       totalScore += (cat.score / 100) * weights[key];
@@ -31,7 +40,7 @@ const Analyzer = (() => {
       score: Math.round(totalScore),
       categories,
       issues,
-      summary: generateSummary(totalScore, forms, scriptRegistrations)
+      summary: generateSummary(totalScore, forms, scriptRegistrations, responseQuality)
     };
   }
 
@@ -150,6 +159,83 @@ const Analyzer = (() => {
   }
 
   /**
+   * Category: Page Structure — how well-structured is the page for agent comprehension
+   */
+  function analyzePageStructure(pageSignals, responseQuality) {
+    if (!pageSignals) {
+      return { score: 0, label: 'Page Structure', detail: 'Could not analyze page structure' };
+    }
+
+    // If proxy was blocked, low score
+    if (responseQuality && (responseQuality.isCaptcha || responseQuality.isBlocked)) {
+      return {
+        score: 5,
+        label: 'Page Structure',
+        detail: `Proxy was ${responseQuality.isCaptcha ? 'served a CAPTCHA' : 'blocked'} — cannot assess real page structure`
+      };
+    }
+
+    if (responseQuality && responseQuality.isJsShell) {
+      return {
+        score: 15,
+        label: 'Page Structure',
+        detail: 'JavaScript-rendered site — static HTML has minimal structure'
+      };
+    }
+
+    let score = 0;
+    const details = [];
+
+    // Title (10pts)
+    if (pageSignals.hasTitle) { score += 10; }
+
+    // Meta description (10pts)
+    if (pageSignals.hasMetaDescription) { score += 10; details.push('meta description'); }
+
+    // OG tags (5pts)
+    if (pageSignals.hasOgTags) { score += 5; details.push('OG tags'); }
+
+    // Structured data (15pts)
+    if (pageSignals.hasJsonLd) { score += 15; details.push('JSON-LD'); }
+    else if (pageSignals.hasMicrodata) { score += 10; details.push('microdata'); }
+
+    // Semantic HTML (20pts max)
+    const semScore = Math.min(20, pageSignals.semanticCount * 4);
+    score += semScore;
+    if (semScore > 0) details.push(`${pageSignals.semanticCount} semantic elements`);
+
+    // Headings (10pts)
+    if (pageSignals.h1Count === 1) score += 5; // proper single H1
+    if (pageSignals.headingCount >= 3) score += 5;
+
+    // Accessibility (15pts)
+    if (pageSignals.ariaCount > 0) {
+      score += Math.min(15, pageSignals.ariaCount * 3);
+      details.push(`${pageSignals.ariaCount} ARIA attributes`);
+    }
+
+    // Images with alt text (5pts)
+    if (pageSignals.totalImages > 0) {
+      const altRatio = pageSignals.imagesWithAlt / pageSignals.totalImages;
+      score += Math.round(altRatio * 5);
+    }
+
+    // Forms present (10pts) — they represent interaction potential
+    if (pageSignals.formCount > 0) {
+      score += 10;
+      details.push(`${pageSignals.formCount} form${pageSignals.formCount > 1 ? 's' : ''}`);
+    }
+
+    score = Math.min(100, score);
+
+    return {
+      score,
+      label: 'Page Structure',
+      detail: details.length > 0 ? `Found: ${details.join(', ')}` : 'Minimal page structure detected'
+    };
+  }
+
+  /**
    * Category: Annotations
    */
   function analyzeAnnotations(forms, scriptRegs) {
@@ -200,7 +286,17 @@ const Analyzer = (() => {
    */
   function generateIssues(scanResult, categories) {
     const issues = [];
-    const { forms, scriptRegistrations, security } = scanResult;
+    const { forms, scriptRegistrations, security, responseQuality, pageSignals } = scanResult;
+
+    // Proxy quality warning
+    if (responseQuality && responseQuality.quality !== 'good') {
+      issues.push({
+        type: responseQuality.isCaptcha || responseQuality.isBlocked ? 'error' : 'warning',
+        title: responseQuality.isCaptcha ? 'CAPTCHA Detected' :
+               responseQuality.isBlocked ? 'Proxy Blocked' : 'JavaScript-Only Site',
+        text: responseQuality.message
+      });
+    }
 
     // Security
     if (!security.isHTTPS) {
@@ -278,12 +374,37 @@ const Analyzer = (() => {
 
     // Missing annotations suggestion
     if (webmcpForms.length > 0 || scriptRegistrations.length > 0) {
-      const hasAnnotations = categories.annotations.score > 0;
+      const hasAnnotations = categories.pageStructure ? false : false; // annotations removed as separate category
       if (!hasAnnotations) {
         issues.push({
           type: 'info',
           title: 'Consider Adding Annotations',
           text: 'Add readOnlyHint, destructiveHint, or idempotentHint to your tools. These help AI agents decide the appropriate consent level before invoking a tool.'
+        });
+      }
+    }
+
+    // Page structure insights
+    if (pageSignals) {
+      const goodSignals = [];
+      if (pageSignals.hasJsonLd) goodSignals.push('JSON-LD structured data');
+      if (pageSignals.hasOgTags) goodSignals.push('Open Graph tags');
+      if (pageSignals.semanticCount >= 3) goodSignals.push('semantic HTML');
+      if (pageSignals.ariaCount > 0) goodSignals.push('ARIA accessibility');
+
+      if (goodSignals.length > 0) {
+        issues.push({
+          type: 'success',
+          title: 'Good Page Structure',
+          text: `Found: ${goodSignals.join(', ')}. This makes it easier for AI agents to understand your page content.`
+        });
+      }
+
+      if (!pageSignals.hasMetaDescription) {
+        issues.push({
+          type: 'info',
+          title: 'Missing Meta Description',
+          text: 'Add a <meta name="description"> tag. AI agents use this to understand what your page does.'
         });
       }
     }
@@ -294,8 +415,20 @@ const Analyzer = (() => {
   /**
    * Generate human-readable summary
    */
-  function generateSummary(score, forms, scriptRegs) {
+  function generateSummary(score, forms, scriptRegs, responseQuality) {
     const hasWebMCP = forms.some(f => f.hasWebMCP) || scriptRegs.length > 0;
+
+    // Proxy issues take priority in summary
+    if (responseQuality && responseQuality.isCaptcha) {
+      return 'The site served a CAPTCHA to our proxy — results may not reflect actual content. Try a different URL or use the browser extension.';
+    }
+    if (responseQuality && responseQuality.isBlocked) {
+      return 'The site blocked our proxy request. Results may be incomplete.';
+    }
+    if (responseQuality && responseQuality.isJsShell) {
+      if (hasWebMCP) return 'WebMCP detected! This JS-rendered site has agent tools, but some may be missing from static analysis.';
+      return 'This site renders content with JavaScript. Forms and interactions may not be visible to static analysis. Consider using the imperative API.';
+    }
 
     if (score >= 80 && hasWebMCP) {
       return 'Excellent! Your website is well-prepared for AI agents.';

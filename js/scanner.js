@@ -224,6 +224,64 @@ const Scanner = (() => {
   }
 
   /**
+   * Analyze response quality — detect captchas, JS shells, blocked pages
+   */
+  function analyzeResponseQuality(html) {
+    const lower = html.toLowerCase();
+    const scriptCount = (lower.match(/<script/g) || []).length;
+    const textOnly = html.replace(/<script[\s\S]*?<\/script>/gi, '')
+                         .replace(/<style[\s\S]*?<\/style>/gi, '')
+                         .replace(/<[^>]+>/g, '').trim();
+
+    const isCaptcha = lower.includes('captcha') || lower.includes('challenge-platform') ||
+                      lower.includes('verify you are human') || lower.includes('captcha-form') ||
+                      lower.includes('recaptcha') || lower.includes('hcaptcha');
+    const isBlocked = lower.includes('access denied') || lower.includes('403 forbidden') ||
+                      lower.includes('just a moment') || lower.includes('cloudflare');
+    const isJsShell = html.length > 500 && scriptCount > 3 && textOnly.length < 200;
+
+    let quality = 'good';
+    let message = '';
+    if (isCaptcha) { quality = 'captcha'; message = 'The site served a CAPTCHA to our proxy. Results may not reflect the actual page content.'; }
+    else if (isBlocked) { quality = 'blocked'; message = 'The site blocked our proxy request. Results may be incomplete.'; }
+    else if (isJsShell) { quality = 'js-only'; message = 'This site renders content with JavaScript. Our proxy can only read static HTML, so some forms and content may be missing.'; }
+
+    return { quality, isCaptcha, isBlocked, isJsShell, message, textContentLength: textOnly.length };
+  }
+
+  /**
+   * Extract page structure signals for readiness scoring
+   */
+  function extractPageSignals(doc) {
+    const semanticCount = ['nav', 'main', 'article', 'section', 'header', 'footer', 'aside']
+      .reduce((sum, tag) => sum + doc.querySelectorAll(tag).length, 0);
+    const h1Count = doc.querySelectorAll('h1').length;
+    const headingCount = doc.querySelectorAll('h1, h2, h3, h4, h5, h6').length;
+    const totalImages = doc.querySelectorAll('img').length;
+    const imagesWithAlt = doc.querySelectorAll('img[alt]:not([alt=""])').length;
+    const ariaCount = doc.querySelectorAll('[aria-label], [role], [aria-describedby], [aria-labelledby]').length;
+    const totalLinks = doc.querySelectorAll('a[href]').length;
+
+    return {
+      hasTitle: !!doc.title && doc.title.length > 2,
+      title: doc.title || '',
+      hasMetaDescription: !!doc.querySelector('meta[name="description"]'),
+      hasOgTags: !!doc.querySelector('meta[property^="og:"]'),
+      hasJsonLd: !!doc.querySelector('script[type="application/ld+json"]'),
+      hasMicrodata: !!doc.querySelector('[itemscope]'),
+      semanticCount,
+      headingCount,
+      h1Count,
+      totalLinks,
+      totalImages,
+      imagesWithAlt,
+      ariaCount,
+      formCount: doc.querySelectorAll('form').length,
+      inputCount: doc.querySelectorAll('input, select, textarea').length
+    };
+  }
+
+  /**
    * Check security aspects
    */
   function checkSecurity(url) {
@@ -337,18 +395,27 @@ const Scanner = (() => {
   async function scan(url) {
     const { html, status } = await fetchPage(url);
     const doc = parseHTML(html);
+    const responseQuality = analyzeResponseQuality(html);
     const forms = extractForms(doc);
     const scriptRegistrations = extractScriptRegistrations(doc);
     const security = checkSecurity(url);
+    const pageSignals = extractPageSignals(doc);
     const suggestedTools = analyzPageContent(doc, url);
+
+    // Filter out captcha forms
+    const realForms = responseQuality.isCaptcha
+      ? forms.filter(f => !f.id?.includes('captcha') && !f.className?.includes('captcha'))
+      : forms;
 
     return {
       url,
       status,
-      forms,
+      forms: realForms,
       scriptRegistrations,
       suggestedTools,
       security,
+      responseQuality,
+      pageSignals,
       htmlLength: html.length,
       timestamp: new Date().toISOString()
     };
