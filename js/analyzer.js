@@ -166,8 +166,10 @@ const Analyzer = (() => {
       return { score: 0, label: 'Page Structure', detail: 'Could not analyze page structure' };
     }
 
-    // If proxy was blocked, low score
-    if (responseQuality && (responseQuality.isCaptcha || responseQuality.isBlocked)) {
+    // Live DOM analysis (bookmarklet) = skip proxy checks
+    if (responseQuality && responseQuality.quality === 'live') {
+      // Full analysis — no proxy limitations
+    } else if (responseQuality && (responseQuality.isCaptcha || responseQuality.isBlocked)) {
       return {
         score: 5,
         label: 'Page Structure',
@@ -423,8 +425,10 @@ const Analyzer = (() => {
   function generateSummary(score, forms, scriptRegs, responseQuality) {
     const hasWebMCP = forms.some(f => f.hasWebMCP) || scriptRegs.length > 0;
 
-    // Proxy issues take priority in summary
-    if (responseQuality && responseQuality.isCaptcha) {
+    // Live DOM (bookmarklet) — skip proxy warnings
+    if (responseQuality && responseQuality.quality === 'live') {
+      // No proxy issues to report
+    } else if (responseQuality && responseQuality.isCaptcha) {
       return 'The site served a CAPTCHA to our proxy — results may not reflect actual content. Try a different URL or use the browser extension.';
     }
     if (responseQuality && responseQuality.isBlocked) {

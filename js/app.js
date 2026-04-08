@@ -53,16 +53,46 @@
       });
     });
 
-    // URL from query param
+    // Handle bookmarklet data via URL param
     const params = new URLSearchParams(window.location.search);
+    const scanParam = params.get('scan');
+    if (scanParam) {
+      try {
+        const scanData = JSON.parse(decodeURIComponent(scanParam));
+        handleBookmarkletData(scanData);
+        // Clean URL
+        history.replaceState(null, '', window.location.pathname);
+      } catch(e) {
+        console.error('Failed to parse bookmarklet data:', e);
+      }
+    }
+
+    // Handle bookmarklet data via postMessage (for large payloads)
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'agentready-scan') {
+        handleBookmarkletData(event.data.data);
+      }
+    });
+
+    // URL from query param
     const urlParam = params.get('url');
-    if (urlParam) {
+    if (urlParam && !scanParam) {
       urlInput.value = urlParam;
       handleScan();
     }
 
     // Load history
     loadHistory();
+  }
+
+  // === Bookmarklet Handler ===
+  function handleBookmarkletData(scanData) {
+    currentScan = scanData;
+    currentAnalysis = Analyzer.analyze(currentScan);
+    urlInput.value = currentScan.url;
+    renderResults();
+    saveToHistory(currentScan.url, currentAnalysis.score);
+    showToast('Live DOM analysis complete!');
   }
 
   // === Scan Handler ===
@@ -132,10 +162,20 @@
     // Scanned URL
     $('#scanned-url-value').textContent = currentScan.url;
 
-    // Proxy quality warning
+    // Source badge & proxy warning
     const warningEl = $('#proxy-warning');
     if (warningEl) warningEl.remove();
-    if (currentScan.responseQuality && currentScan.responseQuality.quality !== 'good') {
+    if (currentScan.source === 'bookmarklet') {
+      const badge = createElement('div', 'proxy-warning', `
+        <span style="font-size:16px;">&#9889;</span>
+        <span><strong>Live DOM Analysis</strong> — Results from the actual rendered page, not a proxy. Full accuracy.</span>
+      `);
+      badge.id = 'proxy-warning';
+      badge.style.background = 'var(--green-light)';
+      badge.style.borderColor = 'var(--green)';
+      const header = $('.results-header');
+      if (header) header.parentNode.insertBefore(badge, header.nextSibling);
+    } else if (currentScan.responseQuality && currentScan.responseQuality.quality !== 'good') {
       const warning = createElement('div', 'proxy-warning', `
         <span style="font-size:16px;">${currentScan.responseQuality.isCaptcha ? '&#9888;' : currentScan.responseQuality.isBlocked ? '&#128683;' : '&#9881;'}</span>
         <span>${currentScan.responseQuality.message}</span>

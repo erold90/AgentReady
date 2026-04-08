@@ -259,6 +259,43 @@ input { font-family: var(--font); }
   color: var(--text);
 }
 
+/* ===== BOOKMARKLET BAR ===== */
+.bookmarklet-bar {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bookmarklet-or {
+  font-size: 13px;
+  color: var(--text-3);
+}
+.bookmarklet-link {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  color: white !important;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: grab;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+.bookmarklet-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+.bookmarklet-link:active { cursor: grabbing; }
+.bookmarklet-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  font-style: italic;
+}
+
 /* ===== RESULTS ===== */
 .results {
   max-width: 1000px;
