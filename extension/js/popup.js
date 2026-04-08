@@ -25,11 +25,18 @@
 
   // === Init ===
   document.addEventListener('DOMContentLoaded', async () => {
-    // Load saved plan
+    // Load license → set plan
     try {
-      const stored = await chrome.storage.local.get('agentready_plan');
-      if (stored.agentready_plan && PLANS[stored.agentready_plan]) {
-        currentPlan = stored.agentready_plan;
+      const license = await License.load();
+      if (license && license.valid && PLANS[license.plan]) {
+        currentPlan = license.plan;
+      }
+      // Also check legacy plan storage (for testing)
+      if (currentPlan === 'free') {
+        const stored = await chrome.storage.local.get('agentready_plan');
+        if (stored.agentready_plan && PLANS[stored.agentready_plan]) {
+          currentPlan = stored.agentready_plan;
+        }
       }
     } catch {}
     updatePlanBadge();
@@ -53,8 +60,13 @@
     // Page detail back button
     $('#pd-back').addEventListener('click', hidePageDetail);
 
-    // Plan picker — click logo to cycle plans
-    $('.logo').addEventListener('click', cyclePlan);
+    // License panel — click logo/badge to open
+    $('.logo').addEventListener('click', showLicensePanel);
+
+    // License panel buttons
+    $('#license-back').addEventListener('click', hideLicensePanel);
+    $('#license-activate').addEventListener('click', activateLicense);
+    $('#license-deactivate').addEventListener('click', deactivateLicense);
 
     // Auto-scan on popup open
     runScan();
@@ -281,16 +293,68 @@
   }
 
   // === Plan Switching ===
-  function cyclePlan() {
-    const keys = Object.keys(PLANS);
-    const idx = keys.indexOf(currentPlan);
-    currentPlan = keys[(idx + 1) % keys.length];
-    chrome.storage.local.set({ agentready_plan: currentPlan });
-    updatePlanBadge();
-    // Re-render full site pages if visible
-    if (fullSiteResults) {
-      renderFullSitePages(fullSiteResults);
+  async function showLicensePanel() {
+    const panel = $('#license-panel');
+    const license = await License.load();
+
+    if (license && license.valid) {
+      $('#license-status').className = 'license-status active';
+      $('#license-status').innerHTML = `<strong>${PLANS[license.plan]?.label || 'Pro'} Plan</strong> — Active<br><span style="font-size:11px;color:#065f46">${license.meta?.customerEmail || ''}</span>`;
+      $('#license-key').value = license.key;
+      $('#license-key').disabled = true;
+      $('#license-activate').hidden = true;
+      $('#license-deactivate').hidden = false;
+    } else {
+      $('#license-status').className = 'license-status free';
+      $('#license-status').innerHTML = '<strong>Free Plan</strong> — 3 pages, 2 code snippets';
+      $('#license-key').value = '';
+      $('#license-key').disabled = false;
+      $('#license-activate').hidden = false;
+      $('#license-deactivate').hidden = true;
     }
+    $('#license-error').hidden = true;
+    panel.hidden = false;
+  }
+
+  function hideLicensePanel() {
+    $('#license-panel').hidden = true;
+  }
+
+  async function activateLicense() {
+    const key = $('#license-key').value.trim();
+    if (!key) return;
+
+    const btn = $('#license-activate');
+    btn.textContent = 'Validating...';
+    btn.disabled = true;
+    $('#license-error').hidden = true;
+
+    const result = await License.validate(key);
+
+    if (result.valid) {
+      await License.save(key, result);
+      currentPlan = result.plan;
+      updatePlanBadge();
+      btn.textContent = 'Activate License';
+      btn.disabled = false;
+      showLicensePanel(); // Refresh panel to show active state
+      if (fullSiteResults) renderFullSitePages(fullSiteResults);
+    } else {
+      $('#license-error').textContent = result.error || 'Invalid license key';
+      $('#license-error').hidden = false;
+      btn.textContent = 'Activate License';
+      btn.disabled = false;
+    }
+  }
+
+  async function deactivateLicense() {
+    await License.remove();
+    currentPlan = 'free';
+    // Also clear legacy plan storage
+    chrome.storage.local.remove('agentready_plan');
+    updatePlanBadge();
+    showLicensePanel(); // Refresh panel
+    if (fullSiteResults) renderFullSitePages(fullSiteResults);
   }
 
   function updatePlanBadge() {

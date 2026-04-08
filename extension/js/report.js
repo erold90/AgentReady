@@ -23,12 +23,22 @@
       const data = result.agentready_report;
       if (!data) { showError('No report data found. Run a scan from the extension first.'); return; }
       reportData = data;
-      // Set plan limits
-      if (data.plan && PLANS[data.plan]) {
-        currentPlan = data.plan;
-        PAGE_LIMIT = PLANS[data.plan].pages;
-        ACTION_LIMIT = PLANS[data.plan].actions;
+      // Set plan from license or legacy plan field
+      try {
+        const licenseData = await chrome.storage.local.get('agentready_license');
+        const license = licenseData.agentready_license;
+        if (license && license.valid && PLANS[license.plan]) {
+          currentPlan = license.plan;
+        } else if (data.plan && PLANS[data.plan]) {
+          currentPlan = data.plan;
+        }
+      } catch {
+        if (data.plan && PLANS[data.plan]) {
+          currentPlan = data.plan;
+        }
       }
+      PAGE_LIMIT = PLANS[currentPlan].pages;
+      ACTION_LIMIT = PLANS[currentPlan].actions;
       $('#loading').hidden = true;
       $('#report').hidden = false;
       renderReport(data);
