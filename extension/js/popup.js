@@ -15,8 +15,25 @@
   let fullSiteResults = null;
   let crawlStartTime = null;
 
+  // === Plan System ===
+  const PLANS = {
+    free:  { label: 'Free',  pages: 3,    actions: 2,    color: '#94a3b8' },
+    pro:   { label: 'Pro',   pages: 500,  actions: 9999, color: '#2563eb' },
+    team:  { label: 'Team',  pages: 2000, actions: 9999, color: '#7c3aed' }
+  };
+  let currentPlan = 'free';
+
   // === Init ===
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Load saved plan
+    try {
+      const stored = await chrome.storage.local.get('agentready_plan');
+      if (stored.agentready_plan && PLANS[stored.agentready_plan]) {
+        currentPlan = stored.agentready_plan;
+      }
+    } catch {}
+    updatePlanBadge();
+
     $('#scan-btn').addEventListener('click', runScan);
 
     // Tabs
@@ -35,6 +52,9 @@
 
     // Page detail back button
     $('#pd-back').addEventListener('click', hidePageDetail);
+
+    // Plan picker — click logo to cycle plans
+    $('.logo').addEventListener('click', cyclePlan);
 
     // Auto-scan on popup open
     runScan();
@@ -260,6 +280,33 @@
     }
   }
 
+  // === Plan Switching ===
+  function cyclePlan() {
+    const keys = Object.keys(PLANS);
+    const idx = keys.indexOf(currentPlan);
+    currentPlan = keys[(idx + 1) % keys.length];
+    chrome.storage.local.set({ agentready_plan: currentPlan });
+    updatePlanBadge();
+    // Re-render full site pages if visible
+    if (fullSiteResults) {
+      renderFullSitePages(fullSiteResults);
+    }
+  }
+
+  function updatePlanBadge() {
+    const plan = PLANS[currentPlan];
+    let badge = $('#plan-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'plan-badge';
+      badge.style.cssText = 'font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:6px;cursor:pointer;text-transform:uppercase;';
+      $('.logo').appendChild(badge);
+    }
+    badge.textContent = plan.label;
+    badge.style.background = plan.color;
+    badge.style.color = '#fff';
+  }
+
   // === Protocol Stats ===
   function renderProtocolStats(protocols) {
     const el = $('#s-protocols');
@@ -409,13 +456,13 @@
     const proOverlay = $('#fs-pro-overlay');
     container.innerHTML = '';
 
-    const FREE_LIMIT = 3;
+    const pageLimit = PLANS[currentPlan].pages;
     const pages = results.pages; // sorted worst-first
 
     pages.forEach((page, i) => {
       const row = document.createElement('div');
       row.className = 'fs-page-row';
-      if (i >= FREE_LIMIT) row.classList.add('blurred');
+      if (i >= pageLimit) row.classList.add('blurred');
 
       const color = Analyzer.getScoreColor(page.score);
       const shortUrl = (() => {
@@ -438,15 +485,15 @@
         </div>
         <div class="fs-page-arrow">&#8250;</div>
       `;
-      if (i < FREE_LIMIT && !page.error) {
+      if (i < pageLimit && !page.error) {
         row.style.cursor = 'pointer';
         row.addEventListener('click', () => showPageDetail(page));
       }
       container.appendChild(row);
     });
 
-    // Show pro overlay if there are more than FREE_LIMIT pages
-    if (pages.length > FREE_LIMIT) {
+    // Show pro overlay if there are more pages than plan allows
+    if (pages.length > pageLimit) {
       proOverlay.hidden = false;
     }
   }
@@ -556,12 +603,14 @@
   // === Full Report ===
   async function openFullReport() {
     try {
-      const FREE_PAGE_LIMIT = 3;
+      const pageLimit = PLANS[currentPlan].pages;
+      const actionLimit = PLANS[currentPlan].actions;
 
       if (fullSiteResults && fullSiteResults.pages.length > 0) {
         // Full site report
         const payload = {
           type: 'sitescan',
+          plan: currentPlan,
           avgScore: fullSiteResults.avgScore,
           totalPages: fullSiteResults.scannedPages,
           totalForms: fullSiteResults.totalForms,
@@ -570,7 +619,7 @@
           protocols: fullSiteResults.protocols || null,
           timestamp: new Date().toISOString(),
           pages: fullSiteResults.pages.map((p, i) => {
-            if (i < FREE_PAGE_LIMIT) {
+            if (i < pageLimit) {
               return {
                 url: p.url, score: p.score, formCount: p.formCount,
                 webmcpCount: p.webmcpCount, issueCount: p.issueCount,
@@ -596,6 +645,7 @@
         // Single page report — also use storage + report.html
         const payload = {
           type: 'singlescan',
+          plan: currentPlan,
           avgScore: currentAnalysis.score,
           totalPages: 1,
           totalForms: currentScan.forms.length,

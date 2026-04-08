@@ -6,9 +6,15 @@
   'use strict';
 
   const $ = (s) => document.querySelector(s);
-  const FREE_LIMIT = 3;
-  const FREE_ACTION_LIMIT = 2; // code snippets shown for free
+  const PLANS = {
+    free:  { pages: 3,    actions: 2    },
+    pro:   { pages: 500,  actions: 9999 },
+    team:  { pages: 2000, actions: 9999 }
+  };
   let reportData = null;
+  let currentPlan = 'free';
+  let PAGE_LIMIT = 3;
+  let ACTION_LIMIT = 2;
 
   document.addEventListener('DOMContentLoaded', async () => {
     $('#btn-download').addEventListener('click', downloadReport);
@@ -17,6 +23,12 @@
       const data = result.agentready_report;
       if (!data) { showError('No report data found. Run a scan from the extension first.'); return; }
       reportData = data;
+      // Set plan limits
+      if (data.plan && PLANS[data.plan]) {
+        currentPlan = data.plan;
+        PAGE_LIMIT = PLANS[data.plan].pages;
+        ACTION_LIMIT = PLANS[data.plan].actions;
+      }
       $('#loading').hidden = true;
       $('#report').hidden = false;
       renderReport(data);
@@ -95,7 +107,18 @@
       renderPages(data.pages);
     }
 
-    $('#r-timestamp').textContent = `Report generated ${new Date().toLocaleString()} by AgentReady`;
+    // Plan badge in header
+    const planLabel = { free: 'Free', pro: 'Pro', team: 'Team' }[currentPlan] || 'Free';
+    const planColor = { free: '#94a3b8', pro: '#2563eb', team: '#7c3aed' }[currentPlan];
+    const headerActions = document.querySelector('.report-actions');
+    if (headerActions && currentPlan !== 'free') {
+      const badge = document.createElement('span');
+      badge.style.cssText = `font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;background:${planColor};color:#fff;margin-right:8px;`;
+      badge.textContent = planLabel;
+      headerActions.prepend(badge);
+    }
+
+    $('#r-timestamp').textContent = `Report generated ${new Date().toLocaleString()} by AgentReady (${planLabel})`;
   }
 
   // =============================================
@@ -172,7 +195,7 @@
       const card = document.createElement('div');
       card.className = 'action-card';
       const hasCode = !!action.code;
-      const isLocked = hasCode && i >= FREE_ACTION_LIMIT;
+      const isLocked = hasCode && i >= ACTION_LIMIT;
 
       card.innerHTML = `
         <div class="action-header">
@@ -741,7 +764,7 @@ if (navigator.modelContext) {
     container.innerHTML = '';
     pages.forEach((page, i) => {
       const c2 = color(page.score);
-      const isLocked = page.locked || i >= FREE_LIMIT;
+      const isLocked = page.locked || i >= PAGE_LIMIT;
       let shortUrl = page.url;
       try { shortUrl = new URL(page.url).pathname + new URL(page.url).search || '/'; } catch {}
 
@@ -764,7 +787,7 @@ if (navigator.modelContext) {
       }
       container.appendChild(row);
     });
-    if (pages.length > FREE_LIMIT) { $('#r-pro-overlay').hidden = false; }
+    if (pages.length > PAGE_LIMIT) { $('#r-pro-overlay').hidden = false; }
   }
 
   function showPageDetail(page) {
@@ -858,7 +881,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
     actions.forEach((a, i) => {
       html += `<div class="action"><div class="action-title">${i + 1}. ${a.title} <span style="font-size:11px;color:#94a3b8">[${a.priority} priority, ${a.difficulty}]</span></div>`;
       html += `<div class="action-desc">${a.description}</div>`;
-      if (a.code && i < FREE_ACTION_LIMIT) html += `<pre>${esc(a.code)}</pre>`;
+      if (a.code && i < ACTION_LIMIT) html += `<pre>${esc(a.code)}</pre>`;
       else if (a.code) html += `<p style="color:#7c3aed;font-size:12px">Code snippet available with Pro plan</p>`;
       html += '</div>';
     });
