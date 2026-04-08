@@ -39,6 +39,9 @@ body {
 .scan-btn:hover { background: #1d4ed8; }
 .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* === Hidden override === */
+[hidden] { display: none !important; }
+
 /* === Loading === */
 .loading {
   display: flex;
