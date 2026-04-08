@@ -10,6 +10,10 @@
  */
 
 const { scan, crawl } = require('../index');
+const reportHtml = require('../lib/report-html');
+const { writeFileSync } = require('fs');
+const { join } = require('path');
+const { execSync } = require('child_process');
 
 const args = process.argv.slice(2);
 const flags = new Set(args.filter(a => a.startsWith('--')));
@@ -22,13 +26,14 @@ if (urls.length === 0 || flags.has('--help')) {
   Usage:
     agentready <url>              Scan homepage
     agentready <url> --crawl      Full site crawl (up to 20 pages)
+    agentready <url> --report     Generate HTML report and open in browser
     agentready <url> --json       Output raw JSON
     agentready <url> --protocols  Only check discovery protocols
     agentready --help             Show this help
 
   Examples:
     agentready https://example.com
-    agentready https://villamareblu.it --crawl
+    agentready https://villamareblu.it --crawl --report
     agentready https://stripe.com --json
     agentready https://api.openai.com --protocols
   `);
@@ -37,6 +42,7 @@ if (urls.length === 0 || flags.has('--help')) {
 
 const isJson = flags.has('--json');
 const isCrawl = flags.has('--crawl');
+const isReport = flags.has('--report');
 const protocolsOnly = flags.has('--protocols') || flags.has('--protocols-only');
 
 async function main() {
@@ -79,6 +85,8 @@ async function main() {
       }
 
       printCrawlResult(result);
+
+      if (isReport) openReport(result, true);
     } else {
       const result = await scan(finalUrl);
 
@@ -97,6 +105,8 @@ async function main() {
       printWebMCP(result);
       printProtocols(result.protocols);
       printSummary(result);
+
+      if (isReport) openReport(result, false);
     }
   } catch (err) {
     console.error(`  Error: ${err.message}`);
@@ -214,6 +224,27 @@ function scoreBar(score) {
   const empty = 20 - filled;
   const c = score >= 80 ? '\x1b[32m' : score >= 50 ? '\x1b[33m' : '\x1b[31m';
   return `${c}${'█'.repeat(filled)}${'░'.repeat(empty)}\x1b[0m`;
+}
+
+function openReport(result, isCrawlResult) {
+  const html = reportHtml.generate(result, isCrawlResult);
+  let domain = '';
+  try { domain = new URL(result.url || result.pages?.[0]?.url).hostname; } catch {}
+  const filename = `agentready-report-${domain || 'scan'}.html`;
+  const filepath = join(process.cwd(), filename);
+  writeFileSync(filepath, html, 'utf-8');
+  console.log(`  Report saved: ${filename}`);
+
+  // Open in default browser
+  const platform = process.platform;
+  try {
+    if (platform === 'darwin') execSync(`open "${filepath}"`);
+    else if (platform === 'win32') execSync(`start "" "${filepath}"`);
+    else execSync(`xdg-open "${filepath}"`);
+    console.log('  Opened in browser.\n');
+  } catch {
+    console.log(`  Open manually: file://${filepath}\n`);
+  }
 }
 
 main();
