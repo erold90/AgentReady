@@ -34,16 +34,6 @@
       }
     });
 
-    // Listen for scan results from content script
-    chrome.runtime.onMessage.addListener((msg) => {
-      if (msg.type === 'scan-result') {
-        currentScan = msg.data;
-        currentAnalysis = Analyzer.analyze(currentScan);
-        hideLoading();
-        renderResults();
-      }
-    });
-
     // Auto-scan on popup open
     runScan();
   });
@@ -65,18 +55,21 @@
         return;
       }
 
-      // Inject content script
-      await chrome.scripting.executeScript({
+      // Inject content script and get result directly
+      const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ['js/content.js']
       });
 
-      // Wait for result — timeout after 8s
-      setTimeout(() => {
-        if (!currentScan) {
-          showError('Scan timed out. The page may be blocking script injection.');
-        }
-      }, 8000);
+      const scanData = results?.[0]?.result;
+      if (scanData && scanData.url) {
+        currentScan = scanData;
+        currentAnalysis = Analyzer.analyze(currentScan);
+        hideLoading();
+        renderResults();
+      } else {
+        showError('Could not extract page data. Try refreshing the page.');
+      }
 
     } catch (err) {
       showError('Failed to scan: ' + (err.message || 'Unknown error'));

@@ -156,6 +156,6 @@
     source: 'extension'
   };
 
-  // Send to background
-  chrome.runtime.sendMessage({ type: 'scan-result', data: scanData });
+  // Return data to executeScript caller
+  scanData;
 })();
