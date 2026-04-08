@@ -91,7 +91,6 @@ const ProtocolScanner = (() => {
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line || line.startsWith('#')) {
-          if (!line) currentAgents = [];
           continue;
         }
         const uaMatch = line.match(/^User-agent\s*:\s*(.+)/i);
@@ -247,7 +246,7 @@ const ProtocolScanner = (() => {
         if (!resp.ok) continue;
         const text = await resp.text();
         // Must start with # (markdown heading) and have some content
-        if (text.length < 20 || !text.trim().startsWith('#')) continue;
+        if (text.trim().length < 5 || !text.trim().startsWith('#')) continue;
         const lines = text.split('\n');
         const title = lines[0].replace(/^#+\s*/, '').trim();
         const linkCount = (text.match(/\[.*?\]\(.*?\)/g) || []).length;

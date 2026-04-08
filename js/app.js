@@ -720,16 +720,16 @@
   <div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
     <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
     <div style="margin-bottom:16px">
-      <img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge" style="height:28px">
+      <img src="https://img.shields.io/badge/AgentReady-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge" style="height:28px">
     </div>
     <div style="font-size:13px;color:#475569;margin-bottom:8px">Add this badge to your site:</div>
-    <pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:11px;overflow-x:auto;white-space:pre-wrap;text-align:left">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
+    <pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:11px;overflow-x:auto;white-space:pre-wrap;text-align:left">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="https://img.shields.io/badge/AgentReady-Score_${score}%2F100-10b981?style=for-the-badge" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
   </div>
   ` : `
   <div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
     <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>
     <div style="margin-bottom:16px">
-      <img src="https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-f59e0b?style=for-the-badge" alt="Work in Progress Badge" style="height:28px">
+      <img src="https://img.shields.io/badge/AgentReady-Score_${score}%2F100-f59e0b?style=for-the-badge" alt="Work in Progress Badge" style="height:28px">
     </div>
     <div style="font-size:13px;color:#475569">Score 75+ to unlock the Agent-Ready certification badge.</div>
   </div>

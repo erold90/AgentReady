@@ -5,7 +5,7 @@
 
 function esc(str) {
   if (!str) return '';
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function color(score) {
@@ -156,7 +156,7 @@ function generate(result, isCrawl, isPro = true, codeLimit = Infinity) {
   const verdict = getVerdict(score, totalForms);
   const actions = generateActions(firstPage, protocols, domain);
 
-  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AgentReady Report — ${esc(domain)}</title>
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>AgentReady Report — ${esc(domain)}</title>
 <style>
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:800px;margin:40px auto;padding:0 24px;color:#0f172a;line-height:1.6}
 h1{font-size:24px;margin-bottom:4px}h2{font-size:18px;margin:32px 0 12px;border-bottom:1px solid #e2e8f0;padding-bottom:8px}
@@ -175,6 +175,13 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 .protocol-row{display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px}
 .protocol-found{color:#10b981}.protocol-missing{color:#ef4444}
 .footer{margin-top:48px;font-size:12px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:16px}
+@media (max-width: 600px) {
+  body { margin: 16px auto; padding: 0 12px; }
+  .score { font-size: 40px; }
+  .stats { gap: 12px; font-size: 12px; }
+  pre { font-size: 11px; }
+  th, td { padding: 6px 8px; font-size: 12px; }
+}
 </style></head><body>
 <h1>AgentReady Report</h1>
 <p style="color:#475569;font-size:14px">${esc(domain)}</p>
@@ -190,7 +197,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 
   // Badge section
   if (score >= 75) {
-    const badgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-10b981?style=for-the-badge`;
+    const badgeUrl = `https://img.shields.io/badge/AgentReady-Score_${score}%2F100-10b981?style=for-the-badge`;
     html += `
 <div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
   <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
@@ -201,7 +208,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
   <pre style="text-align:left;font-size:11px">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="${badgeUrl}" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
 </div>`;
   } else {
-    const wipBadgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${score}%2F100-f59e0b?style=for-the-badge`;
+    const wipBadgeUrl = `https://img.shields.io/badge/AgentReady-Score_${score}%2F100-f59e0b?style=for-the-badge`;
     html += `
 <div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
   <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>

@@ -22,9 +22,12 @@ async function validate(key) {
     return { valid: false, plan: 'free' };
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const resp = await fetch(LEMON_VALIDATE_URL, {
       method: 'POST',
+      signal: controller.signal,
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ license_key: key.trim() })
     });
@@ -52,6 +55,8 @@ async function validate(key) {
     return { valid: true, plan };
   } catch (err) {
     return { valid: false, plan: 'free', error: err.message };
+  } finally {
+    clearTimeout(timeout);
   }
 }
 

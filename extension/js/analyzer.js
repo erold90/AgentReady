@@ -14,16 +14,17 @@ const Analyzer = (() => {
       schema: analyzeSchemaQuality(forms),
       pageStructure: analyzePageStructure(pageSignals, responseQuality),
       security: analyzeSecurity(security),
-      protocols: analyzeProtocols(protocolResults)
+      protocols: analyzeProtocols(protocolResults),
+      botAccess: analyzeBotAccess(protocolResults)
     };
 
     let weights;
     if (hasWebMCP) {
-      weights = { forms: 25, descriptions: 20, schema: 12, pageStructure: 13, security: 12, protocols: 18 };
+      weights = { forms: 23, descriptions: 18, schema: 10, pageStructure: 12, security: 10, protocols: 17, botAccess: 10 };
     } else if (forms.length > 0) {
-      weights = { forms: 22, descriptions: 8, schema: 8, pageStructure: 30, security: 17, protocols: 15 };
+      weights = { forms: 20, descriptions: 7, schema: 7, pageStructure: 27, security: 15, protocols: 14, botAccess: 10 };
     } else {
-      weights = { forms: 8, descriptions: 4, schema: 4, pageStructure: 52, security: 17, protocols: 15 };
+      weights = { forms: 7, descriptions: 3, schema: 3, pageStructure: 47, security: 15, protocols: 14, botAccess: 11 };
     }
 
     let totalScore = 0;
@@ -120,6 +121,19 @@ const Analyzer = (() => {
       label: 'Security',
       detail: security.isHTTPS ? 'HTTPS enabled (required for SecureContext)' : 'HTTP only — WebMCP requires HTTPS'
     };
+  }
+
+  function analyzeBotAccess(protocolResults) {
+    const rt = protocolResults?.robotsTxt;
+    let score = 100;
+    let detail = 'No robots.txt — all bots allowed';
+    if (rt && rt.found) {
+      score = rt.totalBots > 0 ? Math.round(((rt.totalBots - rt.blockedCount) / rt.totalBots) * 100) : 100;
+      detail = rt.blockedCount > 0
+        ? `${rt.blockedCount}/${rt.totalBots} bots blocked: ${rt.blockedBots.join(', ')}`
+        : `All ${rt.totalBots} bots allowed`;
+    }
+    return { score, label: 'Bot Access', detail };
   }
 
   function analyzeProtocols(protocolResults) {

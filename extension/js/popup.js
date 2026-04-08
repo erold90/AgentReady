@@ -117,6 +117,9 @@
           const origin = new URL(tab.url).origin;
           ProtocolScanner.scan(origin).then(protocols => {
             currentProtocols = protocols;
+            // Re-analyze with protocols for botAccess category
+            currentAnalysis = Analyzer.analyze(currentScan, protocols);
+            renderResults();
             renderProtocolStats(protocols);
           }).catch(() => {});
         } catch {}
@@ -377,6 +380,20 @@
     if (!protocols || !protocols.summary) return;
     el.textContent = protocols.summary.found + '/' + protocols.summary.total;
     el.style.color = protocols.summary.found > 0 ? '#10b981' : '#94a3b8';
+
+    // Bot access stats
+    const botEl = $('#s-bots');
+    if (botEl && protocols.robotsTxt) {
+      const rt = protocols.robotsTxt;
+      if (rt.found) {
+        const allowed = rt.totalBots - rt.blockedCount;
+        botEl.textContent = allowed + '/' + rt.totalBots;
+        botEl.style.color = rt.blockedCount === 0 ? '#10b981' : (rt.blockedCount > rt.totalBots / 2 ? '#ef4444' : '#f59e0b');
+      } else {
+        botEl.textContent = 'All';
+        botEl.style.color = '#10b981';
+      }
+    }
   }
 
   // === Full Site Scan ===

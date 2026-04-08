@@ -10,7 +10,7 @@ async function scanPage(url) {
   try {
     const resp = await fetch(url, {
       signal: controller.signal,
-      headers: { 'Accept': 'text/html', 'User-Agent': 'AgentReady/1.0' }
+      headers: { 'Accept': 'text/html', 'User-Agent': 'AgentReady/2.1 (+https://erold90.github.io/AgentReady)' }
     });
 
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);

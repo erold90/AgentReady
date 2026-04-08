@@ -1027,7 +1027,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
     if (analysis?.categories) {
       html += '<h2>Score Breakdown</h2><table><tr><th>Category</th><th>Score</th><th>Detail</th></tr>';
       // Ordered categories
-      const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols'];
+      const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols', 'botAccess'];
       catOrder.forEach(key => {
         let cat = analysis.categories[key];
         if (!cat) return;

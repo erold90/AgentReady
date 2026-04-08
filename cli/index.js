@@ -36,6 +36,7 @@ async function crawl(url, { maxPages = 20, onProgress } = {}) {
   const discovered = await discoverPages(url, origin, maxPages);
 
   const pages = [];
+  const failedPages = [];
   for (let i = 0; i < discovered.length; i++) {
     const pageUrl = discovered[i];
     if (onProgress) onProgress(i + 1, discovered.length, pageUrl);
@@ -43,8 +44,8 @@ async function crawl(url, { maxPages = 20, onProgress } = {}) {
       const page = await pageScanner.scanPage(pageUrl);
       const result = analyzePage(page, protocolResults);
       pages.push(result);
-    } catch {
-      // Skip failed pages
+    } catch (err) {
+      failedPages.push({ url: pageUrl, error: err.message || 'Failed to scan' });
     }
   }
 
@@ -63,6 +64,8 @@ async function crawl(url, { maxPages = 20, onProgress } = {}) {
     totalForms,
     totalIssues,
     pages,
+    failedPages,
+    failedCount: failedPages.length,
     protocols: protocolResults,
     timestamp: new Date().toISOString()
   };
@@ -296,7 +299,7 @@ function fetchUrl(url) {
   const timeout = setTimeout(() => controller.abort(), TIMEOUT);
   return fetch(url, {
     signal: controller.signal,
-    headers: { 'User-Agent': 'AgentReady/1.0', 'Accept': 'text/html, application/xml, text/xml, */*' }
+    headers: { 'User-Agent': 'AgentReady/2.1 (+https://erold90.github.io/AgentReady)', 'Accept': 'text/html, application/xml, text/xml, */*' }
   }).finally(() => clearTimeout(timeout));
 }
 

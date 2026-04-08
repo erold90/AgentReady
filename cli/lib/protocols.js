@@ -79,8 +79,6 @@ async function checkRobotsTxt(origin) {
     for (const rawLine of lines) {
       const line = rawLine.trim();
       if (!line || line.startsWith('#')) {
-        // Empty line or comment resets current agents block
-        if (!line) currentAgents = [];
         continue;
       }
       const uaMatch = line.match(/^User-agent\s*:\s*(.+)/i);
@@ -222,7 +220,7 @@ async function checkLlmsTxt(origin) {
       const resp = await fetchWithTimeout(origin + path);
       if (!resp.ok) continue;
       const text = await resp.text();
-      if (text.length < 20 || !text.trim().startsWith('#')) continue;
+      if (text.trim().length < 5 || !text.trim().startsWith('#')) continue;
       const lines = text.split('\n');
       return {
         found: true,

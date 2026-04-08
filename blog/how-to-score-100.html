@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>How to Score 100/100 on CrawlAudit: Complete Guide — CrawlAudit</title>
-  <meta name="description" content="Step-by-step guide to achieving a perfect 100/100 AI readiness score on CrawlAudit. Code examples, before/after comparisons, and fixes for every category.">
-  <meta property="og:title" content="How to Score 100/100 on CrawlAudit: Complete Guide">
+  <title>How to Score 100/100 on AgentReady: Complete Guide — AgentReady</title>
+  <meta name="description" content="Step-by-step guide to achieving a perfect 100/100 AI readiness score on AgentReady. Code examples, before/after comparisons, and fixes for every category.">
+  <meta property="og:title" content="How to Score 100/100 on AgentReady: Complete Guide">
   <meta property="og:description" content="Walk through every scoring category with code examples and before/after comparisons to achieve a perfect AI readiness score.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/how-to-score-100.html">
   <meta property="article:published_time" content="2026-04-08">
-  <meta property="article:author" content="CrawlAudit Team">
+  <meta property="article:author" content="AgentReady Team">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="How to Score 100/100 on CrawlAudit: Complete Guide">
+  <meta name="twitter:title" content="How to Score 100/100 on AgentReady: Complete Guide">
   <meta name="twitter:description" content="Step-by-step guide to a perfect AI readiness score with code examples.">
   <link rel="canonical" href="https://erold90.github.io/AgentReady/blog/how-to-score-100.html">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,10 +148,10 @@
   {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": "How to Score 100/100 on CrawlAudit",
-    "description": "Step-by-step guide to achieving a perfect AI readiness score on CrawlAudit.",
+    "name": "How to Score 100/100 on AgentReady",
+    "description": "Step-by-step guide to achieving a perfect AI readiness score on AgentReady.",
     "datePublished": "2026-04-08",
-    "author": { "@type": "Organization", "name": "CrawlAudit" },
+    "author": { "@type": "Organization", "name": "AgentReady" },
     "step": [
       { "@type": "HowToStep", "name": "Add WebMCP attributes to forms", "text": "Add tool-name, tool-description, and tool-param-description attributes to HTML forms." },
       { "@type": "HowToStep", "name": "Implement AI discovery protocols", "text": "Add llms.txt, agents.json, A2A Agent Card, MCP Discovery, and OpenAPI spec files." },
@@ -168,15 +168,28 @@
     <div class="header-inner">
       <a href="../" class="logo">
         <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
-        <span>CrawlAudit</span>
+        <span>AgentReady</span>
       </a>
       <nav class="header-nav">
         <a href="../">Scanner</a>
         <a href="./">Blog</a>
         <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <button onclick="toggleTheme()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:16px;color:var(--text-2);cursor:pointer" aria-label="Toggle dark mode">&#9790;</button>
       </nav>
     </div>
   </header>
+  <script>
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+  </script>
 
   <article class="article">
     <div class="article-meta">
@@ -184,9 +197,9 @@
       <span class="article-tag">Guide</span>
     </div>
 
-    <h1>How to Score 100/100 on CrawlAudit: Complete Guide</h1>
+    <h1>How to Score 100/100 on AgentReady: Complete Guide</h1>
 
-    <p>CrawlAudit scores your website's AI agent readiness on a scale of 0 to 100 across six categories. Most websites score between 5 and 25 on their first scan. This guide walks you through every category, explains what's checked, and provides the exact code to fix each issue.</p>
+    <p>AgentReady scores your website's AI agent readiness on a scale of 0 to 100 across six categories. Most websites score between 5 and 25 on their first scan. This guide walks you through every category, explains what's checked, and provides the exact code to fix each issue.</p>
 
     <div class="callout">
       <p><strong>Time estimate:</strong> A typical website can go from ~15/100 to 100/100 in 1-2 hours. Static sites and SPAs are the fastest to fix. WordPress sites may need a plugin or theme edit.</p>
@@ -198,7 +211,7 @@
       <span class="category-weight">Weight: 30%</span>
     </div>
 
-    <p>This is the largest scoring category. CrawlAudit checks whether your forms have WebMCP attributes (declarative) and whether you register tools via the JavaScript API (imperative).</p>
+    <p>This is the largest scoring category. AgentReady checks whether your forms have WebMCP attributes (declarative) and whether you register tools via the JavaScript API (imperative).</p>
 
     <h3>What's checked</h3>
     <ul>
@@ -265,7 +278,7 @@
       <span class="category-weight">Weight: 20%</span>
     </div>
 
-    <p>CrawlAudit checks for the five standard AI discovery files. Each detected protocol adds points.</p>
+    <p>AgentReady checks for the five standard AI discovery files. Each detected protocol adds points.</p>
 
     <h3>What's checked</h3>
     <ul>
@@ -306,7 +319,7 @@ Brief description of your website and its purpose.
       <span class="category-weight">Weight: 15%</span>
     </div>
 
-    <p>Even without WebMCP, good semantic HTML helps AI agents understand your page. CrawlAudit checks your HTML quality from an AI-readability perspective.</p>
+    <p>Even without WebMCP, good semantic HTML helps AI agents understand your page. AgentReady checks your HTML quality from an AI-readability perspective.</p>
 
     <h3>What's checked</h3>
     <ul>
@@ -368,7 +381,7 @@ Brief description of your website and its purpose.
       <span class="category-weight">Weight: 15%</span>
     </div>
 
-    <p>AI agents need permission to access your site. This category checks whether your robots.txt and meta tags welcome AI crawlers.</p>
+    <p>AI agents need permission to access your site. AgentReady checks whether your robots.txt and meta tags welcome AI crawlers.</p>
 
     <h3>What's checked</h3>
     <ul>
@@ -485,7 +498,7 @@ Sitemap: https://yoursite.com/sitemap.xml</code></div>
     </ol>
 
     <div class="callout">
-      <p><strong>Pro tip:</strong> After making changes, use CrawlAudit's rescan feature to verify your score immediately. The Agent Simulator tab shows exactly how an AI agent sees your page before and after your fixes.</p>
+      <p><strong>Pro tip:</strong> After making changes, use AgentReady's rescan feature to verify your score immediately. The Agent Simulator tab shows exactly how an AI agent sees your page before and after your fixes.</p>
     </div>
 
     <h2>Common Mistakes That Cost Points</h2>
@@ -500,7 +513,7 @@ Sitemap: https://yoursite.com/sitemap.xml</code></div>
 
     <div class="cta-box">
       <h3>Ready to hit 100?</h3>
-      <p>Scan your site now and see exactly which fixes you need. CrawlAudit generates the code for you.</p>
+      <p>Scan your site now and see exactly which fixes you need. AgentReady generates the code for you.</p>
       <a href="../#demo" class="btn-primary">Scan Your Site Free</a>
     </div>
 
@@ -518,11 +531,11 @@ Sitemap: https://yoursite.com/sitemap.xml</code></div>
     <div class="footer-inner">
       <div class="footer-left">
         <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
-        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+        AgentReady &middot; The Lighthouse for AI Agent Readiness
       </div>
       <div class="footer-right">
         <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
-        &middot; &copy; 2026 CrawlAudit
+        &middot; &copy; 2026 AgentReady
       </div>
     </div>
   </footer>

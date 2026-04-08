@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready — CrawlAudit</title>
+  <title>What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready — AgentReady</title>
   <meta name="description" content="Learn about WebMCP (Web Model Context Protocol), the W3C standard in Chrome 146+ that lets AI agents interact with your website's forms and tools via navigator.modelContext.">
   <meta property="og:title" content="What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready">
   <meta property="og:description" content="WebMCP lets AI agents discover and use your website's tools. Learn the declarative and imperative approaches to making your site AI-native.">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://erold90.github.io/AgentReady/blog/what-is-webmcp.html">
   <meta property="article:published_time" content="2026-04-08">
-  <meta property="article:author" content="CrawlAudit Team">
+  <meta property="article:author" content="AgentReady Team">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready">
   <meta name="twitter:description" content="WebMCP lets AI agents discover and use your website's tools. Learn the declarative and imperative approaches.">
@@ -114,8 +114,8 @@
     "@type": "Article",
     "headline": "What is WebMCP? The W3C Standard That Makes Websites AI-Agent Ready",
     "datePublished": "2026-04-08",
-    "author": { "@type": "Organization", "name": "CrawlAudit" },
-    "publisher": { "@type": "Organization", "name": "CrawlAudit" },
+    "author": { "@type": "Organization", "name": "AgentReady" },
+    "publisher": { "@type": "Organization", "name": "AgentReady" },
     "description": "Learn about WebMCP, the W3C standard in Chrome 146+ that lets AI agents interact with your website's forms and tools.",
     "mainEntityOfPage": "https://erold90.github.io/AgentReady/blog/what-is-webmcp.html"
   }
@@ -126,15 +126,28 @@
     <div class="header-inner">
       <a href="../" class="logo">
         <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
-        <span>CrawlAudit</span>
+        <span>AgentReady</span>
       </a>
       <nav class="header-nav">
         <a href="../">Scanner</a>
         <a href="./">Blog</a>
         <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <button onclick="toggleTheme()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:16px;color:var(--text-2);cursor:pointer" aria-label="Toggle dark mode">&#9790;</button>
       </nav>
     </div>
   </header>
+  <script>
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+  </script>
 
   <article class="article">
     <div class="article-meta">
@@ -257,7 +270,7 @@
 
     <h2>Getting Started</h2>
 
-    <p>The fastest way to assess your current WebMCP readiness is to run an audit. CrawlAudit scans your pages, identifies forms that lack WebMCP attributes, and generates the exact code you need — both declarative HTML and imperative JavaScript.</p>
+    <p>The fastest way to assess your current WebMCP readiness is to run an audit. AgentReady scans your pages, identifies forms that lack WebMCP attributes, and generates the exact code you need — both declarative HTML and imperative JavaScript.</p>
 
     <p>For most sites, adding WebMCP support takes under an hour. For a WordPress site with a contact form, it can take five minutes.</p>
 
@@ -271,7 +284,7 @@
       <h3>Related Articles</h3>
       <ul>
         <li><a href="ai-discovery-protocols.html">5 AI Discovery Protocols Every Website Should Implement</a></li>
-        <li><a href="how-to-score-100.html">How to Score 100/100 on CrawlAudit: Complete Guide</a></li>
+        <li><a href="how-to-score-100.html">How to Score 100/100 on AgentReady: Complete Guide</a></li>
         <li><a href="robots-txt-ai-bots.html">robots.txt for AI: Which Bots to Allow and Why</a></li>
       </ul>
     </div>
@@ -281,11 +294,11 @@
     <div class="footer-inner">
       <div class="footer-left">
         <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" fill="#2563eb"/><path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="16" cy="16" r="2" fill="white"/></svg>
-        CrawlAudit &middot; The Lighthouse for AI Agent Readiness
+        AgentReady &middot; The Lighthouse for AI Agent Readiness
       </div>
       <div class="footer-right">
         <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
-        &middot; &copy; 2026 CrawlAudit
+        &middot; &copy; 2026 AgentReady
       </div>
     </div>
   </footer>

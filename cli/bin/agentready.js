@@ -90,7 +90,7 @@ async function main() {
   const isPro = plan !== 'free';
 
   if (!isJson) {
-    console.log(`\n  ⚡ AgentReady Scanner v2.0.0${isPro ? ` [${plan.toUpperCase()}]` : ' [FREE]'}`);
+    console.log(`\n  ⚡ AgentReady Scanner v2.2.0${isPro ? ` [${plan.toUpperCase()}]` : ' [FREE]'}`);
     console.log(`  ${isCrawl ? 'Crawling' : 'Scanning'} ${finalUrl}...\n`);
   }
 

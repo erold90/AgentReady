@@ -30,11 +30,15 @@ const License = (() => {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       const resp = await fetch(LEMON_VALIDATE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ license_key: key.trim() })
+        body: JSON.stringify({ license_key: key.trim() }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       if (!resp.ok) {
         return { valid: false, plan: 'free', error: `Validation failed (HTTP ${resp.status})` };
