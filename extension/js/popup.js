@@ -43,16 +43,19 @@
         renderResults();
       }
     });
+
+    // Auto-scan on popup open
+    runScan();
   });
 
   // === Scan ===
   async function runScan() {
     $('#scan-btn').disabled = true;
-    $('#scan-btn').textContent = 'Scanning...';
-    $('#welcome').hidden = true;
+    $('#scan-btn').textContent = 'Scanning';
     $('#results').hidden = true;
     $('#error').hidden = true;
     $('#loading').hidden = false;
+    currentScan = null;
 
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -89,7 +92,7 @@
   function hideLoading() {
     $('#loading').hidden = true;
     $('#scan-btn').disabled = false;
-    $('#scan-btn').textContent = 'Scan Page';
+    $('#scan-btn').textContent = 'Rescan';
   }
 
   // === Render ===
