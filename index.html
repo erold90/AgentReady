@@ -364,6 +364,50 @@
     </div>
   </section>
 
+  <!-- Full Site Report (populated by JS when receiving sitescan data) -->
+  <section id="sitescan-results" class="results" hidden>
+    <div class="sitescan-header">
+      <h2>Full Site Scan Report</h2>
+      <p id="sitescan-subtitle" class="sitescan-subtitle"></p>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="sitescan-summary">
+      <div class="sitescan-stat">
+        <div class="sitescan-stat-val" id="ss-avg-score">0</div>
+        <div class="sitescan-stat-lbl">Avg Score</div>
+      </div>
+      <div class="sitescan-stat">
+        <div class="sitescan-stat-val" id="ss-total-pages">0</div>
+        <div class="sitescan-stat-lbl">Pages Scanned</div>
+      </div>
+      <div class="sitescan-stat">
+        <div class="sitescan-stat-val" id="ss-total-forms">0</div>
+        <div class="sitescan-stat-lbl">Forms Found</div>
+      </div>
+      <div class="sitescan-stat">
+        <div class="sitescan-stat-val" id="ss-total-issues">0</div>
+        <div class="sitescan-stat-lbl">Issues</div>
+      </div>
+    </div>
+
+    <!-- Page List -->
+    <div class="sitescan-pages" id="ss-pages"></div>
+
+    <!-- Pro Overlay -->
+    <div id="ss-pro-overlay" class="ss-pro-overlay" hidden>
+      <div class="ss-pro-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div class="ss-pro-title">Unlock Full Site Report</div>
+      <div class="ss-pro-text">Free plan shows detailed analysis for 3 pages.<br>Upgrade to Pro to see every page with full categories, issues, forms, and code generation.</div>
+      <a href="#pricing" class="btn btn-primary">See Pro Plans</a>
+    </div>
+
+    <!-- Expanded Page Detail -->
+    <div id="ss-page-detail" class="ss-page-detail" hidden></div>
+  </section>
+
   <!-- What is WebMCP -->
   <section class="info-section">
     <div class="info-card">

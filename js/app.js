@@ -72,11 +72,30 @@
       if (event.data && event.data.type === 'agentready-scan') {
         handleBookmarkletData(event.data.data);
       }
+      if (event.data && event.data.type === 'agentready-sitescan') {
+        handleSiteScanData(event.data.data);
+      }
     });
+
+    // Handle full site scan data via URL param
+    const sitescanParam = params.get('sitescan');
+    const modeParam = params.get('mode');
+    if (sitescanParam) {
+      try {
+        const data = JSON.parse(decodeURIComponent(sitescanParam));
+        handleSiteScanData(data);
+        history.replaceState(null, '', window.location.pathname);
+      } catch(e) {
+        console.error('Failed to parse sitescan data:', e);
+      }
+    } else if (modeParam === 'sitescan') {
+      // Data will arrive via postMessage — just clean the URL
+      history.replaceState(null, '', window.location.pathname);
+    }
 
     // URL from query param
     const urlParam = params.get('url');
-    if (urlParam && !scanParam) {
+    if (urlParam && !scanParam && !sitescanParam) {
       urlInput.value = urlParam;
       handleScan();
     }
@@ -93,6 +112,153 @@
     renderResults();
     saveToHistory(currentScan.url, currentAnalysis.score);
     showToast('Live DOM analysis complete!');
+  }
+
+  // === Full Site Scan Handler ===
+  function handleSiteScanData(data) {
+    renderSiteScanResults(data);
+    showToast('Full site scan report loaded!');
+  }
+
+  function renderSiteScanResults(data) {
+    const section = $('#sitescan-results');
+    section.hidden = false;
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Hide single-page results if visible
+    resultsSection.hidden = true;
+
+    // Summary
+    const avgColor = Analyzer.getScoreColor(data.avgScore);
+    $('#ss-avg-score').textContent = data.avgScore;
+    $('#ss-avg-score').style.color = avgColor;
+    $('#ss-total-pages').textContent = data.totalPages;
+    $('#ss-total-forms').textContent = data.totalForms;
+    const issuesEl = $('#ss-total-issues');
+    issuesEl.textContent = data.totalIssues;
+    issuesEl.style.color = data.totalIssues > 0 ? 'var(--red)' : 'var(--green)';
+
+    // Subtitle — try to extract domain from first page
+    let domain = '';
+    if (data.pages && data.pages.length > 0) {
+      try { domain = new URL(data.pages[0].url).hostname; } catch {}
+    }
+    $('#sitescan-subtitle').textContent = domain
+      ? `${data.totalPages} pages scanned on ${domain}`
+      : `${data.totalPages} pages scanned`;
+
+    // Page list
+    const container = $('#ss-pages');
+    container.innerHTML = '';
+    const FREE_LIMIT = 3;
+
+    data.pages.forEach((page, i) => {
+      const color = Analyzer.getScoreColor(page.score);
+      const isLocked = page.locked || i >= FREE_LIMIT;
+
+      let shortUrl = page.url;
+      try { const u = new URL(page.url); shortUrl = u.pathname + u.search || '/'; } catch {}
+
+      const row = createElement('div', 'ss-page-row' + (isLocked ? ' ss-locked' : ''), `
+        <div class="ss-page-score" style="background:${color}">${page.score}</div>
+        <div class="ss-page-info">
+          <div class="ss-page-url" title="${escapeHTML(page.url)}">${escapeHTML(shortUrl)}</div>
+          <div class="ss-page-meta">
+            <span>${page.formCount} form${page.formCount !== 1 ? 's' : ''}</span>
+            <span>${page.webmcpCount} WebMCP</span>
+            <span>${page.issueCount} issue${page.issueCount !== 1 ? 's' : ''}</span>
+            ${page.error ? '<span style="color:var(--red)">Error</span>' : ''}
+          </div>
+        </div>
+        ${isLocked
+          ? '<div class="ss-page-lock"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>'
+          : '<div class="ss-page-arrow">&#8250;</div>'
+        }
+      `);
+
+      if (!isLocked && !page.error && page.analysis) {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => renderSiteScanPageDetail(page));
+      }
+
+      container.appendChild(row);
+    });
+
+    // Pro overlay
+    const proOverlay = $('#ss-pro-overlay');
+    if (data.pages.length > FREE_LIMIT) {
+      proOverlay.hidden = false;
+    } else {
+      proOverlay.hidden = true;
+    }
+  }
+
+  function renderSiteScanPageDetail(page) {
+    const detail = $('#ss-page-detail');
+    detail.hidden = false;
+    detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const analysis = page.analysis;
+    const color = Analyzer.getScoreColor(page.score);
+
+    let shortUrl = page.url;
+    try { const u = new URL(page.url); shortUrl = u.pathname + u.search || '/'; } catch {}
+
+    let html = '';
+    html += `<div class="ss-detail-header">`;
+    html += `  <button class="ss-detail-back" onclick="document.getElementById('ss-page-detail').hidden=true">&larr; Back to pages</button>`;
+    html += `  <div class="ss-detail-score" style="color:${color}">${page.score}</div>`;
+    html += `</div>`;
+    html += `<div class="ss-detail-url">${escapeHTML(shortUrl)}</div>`;
+
+    // Categories
+    if (analysis && analysis.categories) {
+      html += '<h3 style="margin:20px 0 12px;font-size:14px;">Categories</h3>';
+      for (const [key, cat] of Object.entries(analysis.categories)) {
+        const cc = Analyzer.getScoreColor(cat.score);
+        html += `<div class="category-card">`;
+        html += `  <div class="category-name">${cat.label}</div>`;
+        html += `  <div class="category-bar"><div class="category-bar-fill" style="width:${cat.score}%;background:${cc};"></div></div>`;
+        html += `  <div class="category-score" style="color:${cc};">${cat.score}<span style="font-size:14px;color:var(--text-3);">/100</span></div>`;
+        html += `  <div style="font-size:12px;color:var(--text-3);margin-top:4px;">${cat.detail}</div>`;
+        html += `</div>`;
+      }
+    }
+
+    // Issues
+    if (analysis && analysis.issues && analysis.issues.length > 0) {
+      const icons = { error: '!', warning: '!', success: '\u2713', info: 'i' };
+      html += '<h3 style="margin:20px 0 12px;font-size:14px;">Issues</h3>';
+      analysis.issues.forEach(issue => {
+        html += `<div class="issue-item">`;
+        html += `  <div class="issue-icon ${issue.type}">${icons[issue.type]}</div>`;
+        html += `  <div class="issue-text"><strong>${escapeHTML(issue.title)}</strong> — ${escapeHTML(issue.text)}</div>`;
+        html += `</div>`;
+      });
+    }
+
+    // Forms
+    if (page.forms && page.forms.length > 0) {
+      html += '<h3 style="margin:20px 0 12px;font-size:14px;">Forms</h3>';
+      page.forms.forEach(form => {
+        const name = form.toolname || form.name || form.id || 'Form';
+        const badge = form.hasWebMCP
+          ? '<span class="form-badge ready">WebMCP Ready</span>'
+          : '<span class="form-badge not-ready">Not Ready</span>';
+        html += `<div class="form-card expanded">`;
+        html += `  <div class="form-card-header"><div class="form-name">${escapeHTML(name)} ${badge}</div></div>`;
+        html += `  <div class="form-card-body">`;
+        form.fields.forEach(f => {
+          html += `<div class="form-field-row">`;
+          html += `  <div class="form-field-label">${escapeHTML(f.name || f.id || '(no name)')}</div>`;
+          html += `  <div class="form-field-type">${f.type}${f.required ? ' *' : ''}</div>`;
+          html += `</div>`;
+        });
+        html += `  </div></div>`;
+      });
+    }
+
+    detail.innerHTML = html;
   }
 
   // === Scan Handler ===

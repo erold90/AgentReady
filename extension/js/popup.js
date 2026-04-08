@@ -26,17 +26,8 @@
       });
     });
 
-    // Full report link
-    $('#btn-full-report').addEventListener('click', () => {
-      if (currentScan) {
-        const encoded = encodeURIComponent(JSON.stringify(currentScan));
-        if (encoded.length < 50000) {
-          chrome.tabs.create({ url: 'https://erold90.github.io/AgentReady/?scan=' + encoded });
-        } else {
-          chrome.tabs.create({ url: 'https://erold90.github.io/AgentReady/' });
-        }
-      }
-    });
+    // Full report link — adapts based on context
+    $('#btn-full-report').addEventListener('click', openFullReport);
 
     // Full site scan
     $('#btn-full-site').addEventListener('click', runFullSiteScan);
@@ -344,6 +335,9 @@
       renderFullSiteSummary(results);
       renderFullSitePages(results);
 
+      // Update report button to reflect full site context
+      $('#btn-full-report').textContent = 'Full Site Report on AgentReady.dev';
+
     } catch (err) {
       showFullSiteError('Full site scan failed: ' + (err.message || 'Unknown error'));
     } finally {
@@ -515,6 +509,75 @@
 
   function hidePageDetail() {
     $('#page-detail').hidden = true;
+  }
+
+  // === Full Report ===
+  function openFullReport() {
+    const BASE = 'https://erold90.github.io/AgentReady/';
+    const FREE_PAGE_LIMIT = 3;
+
+    if (fullSiteResults && fullSiteResults.pages.length > 0) {
+      // Full site report — package data with freemium gate
+      const payload = {
+        type: 'sitescan',
+        avgScore: fullSiteResults.avgScore,
+        totalPages: fullSiteResults.scannedPages,
+        totalForms: fullSiteResults.totalForms,
+        totalIssues: fullSiteResults.totalIssues,
+        failedPages: fullSiteResults.failedPages,
+        pages: fullSiteResults.pages.map((p, i) => {
+          if (i < FREE_PAGE_LIMIT) {
+            // Full detail for free pages
+            return {
+              url: p.url, score: p.score, formCount: p.formCount,
+              webmcpCount: p.webmcpCount, issueCount: p.issueCount,
+              error: p.error || null,
+              analysis: p.analysis,
+              forms: p.forms,
+              scanData: p.scanData
+            };
+          }
+          // Locked pages — only summary
+          return {
+            url: p.url, score: p.score, formCount: p.formCount,
+            webmcpCount: p.webmcpCount, issueCount: p.issueCount,
+            error: p.error || null,
+            locked: true
+          };
+        })
+      };
+
+      const encoded = encodeURIComponent(JSON.stringify(payload));
+      if (encoded.length < 50000) {
+        chrome.tabs.create({ url: BASE + '?sitescan=' + encoded });
+      } else {
+        // Too large for URL — open page and post data
+        chrome.tabs.create({ url: BASE + '?mode=sitescan' }, (tab) => {
+          // Wait for page to load then send via message
+          const listener = (tabId, info) => {
+            if (tabId === tab.id && info.status === 'complete') {
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: (data) => {
+                  window.postMessage({ type: 'agentready-sitescan', data }, '*');
+                },
+                args: [payload]
+              });
+            }
+          };
+          chrome.tabs.onUpdated.addListener(listener);
+        });
+      }
+    } else if (currentScan) {
+      // Single page report
+      const encoded = encodeURIComponent(JSON.stringify(currentScan));
+      if (encoded.length < 50000) {
+        chrome.tabs.create({ url: BASE + '?scan=' + encoded });
+      } else {
+        chrome.tabs.create({ url: BASE });
+      }
+    }
   }
 
   // === ETA ===

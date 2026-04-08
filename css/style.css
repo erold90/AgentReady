@@ -1205,6 +1205,168 @@ input { font-family: var(--font); }
   margin-top: 16px;
 }
 
+/* ===== FULL SITE SCAN REPORT ===== */
+.sitescan-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.sitescan-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+}
+.sitescan-subtitle {
+  font-size: 14px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+.sitescan-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.sitescan-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+}
+.sitescan-stat-val {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+}
+.sitescan-stat-lbl {
+  font-size: 12px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 4px;
+  letter-spacing: 0.04em;
+}
+.sitescan-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+.ss-page-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  transition: var(--transition);
+}
+.ss-page-row:not(.ss-locked):hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+}
+.ss-page-score {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+.ss-page-info { flex: 1; min-width: 0; }
+.ss-page-url {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ss-page-meta {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: 3px;
+}
+.ss-page-meta span { margin-right: 12px; }
+.ss-page-arrow {
+  font-size: 20px;
+  color: var(--text-3);
+  font-weight: 300;
+}
+.ss-page-row:hover .ss-page-arrow { color: var(--primary); }
+.ss-page-lock { color: var(--text-3); }
+.ss-locked {
+  opacity: 0.5;
+  filter: blur(2px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Pro Overlay */
+.ss-pro-overlay {
+  text-align: center;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, rgba(37,99,235,0.04) 0%, rgba(124,58,237,0.06) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+.ss-pro-icon { margin-bottom: 12px; color: var(--primary); }
+.ss-pro-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.ss-pro-text {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Page Detail */
+.ss-page-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-top: 24px;
+}
+.ss-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ss-detail-back {
+  background: none;
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: var(--radius-xs);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.ss-detail-back:hover { border-color: var(--primary); color: var(--primary); }
+.ss-detail-score {
+  font-size: 36px;
+  font-weight: 800;
+}
+.ss-detail-url {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
 /* ===== DEMO ===== */
 .demo-section {
   max-width: 800px;
@@ -1231,6 +1393,8 @@ input { font-family: var(--font); }
   .score-card { align-self: center; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .steps-grid { grid-template-columns: 1fr; }
+  .sitescan-summary { grid-template-columns: repeat(2, 1fr); }
+  .browser-detected-inner { flex-direction: column; text-align: center; }
   .form-field-row { grid-template-columns: 1fr; gap: 4px; }
   .report-actions { flex-direction: column; }
   .info-card { padding: 24px; }
