@@ -236,9 +236,12 @@ const Scanner = (() => {
     const isCaptcha = lower.includes('captcha') || lower.includes('challenge-platform') ||
                       lower.includes('verify you are human') || lower.includes('captcha-form') ||
                       lower.includes('recaptcha') || lower.includes('hcaptcha');
-    const isBlocked = lower.includes('access denied') || lower.includes('403 forbidden') ||
-                      lower.includes('just a moment') || lower.includes('cloudflare');
-    const isJsShell = html.length > 500 && scriptCount > 3 && textOnly.length < 200;
+    // "just a moment" + cloudflare together = CF challenge page, not just any CF-hosted site
+    const isCfChallenge = lower.includes('just a moment') && lower.includes('cloudflare') && textOnly.length < 500;
+    const isBlocked = lower.includes('access denied') || lower.includes('403 forbidden') || isCfChallenge;
+    // JS shell = very little text content AND no useful metadata
+    const hasGoodMeta = lower.includes('<meta') && (lower.includes('og:') || lower.includes('application/ld+json') || lower.includes('name="description"'));
+    const isJsShell = html.length > 500 && scriptCount > 3 && textOnly.length < 200 && !hasGoodMeta;
 
     let quality = 'good';
     let message = '';
