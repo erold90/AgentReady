@@ -258,78 +258,96 @@
 
     const btn = $('#btn-full-site');
     btn.disabled = true;
-    btn.textContent = 'Scanning Site...';
+    btn.textContent = 'Scanning...';
 
+    // Show overlay
+    const overlay = $('#fs-overlay');
+    const circleFill = $('#fs-circle-fill');
+    const circlePct = $('#fs-circle-pct');
+    const overlayStatus = $('#fs-overlay-status');
+    const overlayUrl = $('#fs-overlay-url');
+    const overlayEta = $('#fs-overlay-eta');
+    const overlayCounter = $('#fs-overlay-counter');
+    const circumference = 2 * Math.PI * 54;
+
+    overlay.hidden = false;
+    circleFill.style.strokeDashoffset = circumference;
+    circlePct.textContent = '0%';
+    overlayStatus.textContent = 'Discovering sitemap...';
+    overlayUrl.textContent = '';
+    overlayEta.textContent = '';
+    overlayCounter.textContent = '';
+
+    // Reset results section
     const section = $('#fullsite-section');
-    section.hidden = false;
-
-    const progress = $('#fs-progress');
-    const progressText = $('#fs-progress-text');
-    const progressFill = $('#fs-progress-fill');
     const summary = $('#fs-summary');
     const pagesContainer = $('#fs-pages');
     const proOverlay = $('#fs-pro-overlay');
     const fsError = $('#fs-error');
-
-    // Reset
-    progress.hidden = false;
     summary.hidden = true;
     pagesContainer.innerHTML = '';
     proOverlay.hidden = true;
     fsError.hidden = true;
-    progressFill.style.width = '0%';
-    progressText.textContent = 'Discovering sitemap...';
+
+    const setProgress = (pct) => {
+      const offset = circumference - (pct / 100) * circumference;
+      circleFill.style.strokeDashoffset = offset;
+      circlePct.textContent = pct + '%';
+    };
 
     try {
-      // Get current tab URL for origin
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url) {
+        overlay.hidden = true;
         showFullSiteError('Cannot determine current page URL.');
         return;
       }
 
       const origin = new URL(tab.url).origin;
 
-      // Discover sitemap URLs
-      progressText.textContent = 'Discovering sitemap...';
-      progressFill.style.width = '5%';
+      setProgress(5);
 
       let urls = [];
       try {
         urls = await SitemapDiscovery.discover(origin);
-      } catch (e) {
-        // Sitemap discovery failed silently
-      }
+      } catch (e) {}
 
       if (urls.length === 0) {
-        // Fallback: just scan the current page URL
         urls = [tab.url];
-        progressText.textContent = 'No sitemap found. Scanning current page...';
+        overlayStatus.textContent = 'No sitemap found. Scanning current page...';
       } else {
-        progressText.textContent = `Found ${urls.length} pages in sitemap. Starting scan...`;
+        overlayStatus.textContent = `Found ${urls.length} pages`;
+        overlayCounter.textContent = 'Starting scan...';
       }
 
-      progressFill.style.width = '10%';
+      setProgress(10);
 
-      // Crawl pages with ETA
       crawlStartTime = Date.now();
       const results = await SiteCrawler.crawl(urls, (current, total, url) => {
         const pct = 10 + Math.round((current / total) * 85);
-        progressFill.style.width = pct + '%';
-        const shortUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
+        setProgress(pct);
+
+        overlayStatus.textContent = `Scanning page ${current} of ${total}`;
+        const shortUrl = url.length > 60 ? url.substring(0, 57) + '...' : url;
+        overlayUrl.textContent = shortUrl;
+        overlayCounter.textContent = `${current}/${total} pages`;
+
         const eta = getETA(current, total);
-        progressText.textContent = `Scanning page ${current}/${total}: ${shortUrl}${eta ? ' — ' + eta : ''}`;
+        overlayEta.textContent = eta || '';
       });
 
-      progressFill.style.width = '100%';
-      progressText.textContent = 'Scan complete!';
+      setProgress(100);
+      overlayStatus.textContent = 'Scan complete!';
+      overlayUrl.textContent = '';
+      overlayEta.textContent = '';
+      overlayCounter.textContent = `${results.scannedPages} pages scanned`;
 
-      // Short delay then show results
-      await new Promise(r => setTimeout(r, 500));
-      progress.hidden = true;
+      await new Promise(r => setTimeout(r, 800));
+      overlay.hidden = true;
 
-      // Store results for detail view
+      // Store results and show section
       fullSiteResults = results;
+      section.hidden = false;
 
       // Render summary
       renderFullSiteSummary(results);
@@ -339,6 +357,7 @@
       $('#btn-full-report').textContent = 'Full Site Report on AgentReady.dev';
 
     } catch (err) {
+      overlay.hidden = true;
       showFullSiteError('Full site scan failed: ' + (err.message || 'Unknown error'));
     } finally {
       fullSiteRunning = false;
@@ -411,10 +430,11 @@
   }
 
   function showFullSiteError(msg) {
+    $('#fs-overlay').hidden = true;
+    $('#fullsite-section').hidden = false;
     const fsError = $('#fs-error');
     fsError.textContent = msg;
     fsError.hidden = false;
-    $('#fs-progress').hidden = true;
     fullSiteRunning = false;
     $('#btn-full-site').disabled = false;
     $('#btn-full-site').textContent = 'Full Site Scan';

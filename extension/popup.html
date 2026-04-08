@@ -85,15 +85,25 @@
       <button id="btn-full-report" class="btn-action btn-secondary">Full Report on AgentReady.dev</button>
     </div>
 
+    <!-- Full Site Scan Overlay -->
+    <div id="fs-overlay" class="fs-overlay" hidden>
+      <div class="fs-overlay-content">
+        <div class="fs-circle-wrap">
+          <svg viewBox="0 0 120 120" class="fs-circle-svg">
+            <circle cx="60" cy="60" r="54" class="fs-circle-bg"/>
+            <circle cx="60" cy="60" r="54" class="fs-circle-fill" id="fs-circle-fill"/>
+          </svg>
+          <div class="fs-circle-pct" id="fs-circle-pct">0%</div>
+        </div>
+        <div class="fs-overlay-status" id="fs-overlay-status">Discovering sitemap...</div>
+        <div class="fs-overlay-url" id="fs-overlay-url"></div>
+        <div class="fs-overlay-eta" id="fs-overlay-eta"></div>
+        <div class="fs-overlay-counter" id="fs-overlay-counter"></div>
+      </div>
+    </div>
+
     <!-- Full Site Scan Section -->
     <div id="fullsite-section" hidden>
-      <!-- Progress -->
-      <div id="fs-progress" class="fs-progress" hidden>
-        <div class="fs-progress-text" id="fs-progress-text">Discovering sitemap...</div>
-        <div class="fs-progress-bar">
-          <div class="fs-progress-fill" id="fs-progress-fill"></div>
-        </div>
-      </div>
 
       <!-- Summary Card -->
       <div id="fs-summary" class="fs-summary" hidden>
