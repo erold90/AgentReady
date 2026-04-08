@@ -10,7 +10,7 @@ Add this to your `GEMINI.md` file to enable AI Agent Readiness auto-fix with Goo
 When asked to "make this site agent-ready":
 
 ## Scan
-Run `npx agentready <url>` to get the baseline score.
+Run `npx @erold90/agentready <url>` to get the baseline score.
 
 ## Fix Checklist
 1. **WebMCP Forms**: Add `toolname`, `tooldescription` to `<form>` tags. Add `toolparamdescription` to all visible inputs.
@@ -23,7 +23,7 @@ Run `npx agentready <url>` to get the baseline score.
 8. **Meta tags**: Ensure title, meta description, OG tags are present.
 
 ## Verify
-Run `npx agentready <url>` again. Target: >= 80/100.
+Run `npx @erold90/agentready <url>` again. Target: >= 80/100.
 ```
 
 ## How to use

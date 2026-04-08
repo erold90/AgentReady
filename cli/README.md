@@ -9,7 +9,7 @@ Zero dependencies. Node 18+.
 ## Install & Use
 
 ```bash
-npx agentready https://example.com
+npx @erold90/agentready https://example.com
 ```
 
 ## Flags
@@ -58,7 +58,7 @@ agentready --help             Show help
 ## Programmatic API
 
 ```javascript
-const { scan } = require('agentready');
+const { scan } = require('@erold90/agentready');
 
 const result = await scan('https://example.com');
 console.log(result.score);        // 0-100

@@ -7,7 +7,7 @@ Add this to your `.windsurfrules` file to enable AI Agent Readiness auto-fix in 
 ```
 When asked to "make this site agent-ready" or "fix agent readiness":
 
-1. Run `npx agentready <url> --json` to assess current state
+1. Run `npx @erold90/agentready <url> --json` to assess current state
 2. Find all <form> elements and add WebMCP attributes:
    - toolname="snake_case_name" on <form>
    - tooldescription="Description for AI agents" on <form>
@@ -20,7 +20,7 @@ When asked to "make this site agent-ready" or "fix agent readiness":
    - .well-known/agents.json (Directory: agents[])
 5. Add JSON-LD <script type="application/ld+json"> with schema.org
 6. Ensure <title>, <meta name="description">, <meta property="og:*"> exist
-7. Re-run `npx agentready <url>` to verify. Target >= 80/100.
+7. Re-run `npx @erold90/agentready <url>` to verify. Target >= 80/100.
 ```
 
 ## How to use

@@ -19,12 +19,12 @@ Then tell Claude Code: **"Make this site agent-ready"**
 Run the AgentReady CLI to assess the current state:
 
 ```bash
-npx agentready https://YOUR-DOMAIN --json
+npx @erold90/agentready https://YOUR-DOMAIN --json
 ```
 
 Or if testing locally:
 ```bash
-npx agentready http://localhost:3000 --json
+npx @erold90/agentready http://localhost:3000 --json
 ```
 
 ### Step 2: Fix WebMCP on forms
@@ -131,7 +131,7 @@ If missing, add JSON-LD to the `<head>`:
 Run the scanner again to confirm improvements:
 
 ```bash
-npx agentready https://YOUR-DOMAIN
+npx @erold90/agentready https://YOUR-DOMAIN
 ```
 
 Target: score >= 80/100

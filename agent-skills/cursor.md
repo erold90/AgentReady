@@ -9,7 +9,7 @@ Add this to your `.cursor/rules` file to enable AI Agent Readiness auto-fix in C
 # Trigger: "make this site agent-ready" or "fix agent readiness"
 
 ## Scan first
-Run `npx agentready <url> --json` to assess the current state.
+Run `npx @erold90/agentready <url> --json` to assess the current state.
 
 ## WebMCP Forms
 Every <form> must have:
@@ -39,7 +39,7 @@ Add JSON-LD <script type="application/ld+json"> to <head> with:
 Ensure: <title>, <meta name="description">, <meta property="og:*">
 
 ## Verification
-Run `npx agentready <url>` after fixes. Target: >= 80/100.
+Run `npx @erold90/agentready <url>` after fixes. Target: >= 80/100.
 ```
 
 ## How to use
