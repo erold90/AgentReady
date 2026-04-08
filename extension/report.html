@@ -66,7 +66,7 @@
     .section-icon { width: 22px; height: 22px; flex-shrink: 0; }
 
     /* === READINESS CHECKLIST === */
-    .checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checklist { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .check-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
     .check-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
     .check-pass .check-icon { background: var(--green-light); color: var(--green); }
@@ -198,6 +198,9 @@
       .checklist { grid-template-columns: 1fr; }
       .report-header { flex-direction: column; gap: 8px; }
     }
+    @media (min-width: 641px) and (max-width: 900px) {
+      .checklist { grid-template-columns: 1fr 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -227,10 +230,11 @@
       </div>
       <div class="hero-verdict" id="r-verdict"></div>
       <div class="hero-summary" id="r-summary"></div>
-      <div class="hero-stats">
+      <div class="hero-stats" style="grid-template-columns: repeat(5, 1fr);">
         <div class="hero-stat"><div class="hero-stat-val" id="r-pages">0</div><div class="hero-stat-lbl">Pages</div></div>
         <div class="hero-stat"><div class="hero-stat-val" id="r-forms">0</div><div class="hero-stat-lbl">Forms</div></div>
         <div class="hero-stat"><div class="hero-stat-val" id="r-webmcp">0</div><div class="hero-stat-lbl">WebMCP</div></div>
+        <div class="hero-stat"><div class="hero-stat-val" id="r-protocols">-</div><div class="hero-stat-lbl">Protocols</div></div>
         <div class="hero-stat"><div class="hero-stat-val" id="r-issues">0</div><div class="hero-stat-lbl">Issues</div></div>
       </div>
     </div>
@@ -272,7 +276,7 @@
           <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Score Breakdown
         </div>
-        <div class="section-subtitle">How your score is calculated across 5 categories</div>
+        <div class="section-subtitle">How your score is calculated across 6 categories</div>
         <div id="r-categories"></div>
       </div>
 
@@ -300,6 +304,7 @@
   </div>
 
   <script src="js/analyzer.js"></script>
+  <script src="js/protocols.js"></script>
   <script src="js/report.js"></script>
 </body>
 </html>

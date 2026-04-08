@@ -16,6 +16,13 @@ const SiteCrawler = (() => {
   async function crawl(urls, onProgress) {
     const pageResults = [];
 
+    // Protocol scan once per origin (non-blocking, runs in parallel)
+    let protocolResults = null;
+    try {
+      const origin = new URL(urls[0]).origin;
+      ProtocolScanner.scan(origin).then(p => { protocolResults = p; }).catch(() => {});
+    } catch {}
+
     for (let i = 0; i < urls.length; i++) {
       const url = urls[i];
       if (onProgress) onProgress(i + 1, urls.length, url);
@@ -43,7 +50,9 @@ const SiteCrawler = (() => {
       }
     }
 
-    return aggregate(pageResults);
+    const aggregated = aggregate(pageResults);
+    aggregated.protocols = protocolResults;
+    return aggregated;
   }
 
   /**

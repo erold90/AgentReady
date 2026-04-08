@@ -72,10 +72,20 @@
     const issEl = $('#r-issues'); issEl.textContent = data.totalIssues;
     issEl.style.color = data.totalIssues > 0 ? '#ef4444' : '#10b981';
 
+    // Protocol stats
+    const protocols = data.protocols;
+    if (protocols && protocols.summary) {
+      const protEl = $('#r-protocols');
+      if (protEl) {
+        protEl.textContent = protocols.summary.found + '/' + protocols.summary.total;
+        protEl.style.color = protocols.summary.found > 0 ? '#10b981' : '#ef4444';
+      }
+    }
+
     // Sections
-    renderChecklist(page0, analysis);
+    renderChecklist(page0, analysis, protocols);
     renderActionPlan(page0, analysis, data);
-    renderAgentSimulator(page0, analysis);
+    renderAgentSimulator(page0, analysis, protocols);
     renderCategories(analysis);
 
     // Pages (multi-page only)
@@ -113,7 +123,7 @@
   // =============================================
   // READINESS CHECKLIST
   // =============================================
-  function renderChecklist(page, analysis) {
+  function renderChecklist(page, analysis, protocols) {
     const container = $('#r-checklist');
     const ps = page?.scanData?.pageSignals || {};
     const forms = page?.forms || [];
@@ -131,6 +141,11 @@
       { pass: forms.length > 0, label: 'Interactive forms' },
       { pass: hasWebMCP, label: 'WebMCP tool attributes' },
       { pass: page?.scanData?.scriptRegistrations?.length > 0, label: 'JS tool registrations' },
+      { pass: protocols?.a2a?.found, label: 'A2A Agent Card' },
+      { pass: protocols?.mcp?.found, label: 'MCP Discovery' },
+      { pass: protocols?.agents?.found, label: 'agents.json' },
+      { pass: protocols?.openapi?.found, label: 'OpenAPI / Swagger' },
+      { pass: protocols?.llms?.found, label: 'llms.txt' },
     ];
 
     container.innerHTML = checks.map(ch => `
@@ -211,6 +226,7 @@
     const regs = page?.scanData?.scriptRegistrations || [];
     const isHTTPS = page?.scanData?.security?.isHTTPS;
     const hasWebMCP = forms.some(f => f.hasWebMCP);
+    const protocols = data?.protocols || {};
     let domain = '';
     try { domain = new URL(page.url).hostname; } catch {}
 
@@ -310,7 +326,105 @@
       });
     }
 
-    // 9. WebMCP forms with missing field descriptions
+    // 9. Missing A2A Agent Card
+    if (!protocols?.a2a?.found) {
+      actions.push({
+        title: 'Add A2A Agent Card',
+        priority: 'medium', difficulty: 'easy', impact: '+15 score',
+        description: 'Google\'s Agent-to-Agent protocol lets AI agents discover your site\'s capabilities. Create a JSON file at /.well-known/agent.json describing your agent\'s skills and authentication.',
+        code: `// Create file: /.well-known/agent.json
+{
+  "name": "${esc(domain)} Agent",
+  "description": "AI agent for ${esc(domain)}",
+  "url": "https://${esc(domain)}",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "name": "general_info",
+      "description": "Get information about ${esc(domain)}",
+      "tags": ["info", "help"]
+    }
+  ],
+  "authentication": null
+}`
+      });
+    }
+
+    // 10. Missing MCP Discovery
+    if (!protocols?.mcp?.found) {
+      actions.push({
+        title: 'Add MCP Discovery endpoint',
+        priority: 'medium', difficulty: 'easy', impact: '+15 score',
+        description: 'MCP (Model Context Protocol) discovery lets AI tools like Claude Code, Cursor, and Copilot find and connect to your MCP servers automatically.',
+        code: `// Create file: /.well-known/mcp.json
+{
+  "mcpServers": {
+    "${domain.replace(/\./g, '-')}": {
+      "url": "https://${esc(domain)}/mcp",
+      "transport": "streamable-http",
+      "description": "MCP server for ${esc(domain)}"
+    }
+  }
+}`
+      });
+    }
+
+    // 11. Missing llms.txt
+    if (!protocols?.llms?.found) {
+      actions.push({
+        title: 'Add llms.txt',
+        priority: 'low', difficulty: 'easy', impact: '+10 score',
+        description: 'llms.txt is a simple Markdown file at /llms.txt that tells LLMs what your site is about, what resources are available, and how to interact with your content. Think of it as robots.txt for AI.',
+        code: `# ${esc(ps.title || domain)}
+
+> Brief description of your site and what it offers.
+
+## Documentation
+- [API Docs](/api-docs): API reference
+- [Getting Started](/docs/start): How to get started
+
+## Features
+- Feature 1: description
+- Feature 2: description`
+      });
+    }
+
+    // 12. Missing OpenAPI
+    if (!protocols?.openapi?.found && (forms.length > 0 || regs.length > 0)) {
+      actions.push({
+        title: 'Add OpenAPI specification',
+        priority: 'low', difficulty: 'medium', impact: '+10 score',
+        description: 'An OpenAPI/Swagger specification lets AI agents understand your API endpoints, parameters, and response formats. Essential if your site has an API.',
+        code: null
+      });
+    }
+
+    // 13. Missing agents.json
+    if (!protocols?.agents?.found) {
+      actions.push({
+        title: 'Add agents.json',
+        priority: 'low', difficulty: 'easy', impact: '+10 score',
+        description: 'agents.json lists all AI agents available on your domain, their protocols, and capabilities. It acts as a directory for multi-agent discovery.',
+        code: `// Create file: /.well-known/agents.json
+{
+  "agents": [
+    {
+      "name": "${esc(domain)} Assistant",
+      "description": "AI assistant for ${esc(domain)}",
+      "protocol": "a2a",
+      "url": "https://${esc(domain)}/.well-known/agent.json",
+      "capabilities": ["chat", "search"]
+    }
+  ]
+}`
+      });
+    }
+
+    // 14. WebMCP forms with missing field descriptions
     const wmForms = forms.filter(f => f.hasWebMCP);
     wmForms.forEach(form => {
       const noDesc = form.fields.filter(f => !f.toolparamdescription);
@@ -513,7 +627,7 @@ if (navigator.modelContext) {
   // =============================================
   // AGENT SIMULATOR
   // =============================================
-  function renderAgentSimulator(page, analysis) {
+  function renderAgentSimulator(page, analysis, protocols) {
     const container = $('#r-agent');
     const forms = page?.forms || [];
     const regs = (page?.scanData?.scriptRegistrations || []).filter(r => r.name !== '_provideContext');
@@ -521,6 +635,28 @@ if (navigator.modelContext) {
 
     let lines = '';
     lines += `<div class="agent-line"><span class="agent-prompt">&gt;</span> <span class="agent-dim">Navigating to</span> ${esc(page.url)}</div>`;
+    lines += `<div class="agent-line"><span class="agent-prompt">&gt;</span> <span class="agent-dim">Scanning discovery protocols...</span></div>`;
+    lines += `<div class="agent-line">&nbsp;</div>`;
+
+    // Protocol discovery lines
+    if (protocols && protocols.summary) {
+      const pNames = ['a2a', 'mcp', 'agents', 'openapi', 'llms'];
+      const pLabels = { a2a: 'A2A Agent Card', mcp: 'MCP Discovery', agents: 'agents.json', openapi: 'OpenAPI', llms: 'llms.txt' };
+      pNames.forEach(p => {
+        const found = protocols[p]?.found;
+        lines += `<div class="agent-line">  <span class="${found ? 'agent-ok' : 'agent-err'}">${found ? '✓' : '✗'}</span> <span class="agent-dim">${pLabels[p]}</span>`;
+        if (found && protocols[p].url) lines += ` <span class="agent-dim" style="opacity:0.5">— ${esc(protocols[p].url)}</span>`;
+        lines += `</div>`;
+      });
+      lines += `<div class="agent-line">&nbsp;</div>`;
+      if (protocols.summary.found > 0) {
+        lines += `<div class="agent-line"><span class="agent-ok">✓ ${protocols.summary.found} protocol${protocols.summary.found > 1 ? 's' : ''} detected</span></div>`;
+      } else {
+        lines += `<div class="agent-line"><span class="agent-warn">! No discovery protocols found</span></div>`;
+      }
+      lines += `<div class="agent-line">&nbsp;</div>`;
+    }
+
     lines += `<div class="agent-line"><span class="agent-prompt">&gt;</span> <span class="agent-dim">Checking navigator.modelContext...</span></div>`;
     lines += `<div class="agent-line">&nbsp;</div>`;
 

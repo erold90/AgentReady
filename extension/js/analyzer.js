@@ -4,7 +4,7 @@
  */
 const Analyzer = (() => {
 
-  function analyze(scanResult) {
+  function analyze(scanResult, protocolResults) {
     const { forms, scriptRegistrations, security, pageSignals, responseQuality } = scanResult;
     const hasWebMCP = forms.some(f => f.hasWebMCP) || scriptRegistrations.length > 0;
 
@@ -13,16 +13,17 @@ const Analyzer = (() => {
       descriptions: analyzeDescriptions(forms, scriptRegistrations),
       schema: analyzeSchemaQuality(forms),
       pageStructure: analyzePageStructure(pageSignals, responseQuality),
-      security: analyzeSecurity(security)
+      security: analyzeSecurity(security),
+      protocols: analyzeProtocols(protocolResults)
     };
 
     let weights;
     if (hasWebMCP) {
-      weights = { forms: 30, descriptions: 25, schema: 15, pageStructure: 15, security: 15 };
+      weights = { forms: 25, descriptions: 20, schema: 12, pageStructure: 13, security: 12, protocols: 18 };
     } else if (forms.length > 0) {
-      weights = { forms: 25, descriptions: 10, schema: 10, pageStructure: 35, security: 20 };
+      weights = { forms: 22, descriptions: 8, schema: 8, pageStructure: 30, security: 17, protocols: 15 };
     } else {
-      weights = { forms: 10, descriptions: 5, schema: 5, pageStructure: 60, security: 20 };
+      weights = { forms: 8, descriptions: 4, schema: 4, pageStructure: 52, security: 17, protocols: 15 };
     }
 
     let totalScore = 0;
@@ -121,6 +122,21 @@ const Analyzer = (() => {
     };
   }
 
+  function analyzeProtocols(protocolResults) {
+    if (!protocolResults || !protocolResults.summary) {
+      return { score: 0, label: 'AI Protocols', detail: 'Protocol scan not available' };
+    }
+    const found = protocolResults.summary.found;
+    const total = protocolResults.summary.total;
+    const names = protocolResults.summary.protocols;
+    // Each protocol found = 20 points (5 protocols = 100)
+    const score = Math.min(100, found * 20);
+    const detail = found > 0
+      ? `Found: ${names.join(', ')}`
+      : 'No AI discovery protocols detected';
+    return { score, label: 'AI Protocols', detail };
+  }
+
   function generateIssues(scanResult, categories) {
     const issues = [];
     const { forms, scriptRegistrations, security, responseQuality, pageSignals } = scanResult;
@@ -169,6 +185,13 @@ const Analyzer = (() => {
       if (!pageSignals.hasMetaDescription) {
         issues.push({ type: 'info', title: 'Missing Meta Description', text: 'AI agents use meta descriptions to understand pages.' });
       }
+    }
+
+    // Protocol issues
+    if (categories.protocols && categories.protocols.score > 0) {
+      issues.push({ type: 'success', title: 'AI Protocols Detected', text: categories.protocols.detail });
+    } else if (categories.protocols) {
+      issues.push({ type: 'info', title: 'No AI Discovery Protocols', text: 'Add A2A Agent Card, MCP discovery, OpenAPI, agents.json, or llms.txt to boost discoverability.' });
     }
 
     return issues;

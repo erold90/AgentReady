@@ -9,6 +9,7 @@
 
   let currentScan = null;
   let currentAnalysis = null;
+  let currentProtocols = null;
 
   let fullSiteRunning = false;
   let fullSiteResults = null;
@@ -78,6 +79,15 @@
         currentAnalysis = Analyzer.analyze(currentScan);
         hideLoading();
         renderResults();
+
+        // Protocol scan in background (non-blocking)
+        try {
+          const origin = new URL(tab.url).origin;
+          ProtocolScanner.scan(origin).then(protocols => {
+            currentProtocols = protocols;
+            renderProtocolStats(protocols);
+          }).catch(() => {});
+        } catch {}
       } else {
         showError('Could not extract page data. Try refreshing the page.');
       }
@@ -251,6 +261,14 @@
     }
   }
 
+  // === Protocol Stats ===
+  function renderProtocolStats(protocols) {
+    const el = $('#s-protocols');
+    if (!protocols || !protocols.summary) return;
+    el.textContent = protocols.summary.found + '/' + protocols.summary.total;
+    el.style.color = protocols.summary.found > 0 ? '#10b981' : '#94a3b8';
+  }
+
   // === Full Site Scan ===
   async function runFullSiteScan() {
     if (fullSiteRunning) return;
@@ -322,6 +340,10 @@
 
       setProgress(10);
 
+      // Protocol scan in parallel with crawl
+      let protocolResults = null;
+      ProtocolScanner.scan(origin).then(p => { protocolResults = p; }).catch(() => {});
+
       crawlStartTime = Date.now();
       const results = await SiteCrawler.crawl(urls, (current, total, url) => {
         const pct = 10 + Math.round((current / total) * 85);
@@ -346,6 +368,7 @@
       overlay.hidden = true;
 
       // Store results and show section
+      results.protocols = protocolResults;
       fullSiteResults = results;
       section.hidden = false;
 
@@ -545,6 +568,7 @@
           totalForms: fullSiteResults.totalForms,
           totalIssues: fullSiteResults.totalIssues,
           failedPages: fullSiteResults.failedPages,
+          protocols: fullSiteResults.protocols || null,
           timestamp: new Date().toISOString(),
           pages: fullSiteResults.pages.map((p, i) => {
             if (i < FREE_PAGE_LIMIT) {
@@ -578,6 +602,7 @@
           totalForms: currentScan.forms.length,
           totalIssues: currentAnalysis.issues.filter(i => i.type === 'warning' || i.type === 'error').length,
           failedPages: 0,
+          protocols: currentProtocols || null,
           timestamp: new Date().toISOString(),
           pages: [{
             url: currentScan.url,
