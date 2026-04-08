@@ -11,6 +11,7 @@
 
 const { scan, crawl } = require('../index');
 const reportHtml = require('../lib/report-html');
+const license = require('../lib/license');
 const { writeFileSync } = require('fs');
 const { join } = require('path');
 const { execSync } = require('child_process');
@@ -29,11 +30,16 @@ if (urls.length === 0 || flags.has('--help')) {
     agentready <url> --report     Generate HTML report and open in browser
     agentready <url> --json       Output raw JSON
     agentready <url> --protocols  Only check discovery protocols
+    agentready <url> --key=KEY    Activate Pro license (unlocks all pages + code)
     agentready --help             Show this help
+
+  Free: 3 pages, 2 code snippets. Pro: unlimited.
+  Get a license at https://crawlaudit.dev
 
   Examples:
     agentready https://example.com
     agentready https://villamareblu.it --crawl --report
+    agentready https://villamareblu.it --crawl --key=YOUR_KEY
     agentready https://stripe.com --json
     agentready https://api.openai.com --protocols
   `);
@@ -44,6 +50,14 @@ const isJson = flags.has('--json');
 const isCrawl = flags.has('--crawl');
 const isReport = flags.has('--report');
 const protocolsOnly = flags.has('--protocols') || flags.has('--protocols-only');
+
+// License key
+const keyArg = args.find(a => a.startsWith('--key='));
+const licenseKey = keyArg ? keyArg.split('=')[1] : process.env.CRAWLAUDIT_KEY || '';
+
+// Plan limits
+const FREE_PAGE_LIMIT = 3;
+const FREE_CODE_LIMIT = 2;
 
 async function main() {
   const url = urls[0];
@@ -60,15 +74,30 @@ async function main() {
 
   const finalUrl = parsed.href;
 
+  // Validate license key
+  let plan = 'free';
+  if (licenseKey) {
+    if (!isJson) process.stdout.write('  Validating license key...');
+    const result = await license.validate(licenseKey);
+    if (result.valid) {
+      plan = result.plan;
+      if (!isJson) console.log(` ✓ ${plan.toUpperCase()} plan activated`);
+    } else {
+      if (!isJson) console.log(` ✗ Invalid key${result.error ? ': ' + result.error : ''}`);
+    }
+  }
+
+  const isPro = plan !== 'free';
+
   if (!isJson) {
-    console.log(`\n  ⚡ AgentReady Scanner v1.0.0`);
+    console.log(`\n  ⚡ AgentReady Scanner v2.0.0${isPro ? ` [${plan.toUpperCase()}]` : ' [FREE]'}`);
     console.log(`  ${isCrawl ? 'Crawling' : 'Scanning'} ${finalUrl}...\n`);
   }
 
   try {
     if (isCrawl) {
       const result = await crawl(finalUrl, {
-        maxPages: 20,
+        maxPages: isPro ? (plan === 'team' ? 2000 : 500) : 20,
         onProgress: (current, total, pageUrl) => {
           if (!isJson) {
             const path = new URL(pageUrl).pathname;
@@ -80,13 +109,21 @@ async function main() {
       if (!isJson) process.stdout.write('\r' + ' '.repeat(80) + '\r');
 
       if (isJson) {
-        console.log(JSON.stringify(result, null, 2));
+        // Gate JSON output for free plan
+        if (!isPro && result.pages.length > FREE_PAGE_LIMIT) {
+          const gated = { ...result };
+          gated.pages = result.pages.slice(0, FREE_PAGE_LIMIT);
+          gated._gated = { totalPages: result.pages.length, shownPages: FREE_PAGE_LIMIT, upgrade: 'Use --key=YOUR_KEY to unlock all pages. Get a license at https://crawlaudit.dev' };
+          console.log(JSON.stringify(gated, null, 2));
+        } else {
+          console.log(JSON.stringify(result, null, 2));
+        }
         return;
       }
 
-      printCrawlResult(result);
+      printCrawlResult(result, isPro);
 
-      if (isReport) openReport(result, true);
+      if (isReport) openReport(result, true, isPro);
     } else {
       const result = await scan(finalUrl);
 
@@ -108,7 +145,7 @@ async function main() {
       printBotAccess(result.protocols);
       printSummary(result);
 
-      if (isReport) openReport(result, false);
+      if (isReport) openReport(result, false, isPro);
     }
   } catch (err) {
     console.error(`  Error: ${err.message}`);
@@ -116,7 +153,7 @@ async function main() {
   }
 }
 
-function printCrawlResult(result) {
+function printCrawlResult(result, isPro) {
   const bar = scoreBar(result.score);
   console.log(`  Full Site Scan Results`);
   console.log(`  ─────────────────────`);
@@ -124,14 +161,21 @@ function printCrawlResult(result) {
   console.log(`  Pages: ${result.pageCount}  |  Forms: ${result.totalForms}  |  Issues: ${result.totalIssues}`);
   console.log('');
 
-  // Per-page scores
+  // Per-page scores (gated for free)
   console.log('  Pages');
-  result.pages.forEach(p => {
+  const pagesToShow = isPro ? result.pages : result.pages.slice(0, FREE_PAGE_LIMIT);
+  pagesToShow.forEach(p => {
     const path = new URL(p.url).pathname || '/';
     const icon = p.score >= 80 ? '✓' : p.score >= 50 ? '~' : '✗';
     const color = p.score >= 80 ? '\x1b[32m' : p.score >= 50 ? '\x1b[33m' : '\x1b[31m';
     console.log(`    ${color}${icon}\x1b[0m ${String(p.score).padStart(3)} ${path}  (${p.forms.total} forms, ${p.issues.length} issues)`);
   });
+
+  if (!isPro && result.pages.length > FREE_PAGE_LIMIT) {
+    const hidden = result.pages.length - FREE_PAGE_LIMIT;
+    console.log(`\n    \x1b[33m🔒 ${hidden} more page${hidden > 1 ? 's' : ''} hidden — use --key=YOUR_KEY to unlock\x1b[0m`);
+    console.log(`    \x1b[33m   Get a Pro license at https://crawlaudit.dev\x1b[0m`);
+  }
   console.log('');
 
   // Protocols
@@ -277,8 +321,8 @@ function scoreBar(score) {
   return `${c}${'█'.repeat(filled)}${'░'.repeat(empty)}\x1b[0m`;
 }
 
-function openReport(result, isCrawlResult) {
-  const html = reportHtml.generate(result, isCrawlResult);
+function openReport(result, isCrawlResult, isPro) {
+  const html = reportHtml.generate(result, isCrawlResult, isPro, FREE_CODE_LIMIT);
   let domain = '';
   try { domain = new URL(result.url || result.pages?.[0]?.url).hostname; } catch {}
   const filename = `agentready-report-${domain || 'scan'}.html`;

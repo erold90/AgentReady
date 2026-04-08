@@ -139,7 +139,7 @@ if (navigator.modelContext) {
 /**
  * Generate full HTML report from scan/crawl result
  */
-function generate(result, isCrawl) {
+function generate(result, isCrawl, isPro = true, codeLimit = Infinity) {
   const firstPage = isCrawl ? result.pages[0] : result;
   let domain = '';
   try { domain = new URL(result.url || firstPage.url).hostname; } catch {}
@@ -288,10 +288,19 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 
   // Action Plan
   html += '<h2>Action Plan</h2>';
+  let codeShown = 0;
   actions.forEach((a, i) => {
     html += `<div class="action"><div class="action-title">${i + 1}. ${esc(a.title)} <span style="font-size:11px;color:#94a3b8">[${a.priority} priority, ${a.difficulty}]</span></div>`;
     html += `<div class="action-desc">${a.description}</div>`;
-    if (a.code) html += `<pre>${esc(a.code)}</pre>`;
+    if (a.code) {
+      if (isPro || codeShown < codeLimit) {
+        html += `<pre>${esc(a.code)}</pre>`;
+        codeShown++;
+      } else {
+        html += `<div style="position:relative;margin:8px 0"><pre style="filter:blur(4px);user-select:none;pointer-events:none">${esc(a.code)}</pre>`;
+        html += `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(30,41,59,0.7);border-radius:6px;color:#fff;font-size:14px;font-weight:600">&#128274; Upgrade to Pro to unlock code snippets — <a href="https://crawlaudit.dev" style="color:#60a5fa;margin-left:4px">crawlaudit.dev</a></div></div>`;
+      }
+    }
     html += '</div>';
   });
 
@@ -316,12 +325,18 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 
   // Pages table (crawl only)
   if (isCrawl && result.pages.length > 1) {
+    const freePageLimit = 3;
+    const pagesToShow = isPro ? result.pages : result.pages.slice(0, freePageLimit);
     html += '<h2>Pages</h2><table><tr><th>Score</th><th>Page</th><th>Forms</th><th>Issues</th></tr>';
-    result.pages.forEach(p => {
+    pagesToShow.forEach(p => {
       let path = '/';
       try { path = new URL(p.url).pathname || '/'; } catch {}
       html += `<tr><td style="font-weight:700;color:${color(p.score)}">${p.score}</td><td>${esc(path)}</td><td>${p.forms?.total || 0}</td><td>${p.issues?.length || 0}</td></tr>`;
     });
+    if (!isPro && result.pages.length > freePageLimit) {
+      const hidden = result.pages.length - freePageLimit;
+      html += `<tr><td colspan="4" style="text-align:center;padding:16px;color:#92400e;background:#fffbeb">&#128274; ${hidden} more page${hidden > 1 ? 's' : ''} hidden — <a href="https://crawlaudit.dev" style="color:#2563eb">Upgrade to Pro</a> to unlock all pages</td></tr>`;
+    }
     html += '</table>';
   }
 
