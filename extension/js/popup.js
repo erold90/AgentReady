@@ -517,7 +517,7 @@
     const FREE_PAGE_LIMIT = 3;
 
     if (fullSiteResults && fullSiteResults.pages.length > 0) {
-      // Full site report — package data with freemium gate
+      // Full site report — always use postMessage (data too large for URL)
       const payload = {
         type: 'sitescan',
         avgScore: fullSiteResults.avgScore,
@@ -527,7 +527,6 @@
         failedPages: fullSiteResults.failedPages,
         pages: fullSiteResults.pages.map((p, i) => {
           if (i < FREE_PAGE_LIMIT) {
-            // Full detail for free pages
             return {
               url: p.url, score: p.score, formCount: p.formCount,
               webmcpCount: p.webmcpCount, issueCount: p.issueCount,
@@ -537,7 +536,6 @@
               scanData: p.scanData
             };
           }
-          // Locked pages — only summary
           return {
             url: p.url, score: p.score, formCount: p.formCount,
             webmcpCount: p.webmcpCount, issueCount: p.issueCount,
@@ -547,35 +545,43 @@
         })
       };
 
-      const encoded = encodeURIComponent(JSON.stringify(payload));
-      if (encoded.length < 50000) {
-        chrome.tabs.create({ url: BASE + '?sitescan=' + encoded });
+      chrome.tabs.create({ url: BASE + '?mode=sitescan' }, (tab) => {
+        const listener = (tabId, info) => {
+          if (tabId === tab.id && info.status === 'complete') {
+            chrome.tabs.onUpdated.removeListener(listener);
+            chrome.scripting.executeScript({
+              target: { tabId: tab.id },
+              func: (data) => {
+                window.postMessage({ type: 'agentready-sitescan', data }, '*');
+              },
+              args: [payload]
+            });
+          }
+        };
+        chrome.tabs.onUpdated.addListener(listener);
+      });
+    } else if (currentScan) {
+      // Single page report — use URL param only if small enough
+      const encoded = encodeURIComponent(JSON.stringify(currentScan));
+      if (encoded.length < 7000) {
+        chrome.tabs.create({ url: BASE + '?scan=' + encoded });
       } else {
-        // Too large for URL — open page and post data
-        chrome.tabs.create({ url: BASE + '?mode=sitescan' }, (tab) => {
-          // Wait for page to load then send via message
+        // Too large — use postMessage
+        chrome.tabs.create({ url: BASE + '?mode=scan' }, (tab) => {
           const listener = (tabId, info) => {
             if (tabId === tab.id && info.status === 'complete') {
               chrome.tabs.onUpdated.removeListener(listener);
               chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: (data) => {
-                  window.postMessage({ type: 'agentready-sitescan', data }, '*');
+                  window.postMessage({ type: 'agentready-scan', data }, '*');
                 },
-                args: [payload]
+                args: [currentScan]
               });
             }
           };
           chrome.tabs.onUpdated.addListener(listener);
         });
-      }
-    } else if (currentScan) {
-      // Single page report
-      const encoded = encodeURIComponent(JSON.stringify(currentScan));
-      if (encoded.length < 50000) {
-        chrome.tabs.create({ url: BASE + '?scan=' + encoded });
-      } else {
-        chrome.tabs.create({ url: BASE });
       }
     }
   }

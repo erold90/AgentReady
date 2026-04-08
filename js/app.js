@@ -77,25 +77,17 @@
       }
     });
 
-    // Handle full site scan data via URL param
-    const sitescanParam = params.get('sitescan');
+    // Handle mode param — data arrives via postMessage
     const modeParam = params.get('mode');
-    if (sitescanParam) {
-      try {
-        const data = JSON.parse(decodeURIComponent(sitescanParam));
-        handleSiteScanData(data);
-        history.replaceState(null, '', window.location.pathname);
-      } catch(e) {
-        console.error('Failed to parse sitescan data:', e);
-      }
-    } else if (modeParam === 'sitescan') {
-      // Data will arrive via postMessage — just clean the URL
+    if (modeParam === 'sitescan' || modeParam === 'scan') {
+      // Show a loading indicator while waiting for data
+      showToast('Receiving scan data...');
       history.replaceState(null, '', window.location.pathname);
     }
 
     // URL from query param
     const urlParam = params.get('url');
-    if (urlParam && !scanParam && !sitescanParam) {
+    if (urlParam && !scanParam) {
       urlInput.value = urlParam;
       handleScan();
     }
