@@ -771,7 +771,16 @@ if (navigator.modelContext) {
     const container = $('#r-categories');
     if (!analysis || !analysis.categories) { container.innerHTML = '<div class="empty-state">No analysis data available.</div>'; return; }
     container.innerHTML = '';
-    for (const [key, cat] of Object.entries(analysis.categories)) {
+    const protocols = reportData?.protocols;
+    for (let [key, cat] of Object.entries(analysis.categories)) {
+      // Override protocols with actual data
+      if (key === 'protocols' && protocols?.summary) {
+        const pScore = Math.min(100, protocols.summary.found * 20);
+        const pDetail = protocols.summary.found > 0
+          ? `Found: ${protocols.summary.protocols.join(', ')}`
+          : 'No AI discovery protocols detected';
+        cat = { label: 'AI Protocols', score: pScore, detail: pDetail };
+      }
       const cc = color(cat.score);
       const div = document.createElement('div');
       div.className = 'cat-card';
@@ -945,8 +954,16 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
       // Ordered categories
       const catOrder = ['forms', 'descriptions', 'schema', 'pageStructure', 'security', 'protocols'];
       catOrder.forEach(key => {
-        const cat = analysis.categories[key];
+        let cat = analysis.categories[key];
         if (!cat) return;
+        // Override protocols category with actual protocol data
+        if (key === 'protocols' && protocols?.summary) {
+          const pScore = Math.min(100, protocols.summary.found * 20);
+          const pDetail = protocols.summary.found > 0
+            ? `Found: ${protocols.summary.protocols.join(', ')}`
+            : 'No AI discovery protocols detected';
+          cat = { label: 'AI Protocols', score: pScore, detail: pDetail };
+        }
         html += `<tr><td>${cat.label}</td><td style="font-weight:600;color:${color(cat.score)}">${cat.score}/100</td><td style="color:#475569">${cat.detail}</td></tr>`;
       });
       html += '</table>';
