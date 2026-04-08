@@ -240,20 +240,34 @@
       <h2>Install in 10 seconds</h2>
       <p>Works on Chrome, Edge, Brave, and Opera</p>
     </div>
+
+    <!-- Smart Browser Detection -->
+    <div id="browser-detected" class="browser-detected" hidden>
+      <div class="browser-detected-inner">
+        <div class="browser-detected-icon" id="detected-icon"></div>
+        <div class="browser-detected-text">
+          <div class="browser-detected-label">We detected you're using</div>
+          <div class="browser-detected-name" id="detected-name"></div>
+        </div>
+        <a id="detected-install-btn" href="#" class="btn btn-primary" target="_blank" rel="noopener">Install for <span id="detected-browser-short"></span></a>
+      </div>
+    </div>
+
     <div class="install-grid">
-      <a href="#" class="install-card">
+      <a href="https://chromewebstore.google.com/detail/agentready/placeholder" class="install-card" id="install-chrome" target="_blank" rel="noopener">
         <svg width="32" height="32" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4285f4"/><path d="M12 2a10 10 0 0 1 8.66 5H12V2z" fill="#ea4335"/><path d="M20.66 7A10 10 0 0 1 12 22V12h8.66z" fill="#34a853"/><path d="M12 22A10 10 0 0 1 3.34 7H12v15z" fill="#fbbc05"/><circle cx="12" cy="12" r="4" fill="white"/></svg>
         <span>Chrome Web Store</span>
       </a>
-      <a href="#" class="install-card">
+      <a href="https://microsoftedge.microsoft.com/addons/detail/agentready/placeholder" class="install-card" id="install-edge" target="_blank" rel="noopener">
         <svg width="32" height="32" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#0078D7"/><path d="M11 7h6v6h-6z" fill="white" opacity="0.9"/><path d="M7 7h4v4H7z" fill="white" opacity="0.7"/><path d="M7 11h4v6H7z" fill="white" opacity="0.5"/></svg>
         <span>Edge Add-ons</span>
       </a>
-      <a href="#" class="install-card">
+      <a href="https://chromewebstore.google.com/detail/agentready/placeholder" class="install-card" id="install-brave" target="_blank" rel="noopener">
         <svg width="32" height="32" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FB542B"/><path d="M8 8h8v8H8z" fill="white" rx="1"/></svg>
         <span>Brave</span>
       </a>
     </div>
+    <p class="install-note">Brave and Opera use the Chrome Web Store. The extension works on all Chromium browsers.</p>
   </section>
 
   <!-- Online Demo -->
@@ -394,6 +408,43 @@
   <script src="js/generator.js"></script>
   <script src="js/app.js"></script>
   <script>
+    // Browser detection
+    (function detectBrowser() {
+      const ua = navigator.userAgent;
+      let browser = null;
+
+      if (ua.includes('Edg/')) {
+        browser = { name: 'Microsoft Edge', short: 'Edge', key: 'edge',
+          icon: '<svg width="40" height="40" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#0078D7"/><path d="M11 7h6v6h-6z" fill="white" opacity="0.9"/><path d="M7 7h4v4H7z" fill="white" opacity="0.7"/><path d="M7 11h4v6H7z" fill="white" opacity="0.5"/></svg>',
+          url: 'https://microsoftedge.microsoft.com/addons/detail/agentready/placeholder' };
+      } else if (ua.includes('Brave')) {
+        browser = { name: 'Brave Browser', short: 'Brave', key: 'brave',
+          icon: '<svg width="40" height="40" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FB542B"/><path d="M8 8h8v8H8z" fill="white" rx="1"/></svg>',
+          url: 'https://chromewebstore.google.com/detail/agentready/placeholder' };
+      } else if (ua.includes('OPR/') || ua.includes('Opera')) {
+        browser = { name: 'Opera', short: 'Opera', key: 'opera',
+          icon: '<svg width="40" height="40" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#FF1B2D"/><ellipse cx="12" cy="12" rx="4" ry="7" fill="white"/></svg>',
+          url: 'https://chromewebstore.google.com/detail/agentready/placeholder' };
+      } else if (ua.includes('Chrome/')) {
+        browser = { name: 'Google Chrome', short: 'Chrome', key: 'chrome',
+          icon: '<svg width="40" height="40" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#4285f4"/><path d="M12 2a10 10 0 0 1 8.66 5H12V2z" fill="#ea4335"/><path d="M20.66 7A10 10 0 0 1 12 22V12h8.66z" fill="#34a853"/><path d="M12 22A10 10 0 0 1 3.34 7H12v15z" fill="#fbbc05"/><circle cx="12" cy="12" r="4" fill="white"/></svg>',
+          url: 'https://chromewebstore.google.com/detail/agentready/placeholder' };
+      }
+
+      if (browser) {
+        const panel = document.getElementById('browser-detected');
+        document.getElementById('detected-icon').innerHTML = browser.icon;
+        document.getElementById('detected-name').textContent = browser.name;
+        document.getElementById('detected-browser-short').textContent = browser.short;
+        document.getElementById('detected-install-btn').href = browser.url;
+        panel.hidden = false;
+
+        // Highlight matching install card
+        const card = document.getElementById('install-' + browser.key);
+        if (card) card.classList.add('install-card-active');
+      }
+    })();
+
     // Pricing toggle
     document.querySelectorAll('.pricing-toggle-btn').forEach(btn => {
       btn.addEventListener('click', () => {

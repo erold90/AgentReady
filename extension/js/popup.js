@@ -11,6 +11,8 @@
   let currentAnalysis = null;
 
   let fullSiteRunning = false;
+  let fullSiteResults = null;
+  let crawlStartTime = null;
 
   // === Init ===
   document.addEventListener('DOMContentLoaded', () => {
@@ -38,6 +40,9 @@
 
     // Full site scan
     $('#btn-full-site').addEventListener('click', runFullSiteScan);
+
+    // Page detail back button
+    $('#pd-back').addEventListener('click', hidePageDetail);
 
     // Auto-scan on popup open
     runScan();
@@ -315,12 +320,14 @@
 
       progressFill.style.width = '10%';
 
-      // Crawl pages
+      // Crawl pages with ETA
+      crawlStartTime = Date.now();
       const results = await SiteCrawler.crawl(urls, (current, total, url) => {
         const pct = 10 + Math.round((current / total) * 85);
         progressFill.style.width = pct + '%';
         const shortUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
-        progressText.textContent = `Scanning page ${current}/${total}: ${shortUrl}`;
+        const eta = getETA(current, total);
+        progressText.textContent = `Scanning page ${current}/${total}: ${shortUrl}${eta ? ' — ' + eta : ''}`;
       });
 
       progressFill.style.width = '100%';
@@ -329,6 +336,9 @@
       // Short delay then show results
       await new Promise(r => setTimeout(r, 500));
       progress.hidden = true;
+
+      // Store results for detail view
+      fullSiteResults = results;
 
       // Render summary
       renderFullSiteSummary(results);
@@ -391,7 +401,12 @@
             ${page.error ? '<span style="color:#ef4444">Error</span>' : ''}
           </div>
         </div>
+        <div class="fs-page-arrow">&#8250;</div>
       `;
+      if (i < FREE_LIMIT && !page.error) {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => showPageDetail(page));
+      }
       container.appendChild(row);
     });
 
@@ -409,6 +424,110 @@
     fullSiteRunning = false;
     $('#btn-full-site').disabled = false;
     $('#btn-full-site').textContent = 'Full Site Scan';
+  }
+
+  // === Page Detail View ===
+  function showPageDetail(page) {
+    const panel = $('#page-detail');
+    panel.hidden = false;
+
+    const analysis = page.analysis;
+    const color = Analyzer.getScoreColor(page.score);
+
+    let shortUrl;
+    try { const u = new URL(page.url); shortUrl = u.pathname + u.search; } catch { shortUrl = page.url; }
+
+    $('#pd-score').textContent = page.score;
+    $('#pd-score').style.color = color;
+    $('#pd-url').textContent = shortUrl || '/';
+    $('#pd-url').title = page.url;
+
+    // Categories
+    const catContainer = $('#pd-categories');
+    catContainer.innerHTML = '';
+    if (analysis && analysis.categories) {
+      for (const [key, cat] of Object.entries(analysis.categories)) {
+        const cc = Analyzer.getScoreColor(cat.score);
+        const div = document.createElement('div');
+        div.className = 'cat-card';
+        div.innerHTML = `
+          <div class="cat-bar-wrap">
+            <div class="cat-name">${esc(cat.label)}</div>
+            <div class="cat-bar"><div class="cat-bar-fill" style="background:${cc};width:${cat.score}%"></div></div>
+            <div class="cat-detail">${esc(cat.detail)}</div>
+          </div>
+          <div class="cat-score" style="color:${cc};">${cat.score}</div>
+        `;
+        catContainer.appendChild(div);
+      }
+    }
+
+    // Issues
+    const issContainer = $('#pd-issues');
+    issContainer.innerHTML = '';
+    const icons = { error: '!', warning: '!', success: '\u2713', info: 'i' };
+    if (analysis && analysis.issues) {
+      analysis.issues.forEach(issue => {
+        const div = document.createElement('div');
+        div.className = 'issue';
+        div.innerHTML = `
+          <div class="issue-badge ${issue.type}">${icons[issue.type]}</div>
+          <div class="issue-body">
+            <div class="issue-title">${esc(issue.title)}</div>
+            <div class="issue-text">${esc(issue.text)}</div>
+          </div>
+        `;
+        issContainer.appendChild(div);
+      });
+    }
+
+    // Forms
+    const formsContainer = $('#pd-forms');
+    formsContainer.innerHTML = '';
+    if (page.forms && page.forms.length > 0) {
+      page.forms.forEach(form => {
+        const name = form.toolname || form.name || form.id || 'Form';
+        const div = document.createElement('div');
+        div.className = 'form-card';
+        div.innerHTML = `
+          <div class="form-header">
+            <span class="form-name">${esc(name)}</span>
+            <span class="form-badge ${form.hasWebMCP ? 'ready' : 'not-ready'}">${form.hasWebMCP ? 'WebMCP' : 'No WebMCP'}</span>
+          </div>
+          <div class="form-fields">
+            ${form.fields.map(f => `
+              <div class="form-field">
+                <span class="ff-name">${esc(f.name || f.id || '(no name)')}</span>
+                <span class="ff-type">${f.type}${f.required ? ' *' : ''}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        formsContainer.appendChild(div);
+      });
+    } else {
+      formsContainer.innerHTML = '<div class="empty-state">No forms on this page.</div>';
+    }
+
+    // Scroll to top
+    panel.scrollTop = 0;
+  }
+
+  function hidePageDetail() {
+    $('#page-detail').hidden = true;
+  }
+
+  // === ETA ===
+  function getETA(current, total) {
+    if (current < 2 || !crawlStartTime) return '';
+    const elapsed = Date.now() - crawlStartTime;
+    const perPage = elapsed / current;
+    const remaining = Math.round((total - current) * perPage / 1000);
+    if (remaining < 5) return '< 5s left';
+    if (remaining < 60) return `~${remaining}s left`;
+    const min = Math.floor(remaining / 60);
+    const sec = remaining % 60;
+    return `~${min}m ${sec}s left`;
   }
 
   // === Helpers ===
