@@ -12,81 +12,81 @@
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <!-- Header -->
   <header class="header">
-    <div class="header-inner">
+    <div class="container">
       <a href="/" class="logo">
-        <svg class="logo-svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="15" fill="#2563eb"/>
-          <path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <circle cx="16" cy="16" r="2" fill="white"/>
-        </svg>
+        <span class="logo-icon">&#9889;</span>
         <span class="logo-text">AgentReady</span>
       </a>
-      <nav class="header-nav" id="header-nav">
-        <a href="#demo">Scanner</a>
+      <nav class="nav" id="header-nav">
+        <a href="#scanner">Scanner</a>
+        <a href="#tools">Tools</a>
         <a href="playground.html">Playground</a>
         <a href="builder.html">Builder</a>
         <a href="tracker.html">Tracker</a>
-        <a href="blog/">Blog</a>
-        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-          <span class="theme-icon-light">&#9790;</span>
-          <span class="theme-icon-dark">&#9728;</span>
-        </button>
-        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu" onclick="document.getElementById('header-nav').classList.toggle('mobile-open')">&#9776;</button>
+        <a href="blog/index.html">Blog</a>
       </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">&#127769;</button>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" class="btn-secondary btn-sm">GitHub</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="document.getElementById('header-nav').classList.toggle('mobile-open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
 
   <!-- Hero -->
   <section class="hero">
-    <div class="hero-badge">WebMCP Standard — Chrome 146+ &middot; W3C Draft</div>
-    <h1>Your website is <span class="gradient-text">invisible</span><br>to AI agents</h1>
-    <p class="hero-subtitle">AI agents can't fill your forms, use your tools, or interact with your site.<br>AgentReady scans every page, finds the gaps, and generates the fix.</p>
-    <div class="hero-cta">
-      <a href="#install" class="btn btn-primary btn-lg">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
-        Install Free Extension
-      </a>
-      <a href="#demo" class="btn btn-secondary btn-lg">Try Online Demo</a>
-    </div>
-    <div class="hero-stats">
-      <div class="hero-stat"><strong>100%</strong> Free tier</div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat"><strong>0</strong> Dependencies</div>
-      <div class="hero-stat-sep"></div>
-      <div class="hero-stat"><strong>&lt;1s</strong> Scan time</div>
+    <div class="bg-grid"></div>
+    <div class="container hero-content">
+      <div class="badge badge-accent">The Lighthouse for AI Agents</div>
+      <h1>Make Your Website <span class="gradient-text">AI Agent-Ready</span></h1>
+      <p class="hero-subtitle">Scan any URL, get a readiness score, generate all the code your site needs to be discovered and used by AI agents. Scanner, Playground, Builder, and Tracker — all free.</p>
+      <div class="hero-actions">
+        <a href="#scanner" class="btn-primary btn-lg">Scan Your Site</a>
+        <a href="#tools" class="btn-secondary btn-lg">Explore Tools</a>
+      </div>
+      <div class="hero-trust">
+        <span>&#10003; 7 scoring categories</span>
+        <span>&#10003; 5 AI protocols</span>
+        <span>&#10003; 13 AI bots tracked</span>
+        <span>&#10003; Zero dependencies</span>
+      </div>
     </div>
   </section>
 
   <!-- Problem / Solution -->
   <section class="problem-section">
-    <div class="problem-grid">
-      <div class="problem-card">
-        <div class="problem-icon problem-icon-red">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    <div class="container">
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="problem-icon problem-icon-red">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+          <h3>Without WebMCP</h3>
+          <p>AI agents see your website as a wall of text. They can't fill forms, trigger actions, or use your tools. Your users have to do everything manually.</p>
         </div>
-        <h3>Without WebMCP</h3>
-        <p>AI agents see your website as a wall of text. They can't fill forms, trigger actions, or use your tools. Your users have to do everything manually.</p>
-      </div>
-      <div class="problem-card">
-        <div class="problem-icon problem-icon-green">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        <div class="problem-card">
+          <div class="problem-icon problem-icon-green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          </div>
+          <h3>With WebMCP</h3>
+          <p>AI agents discover your tools, understand parameters, fill forms with structured data, and complete tasks autonomously. Your site becomes AI-native.</p>
         </div>
-        <h3>With WebMCP</h3>
-        <p>AI agents discover your tools, understand parameters, fill forms with structured data, and complete tasks autonomously. Your site becomes AI-native.</p>
       </div>
     </div>
   </section>
 
   <!-- Features -->
   <section id="features" class="features-section">
+    <div class="container">
     <div class="section-header">
       <h2>Everything you need to become<br><span class="gradient-text">agent-ready</span></h2>
       <p>From single-page audit to full-site monitoring</p>
@@ -149,10 +149,12 @@
         <span class="feature-badge free">Free</span>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- How It Works -->
   <section id="how-it-works" class="how-section">
+    <div class="container">
     <div class="section-header">
       <h2>Three steps to agent-ready</h2>
     </div>
@@ -173,10 +175,12 @@
         <p>Rescan to confirm. Track your score over time. Full site crawl catches every page.</p>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- Compare -->
   <section id="compare" class="compare-section">
+    <div class="container">
     <div class="section-header">
       <h2>Compare Two Sites</h2>
       <p>See how two websites stack up for AI agent readiness</p>
@@ -222,44 +226,55 @@
       </div>
       <div class="compare-winner" id="compare-winner"></div>
     </div>
+    </div>
   </section>
 
-  <!-- Pricing -->
   <!-- Tools -->
   <section id="tools" class="tools-section">
+    <div class="container">
     <div class="section-header">
       <h2>AI Agent Tools</h2>
       <p>Everything you need to make your website AI Agent-Ready</p>
     </div>
     <div class="tools-grid">
-      <a href="#demo" class="tool-card">
-        <div class="tool-icon">&#128269;</div>
+      <a href="#scanner" class="tool-card card">
+        <div class="tool-icon-wrap">
+          <span class="tool-icon">&#128269;</span>
+        </div>
         <h3>Scanner</h3>
         <p>Scan any URL for AI Agent readiness. Score 0-100 across 7 categories, 5 protocols, 13 AI bots.</p>
-        <span class="tool-badge">Free</span>
+        <span class="badge badge-success">Free</span>
       </a>
-      <a href="playground.html" class="tool-card">
-        <div class="tool-icon">&#9889;</div>
+      <a href="playground.html" class="tool-card card">
+        <div class="tool-icon-wrap">
+          <span class="tool-icon">&#9889;</span>
+        </div>
         <h3>Playground</h3>
         <p>Live WebMCP editor. Write HTML and see what AI agents see in real time. 7 templates included.</p>
-        <span class="tool-badge">Free</span>
+        <span class="badge badge-success">Free</span>
       </a>
-      <a href="builder.html" class="tool-card">
-        <div class="tool-icon">&#128736;</div>
+      <a href="builder.html" class="tool-card card">
+        <div class="tool-icon-wrap">
+          <span class="tool-icon">&#128736;</span>
+        </div>
         <h3>Visual Builder</h3>
         <p>Build WebMCP forms without code. Click to add fields, set types, export ready-to-use HTML.</p>
-        <span class="tool-badge">Free</span>
+        <span class="badge badge-success">Free</span>
       </a>
-      <a href="tracker.html" class="tool-card">
-        <div class="tool-icon">&#128202;</div>
+      <a href="tracker.html" class="tool-card card">
+        <div class="tool-icon-wrap">
+          <span class="tool-icon">&#128202;</span>
+        </div>
         <h3>Traffic Tracker</h3>
         <p>Monitor AI agent visits on your site. Track which bots visit, what tools they use, zero external calls.</p>
-        <span class="tool-badge">Free</span>
+        <span class="badge badge-success">Free</span>
       </a>
+    </div>
     </div>
   </section>
 
   <section id="pricing" class="pricing-section">
+    <div class="container">
     <div class="section-header">
       <h2>Simple, transparent pricing</h2>
       <p>Start free. Upgrade when you need full-site scanning.</p>
@@ -270,7 +285,7 @@
     </div>
     <div class="pricing-grid">
       <!-- Free -->
-      <div class="pricing-card">
+      <div class="pricing-card card">
         <div class="pricing-name">Free</div>
         <div class="pricing-price">$0</div>
         <div class="pricing-period">forever</div>
@@ -288,7 +303,7 @@
         <a href="#install" class="btn btn-secondary btn-block">Install Free</a>
       </div>
       <!-- Pro -->
-      <div class="pricing-card pricing-card-featured">
+      <div class="pricing-card card pricing-card-featured">
         <div class="pricing-popular">Most Popular</div>
         <div class="pricing-name">Pro</div>
         <div class="pricing-price" data-monthly="$9" data-yearly="$79">$9</div>
@@ -307,7 +322,7 @@
         <button class="btn btn-primary btn-block" disabled style="opacity:0.6;cursor:default">Coming Soon</button>
       </div>
       <!-- Team -->
-      <div class="pricing-card">
+      <div class="pricing-card card">
         <div class="pricing-name">Team</div>
         <div class="pricing-price" data-monthly="$29" data-yearly="$249">$29</div>
         <div class="pricing-period" data-monthly="/month" data-yearly="/year">/month</div>
@@ -324,10 +339,12 @@
         <button class="btn btn-secondary btn-block" disabled style="opacity:0.6;cursor:default">Coming Soon</button>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- Install -->
   <section id="install" class="install-section">
+    <div class="container">
     <div class="section-header">
       <h2>Install in 10 seconds</h2>
       <p>Works on Chrome, Edge, Brave, and Opera</p>
@@ -360,37 +377,43 @@
       </a>
     </div>
     <p class="install-note">Brave and Opera use the Chrome Web Store. The extension works on all Chromium browsers.</p>
+    </div>
   </section>
 
-  <!-- Online Demo -->
-  <section id="demo" class="demo-section">
-    <div class="section-header">
-      <h2>Try the online demo</h2>
-      <p>Quick preview via proxy. For full accuracy, use the extension.</p>
-    </div>
-    <div class="scan-box">
-      <div class="scan-input-wrap">
-        <svg class="scan-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="url" id="url-input" class="scan-input" placeholder="https://example.com" autocomplete="url" spellcheck="false">
-        <button id="scan-btn" class="scan-btn">
-          <span class="scan-btn-text">Scan</span>
-          <span class="scan-btn-loading" hidden>
-            <span class="spinner"></span> Scanning...
-          </span>
-        </button>
+  <!-- Scanner -->
+  <section id="scanner" class="scanner-section">
+    <div class="container">
+      <div class="section-header">
+        <h2>AI Agent Readiness Scanner</h2>
+        <p>Enter any URL to get a comprehensive readiness score</p>
       </div>
-      <div id="scan-error" class="scan-error" hidden></div>
-    </div>
-    <div class="hero-examples">
-      Try:
-      <button class="example-btn" data-url="https://www.google.com">google.com</button>
-      <button class="example-btn" data-url="https://www.github.com">github.com</button>
-      <button class="example-btn" data-url="https://www.booking.com">booking.com</button>
+      <div class="scanner-card">
+        <div class="scan-box">
+          <div class="scan-input-wrap">
+            <svg class="scan-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="url" id="url-input" class="scan-input" placeholder="https://example.com" autocomplete="url" spellcheck="false">
+            <button id="scan-btn" class="scan-btn">
+              <span class="scan-btn-text">Scan</span>
+              <span class="scan-btn-loading" hidden>
+                <span class="spinner"></span> Scanning...
+              </span>
+            </button>
+          </div>
+          <div id="scan-error" class="scan-error" hidden></div>
+        </div>
+        <div class="hero-examples">
+          Try:
+          <button class="example-btn" data-url="https://www.google.com">google.com</button>
+          <button class="example-btn" data-url="https://www.github.com">github.com</button>
+          <button class="example-btn" data-url="https://www.booking.com">booking.com</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Results (populated by JS) -->
   <section id="results" class="results" hidden>
+    <div class="container">
     <div class="results-header">
       <div class="score-card">
         <div class="score-gauge">
@@ -454,18 +477,22 @@
       </div>
       <div class="report-preview" id="report-preview"></div>
     </div>
+    </div>
   </section>
 
   <!-- Agent Simulator (after scan results) -->
   <section id="simulator" class="simulator-section" hidden>
+    <div class="container">
     <h2>Agent Simulator</h2>
     <p class="simulator-desc">Watch how an AI agent experiences your website step by step</p>
     <button id="sim-btn" class="btn-simulate">&#9654; Simulate AI Agent</button>
     <div id="sim-log" class="sim-log" hidden></div>
+    </div>
   </section>
 
   <!-- Complete Code Generator (populated after scan) -->
   <section id="codegen" class="codegen-section" hidden>
+    <div class="container">
     <h2>Generated Code</h2>
     <p class="codegen-desc">Copy these files to make your site fully AI Agent-Ready</p>
     <div class="codegen-tabs" id="codegen-tabs"></div>
@@ -477,10 +504,12 @@
       <pre class="codegen-code" id="codegen-code"></pre>
     </div>
     <div class="codegen-status" id="codegen-status"></div>
+    </div>
   </section>
 
   <!-- Full Site Report (populated by JS when receiving sitescan data) -->
   <section id="sitescan-results" class="results" hidden>
+    <div class="container">
     <div class="sitescan-header">
       <h2>Full Site Scan Report</h2>
       <p id="sitescan-subtitle" class="sitescan-subtitle"></p>
@@ -521,10 +550,12 @@
 
     <!-- Expanded Page Detail -->
     <div id="ss-page-detail" class="ss-page-detail" hidden></div>
+    </div>
   </section>
 
   <!-- What is WebMCP -->
   <section class="info-section">
+    <div class="container">
     <div class="info-card">
       <h2>What is WebMCP?</h2>
       <p><strong>WebMCP</strong> (Web Model Context Protocol) is a new W3C standard backed by Google and Microsoft. Released in Chrome 146 Canary (Feb 2026), it lets websites expose structured actions to AI agents running in the browser.</p>
@@ -535,10 +566,12 @@
         <a href="https://developer.chrome.com/blog/webmcp-mcp-usage" target="_blank" rel="noopener">WebMCP vs MCP</a>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- CLI + Agent Skills -->
   <section class="info-section">
+    <div class="container">
     <div class="info-card">
       <h2>CLI Scanner & Agent Skills</h2>
       <p>Scan any site from your terminal with zero dependencies:</p>
@@ -552,27 +585,39 @@
         <a href="https://github.com/erold90/AgentReady/blob/main/agent-skills/gemini-cli.md" target="_blank" rel="noopener">Gemini CLI</a>
       </div>
     </div>
+    </div>
   </section>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-left">
-        <svg class="logo-svg" width="20" height="20" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="15" fill="#2563eb"/>
-          <path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <circle cx="16" cy="16" r="2" fill="white"/>
-        </svg>
-        AgentReady
-        <span class="footer-sep">&middot;</span>
-        The Lighthouse for AI Agent Readiness
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <span class="logo-icon">&#9889;</span> AgentReady
+          <p>The Lighthouse for AI Agent Readiness</p>
+        </div>
+        <div class="footer-links">
+          <h4>Tools</h4>
+          <a href="#scanner">Scanner</a>
+          <a href="playground.html">Playground</a>
+          <a href="builder.html">Builder</a>
+          <a href="tracker.html">Tracker</a>
+        </div>
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <a href="blog/index.html">Blog</a>
+          <a href="https://github.com/erold90/AgentReady">GitHub</a>
+          <a href="https://www.npmjs.com/package/webmcp-scanner">npm</a>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">BSL-1.1 License</a>
+        </div>
       </div>
-      <div class="footer-right">
-        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
-        <span class="footer-sep">&middot;</span>
-        <a href="#pricing">Pricing</a>
-        <span class="footer-sep">&middot;</span>
-        &copy; 2026 AgentReady
+      <div class="footer-bottom">
+        <p>&copy; 2026 AgentReady. Built by Daniele Lo Re.</p>
       </div>
     </div>
   </footer>
