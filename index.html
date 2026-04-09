@@ -424,6 +424,29 @@
     </div>
   </section>
 
+  <!-- Agent Simulator (after scan results) -->
+  <section id="simulator" class="simulator-section" hidden>
+    <h2>Agent Simulator</h2>
+    <p class="simulator-desc">Watch how an AI agent experiences your website step by step</p>
+    <button id="sim-btn" class="btn-simulate">&#9654; Simulate AI Agent</button>
+    <div id="sim-log" class="sim-log" hidden></div>
+  </section>
+
+  <!-- Complete Code Generator (populated after scan) -->
+  <section id="codegen" class="codegen-section" hidden>
+    <h2>Generated Code</h2>
+    <p class="codegen-desc">Copy these files to make your site fully AI Agent-Ready</p>
+    <div class="codegen-tabs" id="codegen-tabs"></div>
+    <div class="codegen-content" id="codegen-content">
+      <div class="codegen-file-header">
+        <span class="codegen-path" id="codegen-path"></span>
+        <button class="codegen-copy" id="codegen-copy">Copy</button>
+      </div>
+      <pre class="codegen-code" id="codegen-code"></pre>
+    </div>
+    <div class="codegen-status" id="codegen-status"></div>
+  </section>
+
   <!-- Full Site Report (populated by JS when receiving sitescan data) -->
   <section id="sitescan-results" class="results" hidden>
     <div class="sitescan-header">

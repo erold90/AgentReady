@@ -41,6 +41,12 @@
       compareBtn.addEventListener('click', handleCompare);
     }
 
+    // Agent Simulator
+    const simBtn = $('#sim-btn');
+    if (simBtn) {
+      simBtn.addEventListener('click', runSimulation);
+    }
+
     // Tabs
     $$('.tab').forEach(tab => {
       tab.addEventListener('click', () => switchTab(tab.dataset.tab));
@@ -359,6 +365,17 @@
       if (header) header.parentNode.insertBefore(warning, header.nextSibling);
     }
 
+    // Show simulator section
+    const simSection = $('#simulator');
+    if (simSection) {
+      simSection.hidden = false;
+      // Reset simulator state
+      const simLog = $('#sim-log');
+      if (simLog) { simLog.hidden = true; simLog.innerHTML = ''; }
+      const simBtn = $('#sim-btn');
+      if (simBtn) { simBtn.textContent = '\u25b6 Simulate AI Agent'; simBtn.disabled = false; }
+    }
+
     // Render all tabs
     renderCategoryScores();
     renderIssues();
@@ -366,6 +383,7 @@
     renderCode();
     renderAgentView();
     renderReport();
+    renderCodeGen();
   }
 
   // === Category Scores ===
@@ -870,6 +888,179 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  // === Agent Simulator ===
+  async function runSimulation() {
+    if (!currentScan || !currentAnalysis) return;
+
+    const btn = $('#sim-btn');
+    const log = $('#sim-log');
+    btn.disabled = true;
+    btn.textContent = '\u23f3 Simulating...';
+    log.hidden = false;
+    log.innerHTML = '';
+
+    const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+    const addLine = async (text, cls, ms) => {
+      ms = ms || 400;
+      cls = cls || '';
+      await delay(ms);
+      const div = document.createElement('div');
+      div.className = 'sim-line ' + cls;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    };
+
+    const addVerdict = async (text, level, ms) => {
+      ms = ms || 600;
+      await delay(ms);
+      const div = document.createElement('div');
+      div.className = 'sim-verdict sim-verdict-' + level;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    };
+
+    const scan = currentScan;
+    const analysis = currentAnalysis;
+    const domain = scan.security ? scan.security.domain : '';
+    const protocols = scan._protocols || null;
+    const ps = scan.pageSignals || {};
+    const score = analysis.score;
+
+    // Init
+    await addLine('Agent initializing...', 'sim-info', 300);
+    await addLine('Target: ' + (scan.url || domain), 'sim-info', 200);
+
+    // Step 1: Connection
+    await addLine('\u2500\u2500 Step 1: Discovering site \u2500\u2500', 'sim-step', 500);
+    await addLine('Connecting to ' + domain + '...', 'sim-info', 400);
+    if (scan.security && scan.security.isHTTPS) {
+      await addLine('\u2713 HTTPS connection established \u2014 secure context available', 'sim-pass');
+    } else {
+      await addLine('\u2717 No HTTPS \u2014 navigator.modelContext will NOT be available', 'sim-fail');
+    }
+
+    // Step 2: robots.txt (we don't actually check robots.txt, so simulate based on available data)
+    await addLine('\u2500\u2500 Step 2: Checking access permissions \u2500\u2500', 'sim-step', 600);
+    await addLine('Reading robots.txt...', 'sim-info', 400);
+    // We don't have robots.txt data, so provide a neutral response
+    await addLine('\u2139 robots.txt check not available via proxy \u2014 access assumed', 'sim-info', 300);
+
+    // Step 3: Discovery protocols
+    await addLine('\u2500\u2500 Step 3: Scanning discovery protocols \u2500\u2500', 'sim-step', 600);
+    await addLine('Scanning for AI discovery endpoints...', 'sim-info', 400);
+
+    let protocolCount = 0;
+    if (protocols) {
+      if (protocols.a2a && protocols.a2a.found) {
+        await addLine('\u2713 Found A2A Agent Card' + (protocols.a2a.name ? ' \u2014 ' + protocols.a2a.name : ''), 'sim-pass', 300);
+        protocolCount++;
+      } else {
+        await addLine('\u2717 No A2A Agent Card (/.well-known/agent.json)', 'sim-fail', 200);
+      }
+      if (protocols.mcp && protocols.mcp.found) {
+        await addLine('\u2713 Found MCP Discovery' + (protocols.mcp.serverCount ? ' \u2014 ' + protocols.mcp.serverCount + ' server(s)' : ''), 'sim-pass', 300);
+        protocolCount++;
+      } else {
+        await addLine('\u2717 No MCP Discovery (/.well-known/mcp.json)', 'sim-fail', 200);
+      }
+      if (protocols.agents && protocols.agents.found) {
+        await addLine('\u2713 Found agents.json' + (protocols.agents.agentCount ? ' \u2014 ' + protocols.agents.agentCount + ' agent(s)' : ''), 'sim-pass', 300);
+        protocolCount++;
+      } else {
+        await addLine('\u2717 No agents.json', 'sim-fail', 200);
+      }
+      if (protocols.openapi && protocols.openapi.found) {
+        await addLine('\u2713 Found OpenAPI spec' + (protocols.openapi.title ? ' \u2014 ' + protocols.openapi.title : ''), 'sim-pass', 300);
+        protocolCount++;
+      } else {
+        await addLine('\u2717 No OpenAPI spec', 'sim-fail', 200);
+      }
+      if (protocols.llms && protocols.llms.found) {
+        await addLine('\u2713 Found llms.txt' + (protocols.llms.title ? ' \u2014 ' + protocols.llms.title : ''), 'sim-pass', 300);
+        protocolCount++;
+      } else {
+        await addLine('\u2717 No llms.txt \u2014 cannot read site description', 'sim-fail', 200);
+      }
+      await addLine('Discovered ' + protocolCount + '/' + protocols.summary.total + ' protocols', protocolCount > 0 ? 'sim-pass' : 'sim-warn', 300);
+    } else {
+      await addLine('\u2717 Protocol scan unavailable', 'sim-warn', 300);
+    }
+
+    // Step 4: Page structure
+    await addLine('\u2500\u2500 Step 4: Analyzing page structure \u2500\u2500', 'sim-step', 600);
+    await addLine('Reading page metadata...', 'sim-info', 400);
+
+    if (ps.hasTitle) {
+      await addLine('\u2713 Title: ' + ps.title, 'sim-pass', 250);
+    } else {
+      await addLine('\u2717 No page title \u2014 agent cannot identify this page', 'sim-fail', 250);
+    }
+
+    if (ps.hasMetaDescription) {
+      await addLine('\u2713 Meta description found', 'sim-pass', 200);
+    } else {
+      await addLine('\u2717 No meta description', 'sim-fail', 200);
+    }
+
+    if (ps.hasJsonLd || ps.hasMicrodata) {
+      const types = [];
+      if (ps.hasJsonLd) types.push('JSON-LD');
+      if (ps.hasMicrodata) types.push('Microdata');
+      await addLine('\u2713 Structured data found (' + types.join(', ') + ')', 'sim-pass', 250);
+    } else {
+      await addLine('\u2717 No structured data \u2014 page content is opaque to agents', 'sim-fail', 250);
+    }
+
+    if (ps.semanticCount > 3) {
+      await addLine('\u2713 Semantic HTML detected (' + ps.semanticCount + ' semantic elements)', 'sim-pass', 200);
+    } else if (ps.semanticCount > 0) {
+      await addLine('\u26a0 Minimal semantic HTML (' + ps.semanticCount + ' elements)', 'sim-warn', 200);
+    } else {
+      await addLine('\u2717 No semantic HTML \u2014 content structure is ambiguous', 'sim-fail', 200);
+    }
+
+    // Step 5: Tools
+    await addLine('\u2500\u2500 Step 5: Looking for actionable tools \u2500\u2500', 'sim-step', 600);
+    await addLine('Querying navigator.modelContext...', 'sim-info', 400);
+
+    const webmcpForms = scan.forms.filter(function(f) { return f.hasWebMCP; });
+    const scriptRegs = scan.scriptRegistrations || [];
+    const totalTools = webmcpForms.length + scriptRegs.length;
+    const totalForms = scan.forms.length;
+
+    if (totalTools > 0) {
+      const toolNames = [];
+      webmcpForms.forEach(function(f) { toolNames.push(Generator.inferToolName(f)); });
+      scriptRegs.forEach(function(r) { toolNames.push(r.name || 'script-tool'); });
+      await addLine('\u2713 Found ' + totalTools + ' WebMCP tool(s): ' + toolNames.join(', '), 'sim-pass', 300);
+      await addLine('Agent CAN interact with this site', 'sim-pass', 200);
+    } else if (totalForms > 0) {
+      await addLine('Found ' + totalForms + ' form(s) but none are WebMCP-enabled', 'sim-warn', 300);
+      await addLine('Agent can SEE forms but CANNOT use them programmatically', 'sim-warn', 200);
+    } else {
+      await addLine('No interactive elements found \u2014 site is READ-ONLY to agents', 'sim-fail', 300);
+    }
+
+    // Step 6: Verdict
+    await addLine('\u2500\u2500 Final Assessment \u2500\u2500', 'sim-step', 800);
+
+    if (score >= 80) {
+      await addVerdict('\u2705 SIMULATION PASSED \u2014 AI agents can fully discover and interact with this site (Score: ' + score + '/100)', 'pass');
+    } else if (score >= 50) {
+      await addVerdict('\u26a0\ufe0f PARTIAL \u2014 AI agents can discover the site but cannot fully interact (Score: ' + score + '/100)', 'partial');
+    } else if (totalForms > 0) {
+      await addVerdict('\u274c SIMULATION FAILED \u2014 AI agents can see ' + totalForms + ' form(s) but cannot use them. The site needs WebMCP attributes. (Score: ' + score + '/100)', 'fail');
+    } else {
+      await addVerdict('\u274c SIMULATION FAILED \u2014 This site is invisible to AI agents. No tools, no protocols, no structured actions. (Score: ' + score + '/100)', 'fail');
+    }
+
+    btn.textContent = '\u25b6 Run Again';
+    btn.disabled = false;
+  }
+
   // === Compare Handler ===
   async function handleCompare() {
     const url1Input = $('#compare-url-1');
@@ -961,6 +1152,277 @@
       compareBtn.querySelector('.compare-btn-loading').hidden = true;
       compareBtn.disabled = false;
     }
+  }
+
+  // === Complete Code Generator ===
+  let codeGenFiles = [];
+
+  function detectSiteType(title, domain, scan) {
+    const t = (title + ' ' + domain).toLowerCase();
+    const text = (scan.suggestedTools || []).map(s => s.name).join(' ');
+    if (/hotel|booking|reserv|b&b|hostel|villa|resort|inn|lodge|check.?in/i.test(t + text)) return 'hotel';
+    if (/shop|store|cart|ecommerce|buy|product|price/i.test(t + text)) return 'ecommerce';
+    if (/blog|article|post|news|magazine/i.test(t + text)) return 'blog';
+    if (/api|docs|developer|documentation/i.test(t + text)) return 'api';
+    return 'generic';
+  }
+
+  function generateWebMCPJs(domain, siteType) {
+    const configs = {
+      hotel: { name: 'check_availability', desc: 'Check room availability for given dates',
+        props: '        check_in: { type: "string", description: "Check-in date (YYYY-MM-DD)" },\n        check_out: { type: "string", description: "Check-out date (YYYY-MM-DD)" },\n        guests: { type: "number", description: "Number of guests" }',
+        ret: '      return { available: true, rooms: [] };' },
+      ecommerce: { name: 'search_products', desc: 'Search the product catalog',
+        props: '        query: { type: "string", description: "Search query" },\n        category: { type: "string", description: "Product category" },\n        max_price: { type: "number", description: "Maximum price filter" }',
+        ret: '      return { products: [], total: 0 };' },
+      blog: { name: 'search_articles', desc: 'Search blog articles and content',
+        props: '        query: { type: "string", description: "Search query" },\n        tag: { type: "string", description: "Filter by tag" }',
+        ret: '      return { articles: [], total: 0 };' },
+      api: { name: 'query_api', desc: 'Query the API endpoint',
+        props: '        endpoint: { type: "string", description: "API endpoint path" },\n        method: { type: "string", description: "HTTP method (GET, POST)" }',
+        ret: '      return { status: 200, data: {} };' },
+      generic: { name: 'site_search', desc: 'Search content on ' + domain,
+        props: '        query: { type: "string", description: "Search query" }',
+        ret: '      return { results: [], total: 0 };' }
+    };
+    const c = configs[siteType] || configs.generic;
+    return `if (navigator.modelContext) {
+  navigator.modelContext.registerTool({
+    name: "${c.name}",
+    description: "${c.desc}",
+    parameters: {
+      type: "object",
+      properties: {
+${c.props}
+      }
+    },
+    handler: async (params) => {
+      // Your implementation here
+${c.ret}
+    }
+  });
+}`;
+  }
+
+  function generateWebMCPHTML(forms) {
+    if (!forms || forms.length === 0) return null;
+    const nonReady = forms.filter(f => !f.hasWebMCP);
+    if (nonReady.length === 0) return null;
+
+    let html = '';
+    nonReady.forEach(form => {
+      const toolName = Generator.inferToolName(form);
+      const toolDesc = Generator.inferToolDescription(form);
+      html += `<form toolname="${toolName}"\n      tooldescription="${toolDesc}"\n      toolautosubmit\n`;
+      if (form.action) html += `      action="${form.action}"\n`;
+      html += `      method="${form.method || 'GET'}">\n`;
+      form.fields.forEach(f => {
+        const nameAttr = f.name || f.id || 'field';
+        const desc = f.label || f.placeholder || f.ariaLabel || nameAttr;
+        if (f.tagName === 'select') {
+          html += `  <select name="${nameAttr}" toolparamdescription="${desc}"${f.required ? ' required' : ''}>\n`;
+          (f.options || []).forEach(o => {
+            html += `    <option value="${o.value}">${o.text}</option>\n`;
+          });
+          html += `  </select>\n`;
+        } else if (f.tagName === 'textarea') {
+          html += `  <textarea name="${nameAttr}" toolparamdescription="${desc}"${f.required ? ' required' : ''}></textarea>\n`;
+        } else {
+          html += `  <input type="${f.type}" name="${nameAttr}" toolparamdescription="${desc}"${f.required ? ' required' : ''}`;
+          if (f.placeholder) html += ` placeholder="${f.placeholder}"`;
+          html += `>\n`;
+        }
+      });
+      html += `  <button type="submit">Submit</button>\n</form>`;
+      if (nonReady.indexOf(form) < nonReady.length - 1) html += '\n\n';
+    });
+    return html;
+  }
+
+  function generateLlmsTxt(title, domain, desc, siteType) {
+    let txt = `# ${title}\n\n> ${desc}\n\n## Pages\n- [Home](https://${domain}/)\n`;
+    if (siteType === 'hotel') {
+      txt += `- [Rooms](https://${domain}/rooms)\n- [Book Now](https://${domain}/book)\n- [Gallery](https://${domain}/gallery)\n- [Contact](https://${domain}/contact)\n`;
+      txt += `\n## Key Information\n- Accommodation / hospitality website\n- Online booking available\n- Check-in / check-out info on booking page\n`;
+    } else if (siteType === 'ecommerce') {
+      txt += `- [Products](https://${domain}/products)\n- [Categories](https://${domain}/categories)\n- [Cart](https://${domain}/cart)\n- [Contact](https://${domain}/contact)\n`;
+      txt += `\n## Key Information\n- E-commerce website\n- Product catalog with search\n- Online checkout available\n`;
+    } else if (siteType === 'blog') {
+      txt += `- [Articles](https://${domain}/blog)\n- [About](https://${domain}/about)\n- [Contact](https://${domain}/contact)\n`;
+      txt += `\n## Key Information\n- Blog / content website\n- Articles and posts available\n`;
+    } else {
+      txt += `- [About](https://${domain}/about)\n- [Contact](https://${domain}/contact)\n`;
+      txt += `\n## Key Information\n- ${desc}\n`;
+    }
+    return txt;
+  }
+
+  function renderCodeGen() {
+    const section = $('#codegen');
+    const tabsEl = $('#codegen-tabs');
+    const pathEl = $('#codegen-path');
+    const codeEl = $('#codegen-code');
+    const statusEl = $('#codegen-status');
+    const copyBtn = $('#codegen-copy');
+
+    if (!currentScan || !section) return;
+
+    const protocols = currentScan._protocols || {};
+    let domain = '';
+    try { domain = new URL(currentScan.url).hostname; } catch { return; }
+    const title = currentScan.pageSignals?.title || domain;
+    const desc = currentScan.pageSignals?.hasMetaDescription
+      ? 'Information and services from ' + domain
+      : 'Information about ' + domain;
+    const domainSlug = domain.replace(/\./g, '-');
+    const siteType = detectSiteType(title, domain, currentScan);
+
+    const files = [];
+
+    // 1. agent.json
+    const a2aCode = JSON.stringify({
+      name: title + ' Agent',
+      description: 'AI agent for ' + domain,
+      url: 'https://' + domain,
+      version: '1.0.0',
+      capabilities: { streaming: false, pushNotifications: false },
+      skills: [{
+        name: 'general_info',
+        description: 'Get information about ' + domain,
+        tags: ['info', 'help']
+      }],
+      authentication: null
+    }, null, 2);
+    files.push({
+      name: 'agent.json',
+      path: '/.well-known/agent.json',
+      found: !!(protocols.a2a && protocols.a2a.found),
+      code: protocols.a2a && protocols.a2a.found
+        ? '// Already detected on your site'
+        : a2aCode
+    });
+
+    // 2. mcp.json
+    const mcpCode = JSON.stringify({
+      mcpServers: {
+        [domainSlug]: {
+          url: 'https://' + domain + '/mcp',
+          transport: 'streamable-http',
+          description: 'MCP server for ' + domain
+        }
+      }
+    }, null, 2);
+    files.push({
+      name: 'mcp.json',
+      path: '/.well-known/mcp.json',
+      found: !!(protocols.mcp && protocols.mcp.found),
+      code: protocols.mcp && protocols.mcp.found
+        ? '// Already detected on your site'
+        : mcpCode
+    });
+
+    // 3. agents.json
+    const agentsCode = JSON.stringify({
+      agents: [{
+        name: title + ' Assistant',
+        description: 'AI assistant for ' + domain,
+        protocol: 'a2a',
+        url: 'https://' + domain + '/.well-known/agent.json',
+        capabilities: ['chat', 'search']
+      }]
+    }, null, 2);
+    files.push({
+      name: 'agents.json',
+      path: '/.well-known/agents.json',
+      found: !!(protocols.agents && protocols.agents.found),
+      code: protocols.agents && protocols.agents.found
+        ? '// Already detected on your site'
+        : agentsCode
+    });
+
+    // 4. llms.txt
+    files.push({
+      name: 'llms.txt',
+      path: '/llms.txt',
+      found: !!(protocols.llms && protocols.llms.found),
+      code: protocols.llms && protocols.llms.found
+        ? '// Already detected on your site'
+        : generateLlmsTxt(title, domain, desc, siteType)
+    });
+
+    // 5. robots.txt (always show)
+    files.push({
+      name: 'robots.txt',
+      path: '/robots.txt',
+      found: false,
+      alwaysShow: true,
+      code: `User-agent: *\nAllow: /\n\n# AI Agents \u2014 Allow all\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: ChatGPT-User\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: Google-Extended\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Amazonbot\nAllow: /\n\nSitemap: https://${domain}/sitemap.xml`
+    });
+
+    // 6. WebMCP HTML (only if forms found without WebMCP)
+    const webmcpHTML = generateWebMCPHTML(currentScan.forms);
+    if (webmcpHTML) {
+      files.push({
+        name: 'WebMCP HTML',
+        path: 'Form attributes (add to your HTML)',
+        found: false,
+        code: webmcpHTML
+      });
+    }
+
+    // 7. WebMCP JavaScript (always show as example)
+    files.push({
+      name: 'WebMCP JS',
+      path: '<script> tag or external .js file',
+      found: currentScan.scriptRegistrations && currentScan.scriptRegistrations.length > 0,
+      alwaysShow: true,
+      code: currentScan.scriptRegistrations && currentScan.scriptRegistrations.length > 0
+        ? '// WebMCP registrations already detected on your site.\n// Below is an additional example you can extend:\n\n' + generateWebMCPJs(domain, siteType)
+        : generateWebMCPJs(domain, siteType)
+    });
+
+    codeGenFiles = files;
+
+    // Render tabs
+    tabsEl.innerHTML = '';
+    files.forEach(function(f, i) {
+      const tab = document.createElement('button');
+      tab.className = 'codegen-tab' + (i === 0 ? ' active' : '');
+      const dotClass = f.found ? 'found' : 'missing';
+      tab.innerHTML = '<span class="codegen-tab-dot ' + dotClass + '"></span>' + escapeHTML(f.name);
+      tab.addEventListener('click', function() { selectCodeGenTab(i); });
+      tabsEl.appendChild(tab);
+    });
+
+    // Show first tab
+    selectCodeGenTab(0);
+
+    // Copy button handler
+    copyBtn.onclick = function() {
+      const code = codeEl.textContent;
+      navigator.clipboard.writeText(code).then(function() {
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+        setTimeout(function() { copyBtn.textContent = 'Copy'; copyBtn.classList.remove('copied'); }, 2000);
+      });
+    };
+
+    // Status text
+    const missing = files.filter(function(f) { return !f.found && !f.alwaysShow; }).length;
+    if (missing > 0) {
+      statusEl.textContent = missing + ' file' + (missing > 1 ? 's' : '') + ' missing \u2014 copy and deploy to improve your score';
+    } else {
+      statusEl.textContent = 'All protocols detected! Your site is fully discoverable by AI agents.';
+    }
+
+    section.hidden = false;
+  }
+
+  function selectCodeGenTab(index) {
+    const tabs = $$('.codegen-tab');
+    tabs.forEach(function(t, i) { t.classList.toggle('active', i === index); });
+    $('#codegen-path').textContent = codeGenFiles[index].path;
+    $('#codegen-code').textContent = codeGenFiles[index].code;
   }
 
   // === Start ===
