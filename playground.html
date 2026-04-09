@@ -7,38 +7,46 @@
   <meta name="description" content="Live HTML editor to see how AI agents interpret your WebMCP forms and tools. Write HTML, see the Agent View in real time.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <style>
     /* ===== VARIABLES ===== */
     :root {
       --bg: #ffffff;
+      --fg: #0f172a;
       --bg-2: #f8fafc;
       --bg-3: #f1f5f9;
       --surface: #ffffff;
+      --card-bg: #ffffff;
       --border: #e2e8f0;
       --border-2: #cbd5e1;
       --text: #0f172a;
-      --text-2: #475569;
+      --text-2: #64748b;
       --text-3: #94a3b8;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #dbeafe;
+      --text-secondary: #64748b;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-light: rgba(59,130,246,0.1);
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-light: rgba(59,130,246,0.1);
       --green: #10b981;
       --green-light: #d1fae5;
       --yellow: #f59e0b;
       --yellow-light: #fef3c7;
       --red: #ef4444;
       --red-light: #fee2e2;
-      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-heading: 'Space Grotesk', 'Inter', system-ui, sans-serif;
       --mono: 'JetBrains Mono', 'Fira Code', monospace;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --radius-xs: 6px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
-      --transition: 0.2s ease;
+      --radius: 0.75rem;
+      --radius-sm: 0.375rem;
+      --radius-xs: 0.375rem;
+      --radius-lg: 1rem;
+      --shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       --editor-bg: #0f172a;
       --editor-text: #e2e8f0;
       --editor-line: #334155;
@@ -46,19 +54,23 @@
     }
 
     [data-theme="dark"] {
-      --bg: #0f172a;
-      --bg-2: #1e293b;
-      --bg-3: #334155;
-      --surface: #1e293b;
-      --border: #334155;
-      --border-2: #475569;
-      --text: #f1f5f9;
+      --bg: #0b1120;
+      --fg: #f8fafc;
+      --bg-2: #1a2436;
+      --bg-3: #243044;
+      --surface: #0f1729;
+      --card-bg: #0f1729;
+      --border: #1e293b;
+      --border-2: #334155;
+      --text: #f8fafc;
       --text-2: #94a3b8;
       --text-3: #64748b;
-      --primary-light: #1e3a5f;
-      --green-light: #064e3b;
-      --yellow-light: #78350f;
-      --red-light: #7f1d1d;
+      --text-secondary: #94a3b8;
+      --primary-light: rgba(59,130,246,0.15);
+      --accent-light: rgba(59,130,246,0.15);
+      --green-light: rgba(16,185,129,0.15);
+      --yellow-light: rgba(245,158,11,0.15);
+      --red-light: rgba(239,68,68,0.15);
       --shadow: 0 1px 3px rgba(0,0,0,0.3);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
       --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
@@ -77,11 +89,95 @@
       display: flex;
       flex-direction: column;
     }
-    a { color: var(--primary); text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a { color: var(--primary); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: var(--primary-hover); }
     button { cursor: pointer; font-family: var(--font); }
+    h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; letter-spacing: -0.025em; }
 
     /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    [data-theme="dark"] .header { background: rgba(11,17,32,0.8); }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .logo:hover { color: var(--text); text-decoration: none; }
+    .logo-icon { font-size: 1.375rem; }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .header-nav a {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color var(--transition);
+      text-decoration: none;
+    }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: all var(--transition);
+    }
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); text-decoration: none; }
+    .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 6px;
+      cursor: pointer;
+    }
+    .hamburger span {
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+    }
+    .hamburger:hover { border-color: var(--primary); }
+
     .pg-header {
       background: var(--bg);
       border-bottom: 1px solid var(--border);
@@ -93,7 +189,7 @@
       flex-wrap: wrap;
     }
     [data-theme="dark"] .pg-header {
-      background: rgba(15,23,42,0.95);
+      background: rgba(11,17,32,0.95);
     }
     .pg-header-left {
       display: flex;
@@ -461,12 +557,36 @@
 </head>
 <body>
   <!-- Header -->
+  <header class="header" style="background:rgba(255,255,255,0.8);border-bottom:1px solid var(--border)">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">&#9889;</span>
+        <span class="logo-text">AgentReady</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="index.html#scanner">Scanner</a>
+        <a href="index.html#tools">Tools</a>
+        <a href="playground.html">Playground</a>
+        <a href="builder.html">Builder</a>
+        <a href="tracker.html">Tracker</a>
+        <a href="blog/index.html">Blog</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="theme-icon-light">&#127769;</span>
+          <span class="theme-icon-dark">&#9728;</span>
+        </button>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" class="btn-secondary btn-sm">GitHub</a>
+      </div>
+      <button class="hamburger" id="hamburger" onclick="document.getElementById('header-nav').classList.toggle('mobile-open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Sub-header -->
   <header class="pg-header">
     <div class="pg-header-left">
-      <a href="index.html" class="pg-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-        AgentReady
-      </a>
       <div class="pg-title-group">
         <div class="pg-title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -474,18 +594,6 @@
         </div>
         <div class="pg-subtitle">Write HTML, see what AI agents see — in real time</div>
       </div>
-    </div>
-    <div class="pg-header-right">
-      <nav class="pg-tool-nav">
-        <a href="index.html#demo">Scanner</a>
-        <a href="builder.html">Builder</a>
-        <a href="tracker.html">Tracker</a>
-        <a href="blog/index.html">Blog</a>
-      </nav>
-      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-        <span class="theme-icon-light">&#9790;</span>
-        <span class="theme-icon-dark">&#9728;</span>
-      </button>
     </div>
   </header>
 
