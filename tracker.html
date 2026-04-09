@@ -1020,7 +1020,7 @@
   <script>
     // ===== Theme Toggle =====
     (function() {
-      var saved = localStorage.getItem('agentready_theme');
+      var saved = localStorage.getItem('agentready-theme');
       if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
@@ -1029,7 +1029,7 @@
     document.getElementById('theme-toggle').addEventListener('click', function() {
       var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-      localStorage.setItem('agentready_theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('agentready-theme', isDark ? 'light' : 'dark');
     });
 
     // ===== Hamburger =====

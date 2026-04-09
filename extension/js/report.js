@@ -979,7 +979,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
 
     // Badge section
     if (reportData.avgScore >= 75) {
-      const badgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${reportData.avgScore}%2F100-10b981?style=for-the-badge`;
+      const badgeUrl = `https://img.shields.io/badge/AgentReady-Score_${reportData.avgScore}%2F100-10b981?style=for-the-badge`;
       html += `
 <div style="margin:24px 0;padding:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;text-align:center">
   <div style="font-size:16px;font-weight:700;color:#166534;margin-bottom:12px">&#9989; Certified Agent-Ready</div>
@@ -990,7 +990,7 @@ th{font-size:11px;text-transform:uppercase;color:#94a3b8;font-weight:600}
   <pre style="text-align:left;font-size:11px">&lt;a href="https://crawlaudit.dev"&gt;&lt;img src="${badgeUrl}" alt="Agent-Ready Badge"&gt;&lt;/a&gt;</pre>
 </div>`;
     } else {
-      const wipBadgeUrl = `https://img.shields.io/badge/CrawlAudit-Score_${reportData.avgScore}%2F100-f59e0b?style=for-the-badge`;
+      const wipBadgeUrl = `https://img.shields.io/badge/AgentReady-Score_${reportData.avgScore}%2F100-f59e0b?style=for-the-badge`;
       html += `
 <div style="margin:24px 0;padding:20px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;text-align:center">
   <div style="font-size:16px;font-weight:700;color:#92400e;margin-bottom:12px">&#128679; Work in Progress</div>
