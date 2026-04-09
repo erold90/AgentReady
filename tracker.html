@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent Traffic Tracker — AgentReady</title>
+  <meta name="description" content="Generate a tracking snippet to monitor AI agent visits on your website. Detect GPTBot, ClaudeBot, PerplexityBot and more. 100% local, zero external requests.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg: #ffffff;
+      --bg-2: #f8fafc;
+      --bg-3: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-2: #cbd5e1;
+      --text: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --green: #10b981;
+      --green-light: #d1fae5;
+      --yellow: #f59e0b;
+      --yellow-light: #fef3c7;
+      --red: #ef4444;
+      --red-light: #fee2e2;
+      --purple: #7c3aed;
+      --purple-light: #ede9fe;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --transition: 0.2s ease;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+    }
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-2: #1e293b;
+      --bg-3: #334155;
+      --surface: #1e293b;
+      --border: #334155;
+      --border-2: #475569;
+      --text: #f1f5f9;
+      --text-2: #94a3b8;
+      --text-3: #64748b;
+      --primary-light: #1e3a5f;
+      --green-light: #064e3b;
+      --yellow-light: #78350f;
+      --red-light: #7f1d1d;
+      --purple-light: #2e1065;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+      --code-bg: #0f172a;
+      --code-text: #cbd5e1;
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { cursor: pointer; font-family: var(--font); }
+    input { font-family: var(--font); }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.85);
+    }
+    [data-theme="dark"] .header { background: rgba(15,23,42,0.85); }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-nav a {
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .header-nav a:hover { color: var(--text); text-decoration: none; }
+    .header-nav a.active { color: var(--primary); font-weight: 600; }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 6px 10px;
+      font-size: 16px;
+      color: var(--text-2);
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { border-color: var(--border-2); }
+    .theme-icon-dark { display: none; }
+    [data-theme="dark"] .theme-icon-light { display: none; }
+    [data-theme="dark"] .theme-icon-dark { display: inline; }
+    .hamburger-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 6px 10px;
+      font-size: 18px;
+      color: var(--text-2);
+    }
+    .hamburger-btn:hover { border-color: var(--border-2); }
+
+    /* ===== HERO ===== */
+    .hero {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 4.5vw, 44px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #2563eb, #7c3aed, #2563eb);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 3s ease infinite;
+    }
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .hero-subtitle {
+      font-size: 17px;
+      color: var(--text-2);
+      max-width: 600px;
+      margin: 0 auto 0;
+      line-height: 1.7;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+    }
+
+    /* ===== STEP SECTIONS ===== */
+    .step {
+      margin-bottom: 48px;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .step-desc {
+      color: var(--text-2);
+      font-size: 15px;
+      margin-bottom: 16px;
+      padding-left: 44px;
+    }
+
+    /* ===== DOMAIN INPUT ===== */
+    .domain-input-wrap {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px 4px 4px 16px;
+      transition: var(--transition);
+      box-shadow: var(--shadow);
+      max-width: 600px;
+    }
+    .domain-input-wrap:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .domain-prefix {
+      font-size: 15px;
+      color: var(--text-3);
+      font-weight: 500;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    .domain-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: transparent;
+      color: var(--text);
+      padding: 12px 8px;
+      min-width: 0;
+    }
+    .domain-input::placeholder { color: var(--text-3); }
+    .generate-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .generate-btn:hover { background: var(--primary-hover); }
+
+    /* ===== CODE BLOCK ===== */
+    .code-block-wrap {
+      position: relative;
+      margin-top: 8px;
+    }
+    .code-block {
+      background: var(--code-bg);
+      color: var(--code-text);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+    }
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #94a3b8;
+      border-radius: var(--radius-xs);
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      font-family: var(--font);
+    }
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .copy-btn.copied {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    /* ===== SNIPPET HIDDEN STATE ===== */
+    .snippet-area { display: none; }
+    .snippet-area.visible { display: block; }
+
+    /* ===== CONSOLE COMMANDS ===== */
+    .console-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .console-cmd {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .console-cmd:last-child { border-bottom: none; }
+    .console-cmd code {
+      font-family: var(--mono);
+      font-size: 13px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .console-cmd span {
+      color: var(--text-2);
+      font-size: 14px;
+    }
+
+    /* ===== DIVIDER ===== */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ===== DEMO DASHBOARD ===== */
+    .demo-label {
+      display: inline-block;
+      background: var(--yellow-light);
+      color: var(--yellow);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .dashboard-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .dashboard-subtitle {
+      color: var(--text-2);
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    /* Stats Row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .stat-card:nth-child(2) .stat-value { color: var(--green); }
+    .stat-card:nth-child(3) .stat-value { color: var(--purple); }
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-2);
+      font-weight: 500;
+    }
+
+    /* Bar Chart */
+    .chart-section {
+      margin-bottom: 32px;
+    }
+    .chart-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .chart-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .chart-row:last-child { margin-bottom: 0; }
+    .chart-bot-name {
+      width: 130px;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .chart-bar-wrap {
+      flex: 1;
+      height: 28px;
+      background: var(--bg-3);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .chart-bar {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+    .chart-bar-gptbot { background: linear-gradient(90deg, #10b981, #059669); }
+    .chart-bar-claudebot { background: linear-gradient(90deg, #7c3aed, #6d28d9); }
+    .chart-bar-perplexity { background: linear-gradient(90deg, #2563eb, #1d4ed8); }
+    .chart-bar-applebot { background: linear-gradient(90deg, #64748b, #475569); }
+    .chart-bar-bytespider { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    .chart-bar-amazonbot { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .chart-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-2);
+      width: 60px;
+      flex-shrink: 0;
+    }
+
+    /* Events Log */
+    .events-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .event-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .event-row:last-child { border-bottom: none; }
+    .event-time {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-3);
+      flex-shrink: 0;
+      width: 48px;
+    }
+    .event-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      flex-shrink: 0;
+    }
+    .event-badge-bot {
+      background: var(--green-light);
+      color: var(--green);
+    }
+    .event-badge-tool {
+      background: var(--purple-light);
+      color: var(--purple);
+    }
+    .event-badge-fetch {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .event-text {
+      color: var(--text-2);
+      font-size: 13px;
+    }
+    .event-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ===== FEATURES & PRIVACY ===== */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 48px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .info-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-list {
+      list-style: none;
+    }
+    .info-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 14px;
+      color: var(--text-2);
+    }
+    .info-list li .check {
+      color: var(--green);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ===== API DOCS ===== */
+    .api-section {
+      margin-top: 48px;
+    }
+    .api-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .api-subtitle {
+      color: var(--text-2);
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+    .api-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .api-table th {
+      text-align: left;
+      background: var(--bg-2);
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-2);
+      border-bottom: 1px solid var(--border);
+    }
+    .api-table td {
+      padding: 12px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .api-table tr:last-child td { border-bottom: none; }
+    .api-table code {
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .api-table .desc { color: var(--text-2); }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-3);
+    }
+    .footer-right a { color: var(--text-3); }
+    .footer-right a:hover { color: var(--text); }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s ease;
+      z-index: 999;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+      .chart-bot-name { width: 100px; font-size: 12px; }
+      .api-table { font-size: 13px; display: block; overflow-x: auto; }
+      .footer-inner { flex-direction: column; gap: 8px; text-align: center; }
+    }
+    @media (max-width: 480px) {
+      .header-nav a { display: none; }
+      .header-nav.mobile-open a { display: block; }
+      .header-nav.mobile-open {
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 24px;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: var(--shadow-md);
+      }
+      .hamburger-btn { display: flex !important; }
+      .domain-input-wrap { flex-direction: column; padding: 8px; }
+      .domain-input-wrap .domain-prefix { display: none; }
+      .generate-btn { width: 100%; }
+      .event-text { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" fill="#2563eb"/>
+          <path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="16" cy="16" r="2" fill="white"/>
+        </svg>
+        <span class="logo-text">AgentReady</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="index.html#demo">Scanner</a>
+        <a href="playground.html">Playground</a>
+        <a href="builder.html">Builder</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon-light">&#9790;</span>
+          <span class="theme-icon-dark">&#9728;</span>
+        </button>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu" onclick="document.getElementById('header-nav').classList.toggle('mobile-open')">&#9776;</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">Zero Dependencies &middot; 100% Local &middot; GDPR Compliant</div>
+    <h1>Monitor <span class="gradient-text">AI agent</span> traffic<br>on your website</h1>
+    <p class="hero-subtitle">Generate a lightweight tracking snippet that detects GPTBot, ClaudeBot, PerplexityBot and 10+ AI crawlers. All data stays in your browser.</p>
+  </section>
+
+  <!-- Main Content -->
+  <div class="content">
+
+    <!-- Step 1: Domain -->
+    <div class="step">
+      <div class="step-header">
+        <div class="step-num">1</div>
+        <div class="step-title">Enter your domain</div>
+      </div>
+      <p class="step-desc">We will customize the snippet for your website.</p>
+      <div class="domain-input-wrap">
+        <span class="domain-prefix">https://</span>
+        <input type="text" class="domain-input" id="domain-input" placeholder="example.com" autocomplete="off" spellcheck="false">
+        <button class="generate-btn" id="generate-btn" onclick="generateSnippet()">Generate</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Snippet -->
+    <div class="step snippet-area" id="snippet-area">
+      <div class="step-header">
+        <div class="step-num">2</div>
+        <div class="step-title">Copy this snippet into your &lt;head&gt;</div>
+      </div>
+      <p class="step-desc">Paste it just before the closing <code>&lt;/head&gt;</code> tag on every page you want to track.</p>
+      <div class="code-block-wrap">
+        <pre class="code-block" id="snippet-code"></pre>
+        <button class="copy-btn" id="copy-btn" onclick="copySnippet()">Copy</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Console -->
+    <div class="step snippet-area" id="console-area">
+      <div class="step-header">
+        <div class="step-num">3</div>
+        <div class="step-title">View your dashboard</div>
+      </div>
+      <p class="step-desc">Open your browser console on any page with the snippet and use these commands:</p>
+      <div class="console-card">
+        <div class="console-cmd">
+          <code>__agentready.summary()</code>
+          <span>Get an overview: total events, bot visits, per-bot breakdown</span>
+        </div>
+        <div class="console-cmd">
+          <code>__agentready.getBotVisits()</code>
+          <span>List all recorded AI bot visit events</span>
+        </div>
+        <div class="console-cmd">
+          <code>__agentready.getToolEvents()</code>
+          <span>List WebMCP tool registrations and invocations</span>
+        </div>
+        <div class="console-cmd">
+          <code>__agentready.getEvents()</code>
+          <span>Retrieve the full event log (up to 1,000 events)</span>
+        </div>
+        <div class="console-cmd">
+          <code>__agentready.clear()</code>
+          <span>Clear all stored tracking data</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="section-divider">
+
+    <!-- Demo Dashboard -->
+    <div>
+      <span class="demo-label">Demo &mdash; simulated data</span>
+      <h2 class="dashboard-title">Agent Traffic Dashboard</h2>
+      <p class="dashboard-subtitle">This is what your tracking data looks like. Install the snippet to see real data.</p>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value">47</div>
+          <div class="stat-label">Bot Visits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Tools Used</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Pages Crawled</div>
+        </div>
+      </div>
+
+      <!-- Bar Chart -->
+      <div class="chart-section">
+        <h3 class="chart-title">Bot Activity</h3>
+        <div class="chart-card" id="chart-card">
+          <div class="chart-row">
+            <div class="chart-bot-name">GPTBot</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-gptbot" style="width:0%" data-target="100%"></div></div>
+            <div class="chart-count">23 visits</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-bot-name">ClaudeBot</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-claudebot" style="width:0%" data-target="65%"></div></div>
+            <div class="chart-count">15 visits</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-bot-name">PerplexityBot</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-perplexity" style="width:0%" data-target="26%"></div></div>
+            <div class="chart-count">6 visits</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-bot-name">Applebot</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-applebot" style="width:0%" data-target="17%"></div></div>
+            <div class="chart-count">4 visits</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-bot-name">Bytespider</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-bytespider" style="width:0%" data-target="13%"></div></div>
+            <div class="chart-count">3 visits</div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-bot-name">Amazonbot</div>
+            <div class="chart-bar-wrap"><div class="chart-bar chart-bar-amazonbot" style="width:0%" data-target="9%"></div></div>
+            <div class="chart-count">2 visits</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Events -->
+      <div class="chart-section">
+        <h3 class="chart-title">Recent Events</h3>
+        <div class="events-card">
+          <div class="event-row">
+            <div class="event-time">14:23</div>
+            <span class="event-badge event-badge-bot">visit</span>
+            <div class="event-text"><strong>GPTBot</strong> visited <strong>/products</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:21</div>
+            <span class="event-badge event-badge-tool">tool</span>
+            <div class="event-text"><strong>ClaudeBot</strong> invoked <strong>search_products</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:18</div>
+            <span class="event-badge event-badge-fetch">fetch</span>
+            <div class="event-text"><strong>GPTBot</strong> fetched <strong>/.well-known/agent.json</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:15</div>
+            <span class="event-badge event-badge-bot">visit</span>
+            <div class="event-text"><strong>PerplexityBot</strong> visited <strong>/</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:12</div>
+            <span class="event-badge event-badge-tool">tool</span>
+            <div class="event-text"><strong>ClaudeBot</strong> registered <strong>check_availability</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:08</div>
+            <span class="event-badge event-badge-bot">visit</span>
+            <div class="event-text"><strong>Applebot</strong> visited <strong>/pricing</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">14:03</div>
+            <span class="event-badge event-badge-fetch">fetch</span>
+            <div class="event-text"><strong>ClaudeBot</strong> fetched <strong>/.well-known/mcp.json</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">13:57</div>
+            <span class="event-badge event-badge-bot">visit</span>
+            <div class="event-text"><strong>GPTBot</strong> visited <strong>/about</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">13:52</div>
+            <span class="event-badge event-badge-tool">tool</span>
+            <div class="event-text"><strong>GPTBot</strong> invoked <strong>get_pricing</strong></div>
+          </div>
+          <div class="event-row">
+            <div class="event-time">13:48</div>
+            <span class="event-badge event-badge-bot">visit</span>
+            <div class="event-text"><strong>Bytespider</strong> visited <strong>/blog</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's Tracked & Privacy -->
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+          What's Tracked
+        </h3>
+        <ul class="info-list">
+          <li><span class="check">&#10003;</span> AI bot visits (13 bots detected by User-Agent)</li>
+          <li><span class="check">&#10003;</span> WebMCP tool registrations</li>
+          <li><span class="check">&#10003;</span> Tool invocations by AI agents</li>
+          <li><span class="check">&#10003;</span> Protocol file requests (.well-known/*)</li>
+          <li><span class="check">&#10003;</span> Page-by-page visit breakdown</li>
+          <li><span class="check">&#10003;</span> Timestamped event log (last 1,000)</li>
+        </ul>
+      </div>
+      <div class="info-card">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Privacy
+        </h3>
+        <ul class="info-list">
+          <li><span class="check">&#10003;</span> All data stored locally (localStorage)</li>
+          <li><span class="check">&#10003;</span> No data sent to any server</li>
+          <li><span class="check">&#10003;</span> No cookies, no tracking pixels</li>
+          <li><span class="check">&#10003;</span> GDPR compliant &mdash; zero external requests</li>
+          <li><span class="check">&#10003;</span> Snippet is ~2KB, zero dependencies</li>
+          <li><span class="check">&#10003;</span> Open source &mdash; inspect the code yourself</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- API Reference -->
+    <div class="api-section">
+      <h2 class="api-title">API Reference</h2>
+      <p class="api-subtitle">The snippet exposes <code style="font-family:var(--mono);font-size:13px;background:var(--code-bg);color:var(--code-text);padding:2px 6px;border-radius:4px;">window.__agentready</code> with these methods:</p>
+      <table class="api-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Returns</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>.getEvents()</code></td>
+            <td>Array</td>
+            <td class="desc">All recorded events (up to 1,000)</td>
+          </tr>
+          <tr>
+            <td><code>.getBotVisits()</code></td>
+            <td>Array</td>
+            <td class="desc">Only events from detected AI bots</td>
+          </tr>
+          <tr>
+            <td><code>.getToolEvents()</code></td>
+            <td>Array</td>
+            <td class="desc">WebMCP tool registrations and invocations</td>
+          </tr>
+          <tr>
+            <td><code>.summary()</code></td>
+            <td>Object</td>
+            <td class="desc">Overview with total events, bot count, and per-bot breakdown</td>
+          </tr>
+          <tr>
+            <td><code>.clear()</code></td>
+            <td>void</td>
+            <td class="desc">Delete all stored tracking data</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Event Schema -->
+    <div class="api-section">
+      <h2 class="api-title">Event Schema</h2>
+      <p class="api-subtitle">Each event object stored in localStorage has this shape:</p>
+      <div class="code-block-wrap">
+        <pre class="code-block">{
+  "type": "bot_visit" | "page_visit" | "tool_registered" | "tool_invoked" | "protocol_fetch",
+  "timestamp": "2026-04-09T14:23:01.000Z",
+  "page": "/products",
+  "bot": "GPTBot" | null,
+  "owner": "OpenAI" | null,
+  "userAgent": "Mozilla/5.0 ... GPTBot/1.0",
+  "data": null | { "name": "search_products", ... }
+}</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>AgentReady &copy; 2026</div>
+      <div class="footer-right">
+        <a href="index.html">Home</a>
+        <span style="margin:0 8px;opacity:0.5;">|</span>
+        <a href="index.html#demo">Scanner</a>
+        <span style="margin:0 8px;opacity:0.5;">|</span>
+        <a href="playground.html">Playground</a>
+        <span style="margin:0 8px;opacity:0.5;">|</span>
+        <a href="builder.html">Builder</a>
+        <span style="margin:0 8px;opacity:0.5;">|</span>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ===== Theme Toggle =====
+    (function() {
+      var saved = localStorage.getItem('agentready_theme');
+      if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('agentready_theme', isDark ? 'light' : 'dark');
+    });
+
+    // ===== Hamburger =====
+    document.getElementById('hamburger-btn').addEventListener('click', function() {
+      document.getElementById('header-nav').classList.toggle('mobile-open');
+    });
+
+    // ===== Tracking Script Template =====
+    function getTrackingScript(domain) {
+      return '<script>\n(function(){\'use strict\';var D=\'' + domain + '\',K=\'agentready_traffic\',B=[{p:/GPTBot/i,n:\'GPTBot\',o:\'OpenAI\'},{p:/ChatGPT/i,n:\'ChatGPT-User\',o:\'OpenAI\'},{p:/ClaudeBot/i,n:\'ClaudeBot\',o:\'Anthropic\'},{p:/Claude-Web/i,n:\'Claude-Web\',o:\'Anthropic\'},{p:/Bytespider/i,n:\'Bytespider\',o:\'ByteDance\'},{p:/CCBot/i,n:\'CCBot\',o:\'Common Crawl\'},{p:/Google-Extended/i,n:\'Google-Extended\',o:\'Google\'},{p:/PerplexityBot/i,n:\'PerplexityBot\',o:\'Perplexity\'},{p:/Applebot/i,n:\'Applebot\',o:\'Apple\'},{p:/FacebookBot/i,n:\'FacebookBot\',o:\'Meta\'},{p:/cohere-ai/i,n:\'cohere-ai\',o:\'Cohere\'},{p:/Amazonbot/i,n:\'Amazonbot\',o:\'Amazon\'}],ua=navigator.userAgent,bot=null;for(var i=0;i<B.length;i++){if(B[i].p.test(ua)){bot=B[i];break}}function log(t,d){var e=JSON.parse(localStorage.getItem(K)||\'[]\');e.push({type:t,timestamp:new Date().toISOString(),page:location.pathname,bot:bot?bot.n:null,owner:bot?bot.o:null,userAgent:ua.substring(0,200),data:d||null});if(e.length>1000)e=e.slice(-1000);localStorage.setItem(K,JSON.stringify(e));if(bot)console.log(\'[AgentReady] AI bot detected:\',bot.n,\'(\'+bot.o+\')\')}if(navigator.modelContext){var oR=navigator.modelContext.registerTool;if(oR){navigator.modelContext.registerTool=function(td){log(\'tool_registered\',{name:td.name,description:td.description});console.log(\'[AgentReady] Tool registered:\',td.name);if(td.handler){var oH=td.handler;td.handler=function(p){log(\'tool_invoked\',{name:td.name,params:p});console.log(\'[AgentReady] Tool invoked:\',td.name,p);return oH.call(this,p)}}return oR.call(this,td)}}}var oF=window.fetch;window.fetch=function(u,o){var s=typeof u===\'string\'?u:(u&&u.url)||\'\';if(s.indexOf(\'.well-known/agent.json\')>-1||s.indexOf(\'.well-known/mcp.json\')>-1||s.indexOf(\'.well-known/agents.json\')>-1||s.indexOf(\'llms.txt\')>-1){log(\'protocol_fetch\',{url:s});console.log(\'[AgentReady] Protocol file requested:\',s)}return oF.apply(this,arguments)};log(bot?\'bot_visit\':\'page_visit\');window.__agentready={getEvents:function(){return JSON.parse(localStorage.getItem(K)||\'[]\')},getBotVisits:function(){return this.getEvents().filter(function(e){return e.bot})},getToolEvents:function(){return this.getEvents().filter(function(e){return e.type===\'tool_registered\'||e.type===\'tool_invoked\'})},clear:function(){localStorage.removeItem(K);console.log(\'[AgentReady] Traffic log cleared\')},summary:function(){var ev=this.getEvents(),b={};ev.forEach(function(e){if(e.bot)b[e.bot]=(b[e.bot]||0)+1});return{total:ev.length,botVisits:this.getBotVisits().length,bots:b}}}})();\n<\/script>';
+    }
+
+    // ===== Generate Snippet =====
+    function generateSnippet() {
+      var input = document.getElementById('domain-input');
+      var domain = input.value.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+      if (!domain) {
+        input.focus();
+        showToast('Please enter a domain name');
+        return;
+      }
+      var snippet = getTrackingScript(domain);
+      document.getElementById('snippet-code').textContent = snippet;
+      document.getElementById('snippet-area').classList.add('visible');
+      document.getElementById('console-area').classList.add('visible');
+      document.getElementById('snippet-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Enter key triggers generate
+    document.getElementById('domain-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') generateSnippet();
+    });
+
+    // ===== Copy Snippet =====
+    function copySnippet() {
+      var code = document.getElementById('snippet-code').textContent;
+      var btn = document.getElementById('copy-btn');
+      navigator.clipboard.writeText(code).then(function() {
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function() {
+        // Fallback
+        var ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+
+    // ===== Toast =====
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+
+    // ===== Animate Chart Bars on Scroll =====
+    (function() {
+      var animated = false;
+      var chart = document.getElementById('chart-card');
+      function animateBars() {
+        if (animated) return;
+        var rect = chart.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+          animated = true;
+          var bars = chart.querySelectorAll('.chart-bar');
+          bars.forEach(function(bar, i) {
+            setTimeout(function() {
+              bar.style.width = bar.getAttribute('data-target');
+            }, i * 100);
+          });
+        }
+      }
+      window.addEventListener('scroll', animateBars);
+      animateBars();
+    })();
+  </script>
+</body>
+</html>

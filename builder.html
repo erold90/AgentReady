@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebMCP Visual Builder — AgentReady</title>
+  <meta name="description" content="Build WebMCP-ready HTML forms visually. No code required. Click to add fields, configure, and export clean HTML.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <style>
+/* ===== VARIABLES ===== */
+:root {
+  --bg: #ffffff;
+  --bg-2: #f8fafc;
+  --bg-3: #f1f5f9;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --border-2: #cbd5e1;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #94a3b8;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-light: #dbeafe;
+  --green: #10b981;
+  --green-light: #d1fae5;
+  --yellow: #f59e0b;
+  --yellow-light: #fef3c7;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+  --transition: 0.2s ease;
+  --code-bg: #0f172a;
+  --code-text: #e2e8f0;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg-2: #1e293b;
+  --bg-3: #334155;
+  --surface: #1e293b;
+  --border: #334155;
+  --border-2: #475569;
+  --text: #f1f5f9;
+  --text-2: #94a3b8;
+  --text-3: #64748b;
+  --primary-light: #1e3a5f;
+  --green-light: #064e3b;
+  --yellow-light: #78350f;
+  --red-light: #7f1d1d;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+  --code-bg: #020617;
+  --code-text: #cbd5e1;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: var(--font); }
+input, select, textarea { font-family: var(--font); }
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.85);
+}
+[data-theme="dark"] .header {
+  background: rgba(15,23,42,0.85);
+}
+.header-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  text-decoration: none;
+}
+.logo:hover { text-decoration: none; }
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.header-nav a:hover { color: var(--primary); text-decoration: none; }
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 6px 10px;
+  font-size: 16px;
+  color: var(--text-2);
+  transition: all var(--transition);
+}
+.theme-toggle:hover { border-color: var(--primary); color: var(--primary); }
+.theme-icon-dark { display: none; }
+[data-theme="dark"] .theme-icon-light { display: none; }
+[data-theme="dark"] .theme-icon-dark { display: inline; }
+
+/* ===== MAIN LAYOUT ===== */
+.builder-container {
+  flex: 1;
+  display: flex;
+  max-width: 1440px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: calc(100vh - 60px);
+}
+.config-panel {
+  width: 50%;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg);
+}
+.preview-panel {
+  width: 50%;
+  overflow-y: auto;
+  padding: 24px;
+  background: var(--bg-2);
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+
+/* ===== TOOL CONFIG ===== */
+.tool-config {
+  margin-bottom: 24px;
+}
+.config-row {
+  margin-bottom: 12px;
+}
+.config-row label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 4px;
+}
+.config-row input, .config-row textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.config-row input:focus, .config-row textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.config-row textarea { resize: vertical; min-height: 60px; }
+
+/* ===== ADD FIELD BUTTONS ===== */
+.add-field-section { margin-bottom: 24px; }
+.field-type-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pill-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pill-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+.pill-btn .pill-plus { font-weight: 700; font-size: 14px; }
+
+/* ===== FIELD CARDS ===== */
+.fields-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.field-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 16px;
+  transition: all var(--transition);
+  position: relative;
+}
+.field-card:hover {
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-md);
+}
+.field-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.field-card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary);
+}
+.field-card-actions {
+  display: flex;
+  gap: 4px;
+}
+.field-action-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.field-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+.field-action-btn.delete:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-light);
+}
+.field-card-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.field-input-group { display: flex; flex-direction: column; }
+.field-input-group.full { grid-column: 1 / -1; }
+.field-input-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-3);
+  margin-bottom: 3px;
+}
+.field-input-group input,
+.field-input-group select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 13px;
+  transition: border-color var(--transition);
+}
+.field-input-group input:focus,
+.field-input-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.field-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 20px;
+}
+.field-checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
+.field-checkbox-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  margin: 0;
+}
+.validation-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  font-size: 14px;
+}
+.valid { color: var(--green); }
+.warning { color: var(--yellow); }
+
+/* ===== TEMPLATES ===== */
+.templates-section { margin-bottom: 24px; }
+.template-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.template-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition);
+}
+.template-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-3);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text-2); }
+.empty-state-desc { font-size: 14px; }
+
+/* ===== PREVIEW PANEL ===== */
+.preview-section { margin-bottom: 24px; }
+.preview-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.form-preview-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.form-preview-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-preview-box label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  display: block;
+}
+.form-preview-box input,
+.form-preview-box select,
+.form-preview-box textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: var(--font);
+}
+.form-preview-box input:focus,
+.form-preview-box select:focus,
+.form-preview-box textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+}
+.form-preview-box textarea { resize: vertical; min-height: 80px; }
+.form-preview-box button[type="submit"] {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background var(--transition);
+}
+.form-preview-box button[type="submit"]:hover { background: var(--primary-hover); }
+.form-preview-box .field-group { display: flex; flex-direction: column; }
+
+/* Hidden field display */
+.form-preview-box .hidden-field-indicator {
+  padding: 8px 12px;
+  background: var(--bg-3);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--mono);
+}
+
+/* ===== CODE PREVIEW ===== */
+.code-preview-box {
+  background: var(--code-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  overflow-x: auto;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+.code-preview-box pre {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--code-text);
+  white-space: pre;
+  tab-size: 2;
+}
+.copy-btn {
+  padding: 10px 24px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.copy-btn:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.copy-btn.copied { background: var(--green); }
+.copy-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* ===== VALIDATION STATUS ===== */
+.validation-bar {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.validation-bar.ok { background: var(--green-light); color: var(--green); }
+.validation-bar.warn { background: var(--yellow-light); color: var(--yellow); }
+.validation-bar.error { background: var(--red-light); color: var(--red); }
+
+/* ===== FIELD COUNT ===== */
+.field-count {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-3);
+  color: var(--text-3);
+}
+
+/* ===== CLEAR BTN ===== */
+.clear-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all var(--transition);
+}
+.clear-btn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-light);
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .builder-container {
+    flex-direction: column;
+  }
+  .config-panel, .preview-panel {
+    width: 100%;
+    border-right: none;
+    min-height: auto;
+  }
+  .config-panel {
+    border-bottom: 1px solid var(--border);
+  }
+}
+@media (max-width: 480px) {
+  .config-panel, .preview-panel { padding: 16px; }
+  .field-card-body { grid-template-columns: 1fr; }
+  .header-nav { gap: 8px; }
+  .header-nav a { display: none; }
+  .header-nav.mobile-open a { display: block; }
+  .header-nav.mobile-open {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    left: 0;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: 16px 24px;
+    gap: 12px;
+    box-shadow: var(--shadow-md);
+    z-index: 200;
+  }
+  .hamburger-btn { display: flex !important; }
+}
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  padding: 6px 10px;
+  font-size: 20px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.hamburger-btn:hover { border-color: var(--border-2); }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-svg" width="24" height="24" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" fill="#2563eb"/>
+          <path d="M16 6 L16 16 L24 12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="16" cy="16" r="2" fill="white"/>
+        </svg>
+        <span class="logo-text">AgentReady</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="index.html#demo">Scanner</a>
+        <a href="playground.html">Playground</a>
+        <a href="tracker.html">Tracker</a>
+        <a href="https://github.com/erold90/AgentReady" target="_blank" rel="noopener">GitHub</a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-icon-light">&#9790;</span>
+          <span class="theme-icon-dark">&#9728;</span>
+        </button>
+        <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle menu" onclick="document.getElementById('header-nav').classList.toggle('mobile-open')">&#9776;</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Builder -->
+  <div class="builder-container">
+    <!-- LEFT: Config Panel -->
+    <div class="config-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div>
+          <h1 style="font-size:22px;font-weight:800;margin-bottom:2px;">WebMCP Visual Builder</h1>
+          <p style="font-size:13px;color:var(--text-3);">Build AI-ready forms without writing code</p>
+        </div>
+        <button class="clear-btn" onclick="clearAll()">Clear All</button>
+      </div>
+
+      <!-- Tool Config -->
+      <div class="tool-config">
+        <div class="section-title">Tool Configuration</div>
+        <div class="config-row">
+          <label for="toolname">Tool Name <span style="color:var(--red)">*</span></label>
+          <input type="text" id="toolname" placeholder="e.g. book_room" oninput="onToolConfigChange()">
+        </div>
+        <div class="config-row">
+          <label for="tooldescription">Description <span style="color:var(--red)">*</span></label>
+          <textarea id="tooldescription" placeholder="e.g. Book a hotel room with dates and guest count" oninput="onToolConfigChange()"></textarea>
+        </div>
+      </div>
+
+      <!-- Templates -->
+      <div class="templates-section">
+        <div class="section-title">Quick Templates</div>
+        <div class="template-pills">
+          <button class="template-btn" onclick="loadTemplate('booking')">Booking</button>
+          <button class="template-btn" onclick="loadTemplate('contact')">Contact</button>
+          <button class="template-btn" onclick="loadTemplate('search')">Search</button>
+          <button class="template-btn" onclick="loadTemplate('cart')">Cart</button>
+          <button class="template-btn" onclick="loadTemplate('newsletter')">Newsletter</button>
+          <button class="template-btn" onclick="loadTemplate('reservation')">Reservation</button>
+        </div>
+      </div>
+
+      <!-- Add Field -->
+      <div class="add-field-section">
+        <div class="section-title">Add Field</div>
+        <div class="field-type-pills">
+          <button class="pill-btn" onclick="addField('text')"><span class="pill-plus">+</span> Text</button>
+          <button class="pill-btn" onclick="addField('email')"><span class="pill-plus">+</span> Email</button>
+          <button class="pill-btn" onclick="addField('number')"><span class="pill-plus">+</span> Number</button>
+          <button class="pill-btn" onclick="addField('date')"><span class="pill-plus">+</span> Date</button>
+          <button class="pill-btn" onclick="addField('time')"><span class="pill-plus">+</span> Time</button>
+          <button class="pill-btn" onclick="addField('tel')"><span class="pill-plus">+</span> Tel</button>
+          <button class="pill-btn" onclick="addField('url')"><span class="pill-plus">+</span> URL</button>
+          <button class="pill-btn" onclick="addField('textarea')"><span class="pill-plus">+</span> Textarea</button>
+          <button class="pill-btn" onclick="addField('select')"><span class="pill-plus">+</span> Select</button>
+          <button class="pill-btn" onclick="addField('checkbox')"><span class="pill-plus">+</span> Checkbox</button>
+          <button class="pill-btn" onclick="addField('hidden')"><span class="pill-plus">+</span> Hidden</button>
+        </div>
+      </div>
+
+      <!-- Fields List -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="section-title" style="margin-bottom:0;">Fields <span class="field-count" id="field-count">0</span></div>
+      </div>
+      <div class="fields-list" id="fields-list">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state-icon">+</div>
+          <div class="empty-state-title">No fields yet</div>
+          <div class="empty-state-desc">Click a field type above or load a template to get started.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview Panel -->
+    <div class="preview-panel">
+      <!-- Validation Bar -->
+      <div id="validation-bar" class="validation-bar warn" style="display:none;"></div>
+
+      <!-- Form Preview -->
+      <div class="preview-section">
+        <div class="preview-section-title">Live Preview</div>
+        <div class="form-preview-box" id="form-preview">
+          <div class="empty-state">
+            <div class="empty-state-icon">&#9998;</div>
+            <div class="empty-state-title">Form preview</div>
+            <div class="empty-state-desc">Configure your tool and add fields to see the live preview.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Preview -->
+      <div class="preview-section">
+        <div class="preview-section-title">Generated HTML</div>
+        <div class="code-preview-box">
+          <pre id="code-preview">&lt;!-- Set a tool name and add fields to generate HTML --&gt;</pre>
+        </div>
+        <div class="copy-actions">
+          <button class="copy-btn" id="copy-btn" onclick="copyHTML()">
+            <span id="copy-icon">&#128203;</span> Copy HTML
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// ===== STATE =====
+let fields = [];
+let toolname = '';
+let tooldescription = '';
+
+// ===== TEMPLATES =====
+const templates = {
+  booking: {
+    toolname: 'book_room',
+    tooldescription: 'Book a hotel room with check-in/check-out dates and guest count',
+    fields: [
+      { type: 'date', name: 'Check-in Date', description: 'Check-in date (YYYY-MM-DD)', required: true, placeholder: '', options: '' },
+      { type: 'date', name: 'Check-out Date', description: 'Check-out date (YYYY-MM-DD)', required: true, placeholder: '', options: '' },
+      { type: 'number', name: 'Guests', description: 'Number of guests (1-10)', required: true, placeholder: '', options: '' },
+      { type: 'select', name: 'Room Type', description: 'Type of room to book', required: false, placeholder: '', options: 'Standard, Deluxe, Suite' }
+    ]
+  },
+  contact: {
+    toolname: 'contact_form',
+    tooldescription: 'Send a message through the contact form',
+    fields: [
+      { type: 'text', name: 'Name', description: 'Full name of the sender', required: true, placeholder: 'John Doe', options: '' },
+      { type: 'email', name: 'Email', description: 'Email address for reply', required: true, placeholder: 'john@example.com', options: '' },
+      { type: 'tel', name: 'Phone', description: 'Phone number with country code', required: false, placeholder: '+1 555 0123', options: '' },
+      { type: 'textarea', name: 'Message', description: 'Message content', required: true, placeholder: 'Your message here...', options: '' }
+    ]
+  },
+  search: {
+    toolname: 'search_catalog',
+    tooldescription: 'Search the product catalog with filters',
+    fields: [
+      { type: 'text', name: 'Query', description: 'Search keywords', required: true, placeholder: 'Search...', options: '' },
+      { type: 'select', name: 'Category', description: 'Product category to search in', required: false, placeholder: '', options: 'All, Electronics, Clothing, Books, Home' },
+      { type: 'select', name: 'Sort', description: 'Sort order for results', required: false, placeholder: '', options: 'Relevance, Price Low to High, Price High to Low, Newest' }
+    ]
+  },
+  cart: {
+    toolname: 'add_to_cart',
+    tooldescription: 'Add a product to the shopping cart',
+    fields: [
+      { type: 'hidden', name: 'Product ID', description: 'Unique product identifier', required: true, placeholder: '', options: '' },
+      { type: 'number', name: 'Quantity', description: 'Number of items to add', required: true, placeholder: '1', options: '' },
+      { type: 'select', name: 'Size', description: 'Product size variant', required: false, placeholder: '', options: 'S, M, L, XL, XXL' }
+    ]
+  },
+  newsletter: {
+    toolname: 'subscribe_newsletter',
+    tooldescription: 'Subscribe to the email newsletter',
+    fields: [
+      { type: 'email', name: 'Email', description: 'Email address to subscribe', required: true, placeholder: 'you@example.com', options: '' },
+      { type: 'text', name: 'Name', description: 'Your name (optional)', required: false, placeholder: 'Your name', options: '' }
+    ]
+  },
+  reservation: {
+    toolname: 'make_reservation',
+    tooldescription: 'Make a table reservation at the restaurant',
+    fields: [
+      { type: 'date', name: 'Date', description: 'Reservation date (YYYY-MM-DD)', required: true, placeholder: '', options: '' },
+      { type: 'time', name: 'Time', description: 'Reservation time (HH:MM)', required: true, placeholder: '', options: '' },
+      { type: 'number', name: 'Guests', description: 'Number of guests (1-20)', required: true, placeholder: '2', options: '' },
+      { type: 'text', name: 'Name', description: 'Name for the reservation', required: true, placeholder: 'John Doe', options: '' },
+      { type: 'tel', name: 'Phone', description: 'Contact phone number', required: true, placeholder: '+1 555 0123', options: '' }
+    ]
+  }
+};
+
+// ===== HELPERS =====
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function escAttr(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toId(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+}
+
+// ===== CORE FUNCTIONS =====
+function addField(type) {
+  fields.push({
+    id: 'field_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    type: type,
+    name: '',
+    description: '',
+    required: false,
+    placeholder: '',
+    options: type === 'select' ? 'Option 1, Option 2, Option 3' : ''
+  });
+  renderConfig();
+  updatePreview();
+  // Scroll to new field
+  setTimeout(() => {
+    const list = document.getElementById('fields-list');
+    const last = list.lastElementChild;
+    if (last) last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+}
+
+function removeField(index) {
+  fields.splice(index, 1);
+  renderConfig();
+  updatePreview();
+}
+
+function moveField(index, direction) {
+  const newIndex = index + direction;
+  if (newIndex < 0 || newIndex >= fields.length) return;
+  [fields[index], fields[newIndex]] = [fields[newIndex], fields[index]];
+  renderConfig();
+  updatePreview();
+}
+
+function updateField(index, prop, value) {
+  fields[index][prop] = prop === 'required' ? value : value;
+  updatePreview();
+  updateValidation();
+  // Update validation icon for this field
+  updateFieldValidationIcon(index);
+}
+
+function updateFieldValidationIcon(index) {
+  const f = fields[index];
+  const icon = document.getElementById('val-icon-' + index);
+  if (!icon) return;
+  if (f.name && f.description) {
+    icon.innerHTML = '<span class="valid">&#10003;</span>';
+  } else if (f.name) {
+    icon.innerHTML = '<span class="warning" title="Missing description">&#9888;</span>';
+  } else {
+    icon.innerHTML = '';
+  }
+}
+
+function onToolConfigChange() {
+  toolname = document.getElementById('toolname').value.trim();
+  tooldescription = document.getElementById('tooldescription').value.trim();
+  updatePreview();
+  updateValidation();
+}
+
+function clearAll() {
+  fields = [];
+  toolname = '';
+  tooldescription = '';
+  document.getElementById('toolname').value = '';
+  document.getElementById('tooldescription').value = '';
+  renderConfig();
+  updatePreview();
+  updateValidation();
+}
+
+function loadTemplate(name) {
+  const t = templates[name];
+  if (!t) return;
+  toolname = t.toolname;
+  tooldescription = t.tooldescription;
+  document.getElementById('toolname').value = t.toolname;
+  document.getElementById('tooldescription').value = t.tooldescription;
+  fields = t.fields.map(f => ({
+    id: 'field_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    type: f.type,
+    name: f.name,
+    description: f.description,
+    required: f.required,
+    placeholder: f.placeholder || '',
+    options: f.options || ''
+  }));
+  renderConfig();
+  updatePreview();
+  updateValidation();
+}
+
+// ===== RENDER CONFIG =====
+function renderConfig() {
+  const container = document.getElementById('fields-list');
+  const countEl = document.getElementById('field-count');
+  countEl.textContent = fields.length;
+
+  if (fields.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" id="empty-state">
+        <div class="empty-state-icon">+</div>
+        <div class="empty-state-title">No fields yet</div>
+        <div class="empty-state-desc">Click a field type above or load a template to get started.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = fields.map((f, i) => `
+    <div class="field-card" data-index="${i}">
+      <div class="field-card-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="field-card-badge">${f.type}</span>
+          <span id="val-icon-${i}" class="validation-icon">${
+            f.name && f.description ? '<span class="valid">&#10003;</span>' :
+            f.name ? '<span class="warning" title="Missing description">&#9888;</span>' : ''
+          }</span>
+        </div>
+        <div class="field-card-actions">
+          <button class="field-action-btn" onclick="moveField(${i}, -1)" title="Move up" ${i === 0 ? 'disabled style="opacity:0.3;cursor:default"' : ''}>&#8593;</button>
+          <button class="field-action-btn" onclick="moveField(${i}, 1)" title="Move down" ${i === fields.length - 1 ? 'disabled style="opacity:0.3;cursor:default"' : ''}>&#8595;</button>
+          <button class="field-action-btn delete" onclick="removeField(${i})" title="Remove field">&#10005;</button>
+        </div>
+      </div>
+      <div class="field-card-body">
+        <div class="field-input-group">
+          <label>Name *</label>
+          <input type="text" value="${escAttr(f.name)}" placeholder="e.g. Email Address" oninput="updateField(${i}, 'name', this.value)">
+        </div>
+        <div class="field-input-group">
+          <label>Type</label>
+          <select onchange="updateField(${i}, 'type', this.value); renderConfig();">
+            ${['text','email','number','date','time','tel','url','textarea','select','checkbox','hidden'].map(t =>
+              `<option value="${t}" ${t === f.type ? 'selected' : ''}>${t}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="field-input-group full">
+          <label>Description</label>
+          <input type="text" value="${escAttr(f.description)}" placeholder="Describe what this field is for" oninput="updateField(${i}, 'description', this.value)">
+        </div>
+        ${f.type !== 'hidden' ? `
+        <div class="field-input-group">
+          <label>Placeholder</label>
+          <input type="text" value="${escAttr(f.placeholder)}" placeholder="Optional" oninput="updateField(${i}, 'placeholder', this.value)">
+        </div>` : ''}
+        <div class="field-checkbox-group">
+          <input type="checkbox" id="req-${i}" ${f.required ? 'checked' : ''} onchange="updateField(${i}, 'required', this.checked)">
+          <label for="req-${i}">Required</label>
+        </div>
+        ${f.type === 'select' ? `
+        <div class="field-input-group full">
+          <label>Options (comma-separated)</label>
+          <input type="text" value="${escAttr(f.options)}" placeholder="Standard, Deluxe, Suite" oninput="updateField(${i}, 'options', this.value)">
+        </div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== GENERATE HTML =====
+function generateHTML() {
+  if (!toolname) return '<!-- Set a tool name to begin -->';
+  if (fields.length === 0) return '<!-- Add fields to generate HTML -->';
+
+  let html = `<form toolname="${escAttr(toolname)}" tooldescription="${escAttr(tooldescription)}">\n`;
+
+  fields.forEach(f => {
+    if (!f.name) return;
+    const id = toId(f.name);
+    const req = f.required ? ' required' : '';
+    const ph = f.placeholder ? ` placeholder="${escAttr(f.placeholder)}"` : '';
+    const desc = ` toolparamdescription="${escAttr(f.description)}"`;
+
+    if (f.type === 'hidden') {
+      html += `  <input type="hidden" id="${id}" name="${id}"${desc}${req}>\n\n`;
+    } else if (f.type === 'textarea') {
+      html += `  <label for="${id}">${esc(f.name)}</label>\n`;
+      html += `  <textarea id="${id}" name="${id}"${desc}${req}${ph}></textarea>\n\n`;
+    } else if (f.type === 'select') {
+      html += `  <label for="${id}">${esc(f.name)}</label>\n`;
+      html += `  <select id="${id}" name="${id}"${desc}${req}>\n`;
+      const opts = f.options.split(',').map(o => o.trim()).filter(Boolean);
+      opts.forEach(o => {
+        const val = toId(o);
+        html += `    <option value="${val}">${esc(o)}</option>\n`;
+      });
+      html += `  </select>\n\n`;
+    } else if (f.type === 'checkbox') {
+      html += `  <label>\n`;
+      html += `    <input type="checkbox" id="${id}" name="${id}"${desc}${req}>\n`;
+      html += `    ${esc(f.name)}\n`;
+      html += `  </label>\n\n`;
+    } else {
+      html += `  <label for="${id}">${esc(f.name)}</label>\n`;
+      html += `  <input type="${f.type}" id="${id}" name="${id}"${desc}${req}${ph}>\n\n`;
+    }
+  });
+
+  html += `  <button type="submit">Submit</button>\n</form>`;
+  return html;
+}
+
+// ===== UPDATE PREVIEW =====
+function updatePreview() {
+  const htmlStr = generateHTML();
+
+  // Code preview (escaped)
+  document.getElementById('code-preview').textContent = htmlStr;
+
+  // Form preview (rendered)
+  const previewBox = document.getElementById('form-preview');
+
+  if (!toolname || fields.length === 0) {
+    previewBox.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">&#9998;</div>
+        <div class="empty-state-title">Form preview</div>
+        <div class="empty-state-desc">Configure your tool and add fields to see the live preview.</div>
+      </div>`;
+    return;
+  }
+
+  // Build a rendered version (not using innerHTML with the raw HTML for safety)
+  let previewHTML = '<form onsubmit="event.preventDefault();">';
+  fields.forEach(f => {
+    if (!f.name) return;
+    const id = 'preview_' + toId(f.name);
+    const req = f.required ? ' required' : '';
+    const ph = f.placeholder ? ` placeholder="${escAttr(f.placeholder)}"` : '';
+
+    if (f.type === 'hidden') {
+      previewHTML += `<div class="field-group"><div class="hidden-field-indicator">hidden: ${esc(f.name)} (${toId(f.name)})</div></div>`;
+    } else if (f.type === 'textarea') {
+      previewHTML += `<div class="field-group"><label for="${id}">${esc(f.name)}${f.required ? ' <span style="color:var(--red)">*</span>' : ''}</label>`;
+      previewHTML += `<textarea id="${id}"${req}${ph}></textarea></div>`;
+    } else if (f.type === 'select') {
+      previewHTML += `<div class="field-group"><label for="${id}">${esc(f.name)}${f.required ? ' <span style="color:var(--red)">*</span>' : ''}</label>`;
+      previewHTML += `<select id="${id}"${req}>`;
+      const opts = f.options.split(',').map(o => o.trim()).filter(Boolean);
+      opts.forEach(o => {
+        previewHTML += `<option>${esc(o)}</option>`;
+      });
+      previewHTML += `</select></div>`;
+    } else if (f.type === 'checkbox') {
+      previewHTML += `<div class="field-group" style="flex-direction:row;align-items:center;gap:8px;"><input type="checkbox" id="${id}"${req} style="width:auto;"> <label for="${id}" style="margin:0;cursor:pointer;">${esc(f.name)}</label></div>`;
+    } else {
+      previewHTML += `<div class="field-group"><label for="${id}">${esc(f.name)}${f.required ? ' <span style="color:var(--red)">*</span>' : ''}</label>`;
+      previewHTML += `<input type="${f.type}" id="${id}"${req}${ph}></div>`;
+    }
+  });
+  previewHTML += '<button type="submit">Submit</button></form>';
+  previewBox.innerHTML = previewHTML;
+}
+
+// ===== VALIDATION =====
+function updateValidation() {
+  const bar = document.getElementById('validation-bar');
+
+  if (fields.length === 0 && !toolname) {
+    bar.style.display = 'none';
+    return;
+  }
+
+  const issues = [];
+  if (!toolname) issues.push('Tool name is required');
+  if (!tooldescription) issues.push('Tool description is recommended');
+
+  let missingNames = 0, missingDescs = 0;
+  fields.forEach(f => {
+    if (!f.name) missingNames++;
+    if (!f.description) missingDescs++;
+  });
+  if (missingNames > 0) issues.push(missingNames + ' field(s) missing name');
+  if (missingDescs > 0) issues.push(missingDescs + ' field(s) missing description');
+
+  bar.style.display = 'flex';
+
+  if (issues.length === 0) {
+    bar.className = 'validation-bar ok';
+    bar.innerHTML = '&#10003; All fields configured correctly. Ready to copy!';
+  } else {
+    const hasErrors = !toolname || missingNames > 0;
+    bar.className = hasErrors ? 'validation-bar error' : 'validation-bar warn';
+    bar.innerHTML = (hasErrors ? '&#10005; ' : '&#9888; ') + issues.join(' &middot; ');
+  }
+}
+
+// ===== COPY =====
+function copyHTML() {
+  const html = generateHTML();
+  navigator.clipboard.writeText(html).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const icon = document.getElementById('copy-icon');
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>&#10003;</span> Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span id="copy-icon">&#128203;</span> Copy HTML';
+    }, 2000);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = html;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('copied');
+    btn.innerHTML = '<span>&#10003;</span> Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<span id="copy-icon">&#128203;</span> Copy HTML';
+    }, 2000);
+  });
+}
+
+// ===== THEME =====
+(function() {
+  const saved = localStorage.getItem('agentready-theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('agentready-theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('agentready-theme', 'dark');
+    }
+  });
+})();
+  </script>
+</body>
+</html>

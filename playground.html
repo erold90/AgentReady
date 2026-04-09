@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebMCP Playground — AgentReady</title>
+  <meta name="description" content="Live HTML editor to see how AI agents interpret your WebMCP forms and tools. Write HTML, see the Agent View in real time.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --bg: #ffffff;
+      --bg-2: #f8fafc;
+      --bg-3: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-2: #cbd5e1;
+      --text: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --green: #10b981;
+      --green-light: #d1fae5;
+      --yellow: #f59e0b;
+      --yellow-light: #fef3c7;
+      --red: #ef4444;
+      --red-light: #fee2e2;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-xs: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+      --transition: 0.2s ease;
+      --editor-bg: #0f172a;
+      --editor-text: #e2e8f0;
+      --editor-line: #334155;
+      --editor-gutter: #1e293b;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --bg-2: #1e293b;
+      --bg-3: #334155;
+      --surface: #1e293b;
+      --border: #334155;
+      --border-2: #475569;
+      --text: #f1f5f9;
+      --text-2: #94a3b8;
+      --text-3: #64748b;
+      --primary-light: #1e3a5f;
+      --green-light: #064e3b;
+      --yellow-light: #78350f;
+      --red-light: #7f1d1d;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    button { cursor: pointer; font-family: var(--font); }
+
+    /* ===== HEADER ===== */
+    .pg-header {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    [data-theme="dark"] .pg-header {
+      background: rgba(15,23,42,0.95);
+    }
+    .pg-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .pg-back {
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .pg-back:hover { color: var(--text); text-decoration: none; }
+    .pg-title-group { display: flex; flex-direction: column; gap: 2px; }
+    .pg-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pg-title svg { flex-shrink: 0; }
+    .pg-subtitle { font-size: 13px; color: var(--text-3); }
+    .pg-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pg-tool-nav {
+      display: flex;
+      gap: 12px;
+    }
+    .pg-tool-nav a {
+      font-size: 13px;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .pg-tool-nav a:hover { color: var(--text); }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      padding: 6px 10px;
+      font-size: 16px;
+      color: var(--text-2);
+      transition: var(--transition);
+    }
+    .theme-toggle:hover { border-color: var(--border-2); }
+    .theme-icon-dark { display: none; }
+    [data-theme="dark"] .theme-icon-light { display: none; }
+    [data-theme="dark"] .theme-icon-dark { display: inline; }
+
+    /* ===== TOOLBAR ===== */
+    .pg-toolbar {
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pg-toolbar select {
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      min-width: 160px;
+    }
+    .pg-toolbar button {
+      font-size: 13px;
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      background: var(--surface);
+      color: var(--text-2);
+      transition: var(--transition);
+    }
+    .pg-toolbar button:hover {
+      background: var(--bg-3);
+      color: var(--text);
+      border-color: var(--border-2);
+    }
+    .pg-toolbar .btn-copy.copied {
+      background: var(--green-light);
+      color: var(--green);
+      border-color: var(--green);
+    }
+    .pg-toolbar-spacer { flex: 1; }
+    .pg-toolbar-label {
+      font-size: 12px;
+      color: var(--text-3);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== EDITOR LAYOUT ===== */
+    .pg-editor {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .pg-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .pg-pane-header {
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .pg-code .pg-pane-header {
+      background: var(--editor-gutter);
+      color: var(--text-3);
+      border-color: var(--editor-line);
+    }
+    .pg-preview .pg-pane-header {
+      background: var(--bg-2);
+      color: var(--text-2);
+    }
+    .pg-divider {
+      width: 3px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      transition: background var(--transition);
+    }
+    .pg-divider:hover, .pg-divider.dragging {
+      background: var(--primary);
+    }
+
+    /* ===== CODE EDITOR ===== */
+    .pg-code-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #pg-input {
+      width: 100%;
+      height: 100%;
+      resize: none;
+      border: none;
+      outline: none;
+      background: var(--editor-bg);
+      color: var(--editor-text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 16px;
+      tab-size: 2;
+      white-space: pre;
+      overflow: auto;
+    }
+    #pg-input::placeholder {
+      color: var(--text-3);
+    }
+
+    /* ===== AGENT VIEW ===== */
+    .pg-preview-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .pg-score-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .pg-score-badge.score-high { background: var(--green-light); color: var(--green); }
+    .pg-score-badge.score-mid { background: var(--yellow-light); color: var(--yellow); }
+    .pg-score-badge.score-low { background: var(--red-light); color: var(--red); }
+
+    .no-tools {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-3);
+      gap: 8px;
+      height: 100%;
+    }
+    .no-tools p:first-child {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+    .no-tools code {
+      background: var(--bg-3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    /* ===== TOOL CARD ===== */
+    .tool-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .tool-name {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .tool-source {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 100px;
+      background: var(--bg-3);
+      color: var(--text-3);
+      font-weight: 500;
+    }
+    .tool-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+    .tool-params-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+    .param-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--bg-3);
+      flex-wrap: wrap;
+    }
+    .param-row:last-child { border-bottom: none; }
+    .param-name {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 100px;
+    }
+    .param-type {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-family: var(--mono);
+      font-weight: 500;
+    }
+    .param-desc {
+      font-size: 12px;
+      color: var(--text-2);
+      flex: 1;
+      min-width: 120px;
+    }
+    .param-required {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--red-light);
+      color: var(--red);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .param-options {
+      font-size: 11px;
+      color: var(--text-3);
+      font-family: var(--mono);
+    }
+
+    /* ===== VALIDATION ===== */
+    .pg-validation {
+      border-top: 1px solid var(--border);
+      background: var(--bg-2);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      min-height: 44px;
+      align-items: center;
+    }
+    .val-item {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .val-pass { color: var(--green); }
+    .val-warn { color: var(--yellow); }
+    .val-fail { color: var(--red); }
+    .val-icon { font-weight: 700; font-size: 14px; }
+    .val-empty {
+      color: var(--text-3);
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+      .pg-editor {
+        flex-direction: column;
+      }
+      .pg-pane {
+        min-height: 40vh;
+      }
+      .pg-divider {
+        width: auto;
+        height: 3px;
+        cursor: row-resize;
+      }
+      .pg-header {
+        padding: 12px 16px;
+      }
+      .pg-header-left { flex-wrap: wrap; }
+      .pg-toolbar { padding: 8px 16px; }
+      .pg-subtitle { display: none; }
+      .pg-tool-nav { display: none; }
+      .pg-validation { padding: 10px 16px; }
+      .pg-preview-content { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="pg-header">
+    <div class="pg-header-left">
+      <a href="index.html" class="pg-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        AgentReady
+      </a>
+      <div class="pg-title-group">
+        <div class="pg-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          WebMCP Playground
+        </div>
+        <div class="pg-subtitle">Write HTML, see what AI agents see — in real time</div>
+      </div>
+    </div>
+    <div class="pg-header-right">
+      <nav class="pg-tool-nav">
+        <a href="index.html#demo">Scanner</a>
+        <a href="builder.html">Builder</a>
+        <a href="tracker.html">Tracker</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
+        <span class="theme-icon-light">&#9790;</span>
+        <span class="theme-icon-dark">&#9728;</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="pg-toolbar">
+    <span class="pg-toolbar-label">Template</span>
+    <select id="pg-template">
+      <option value="blank">Blank</option>
+      <option value="booking" selected>Booking Form</option>
+      <option value="contact">Contact Form</option>
+      <option value="search">Search Form</option>
+      <option value="ecommerce">E-commerce</option>
+      <option value="newsletter">Newsletter</option>
+      <option value="jsapi">JavaScript API</option>
+    </select>
+    <div class="pg-toolbar-spacer"></div>
+    <button id="pg-copy" class="btn-copy">Copy HTML</button>
+    <button id="pg-reset">Reset</button>
+  </div>
+
+  <!-- Editor -->
+  <div class="pg-editor">
+    <div class="pg-pane pg-code">
+      <div class="pg-pane-header">HTML Code</div>
+      <div class="pg-code-wrap">
+        <textarea id="pg-input" spellcheck="false" placeholder="Type or paste your HTML here..."></textarea>
+      </div>
+    </div>
+    <div class="pg-divider" id="pg-divider"></div>
+    <div class="pg-pane pg-preview">
+      <div class="pg-pane-header">
+        <span>Agent View</span>
+        <span id="pg-score"></span>
+      </div>
+      <div class="pg-preview-content" id="pg-output"></div>
+    </div>
+  </div>
+
+  <!-- Validation Bar -->
+  <div class="pg-validation" id="pg-validation">
+    <span class="val-empty">Start typing to see validation results</span>
+  </div>
+
+  <script>
+    /* ===== THEME ===== */
+    (function initTheme() {
+      const saved = localStorage.getItem('agentready-theme');
+      if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    })();
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      localStorage.setItem('agentready-theme', isDark ? 'light' : 'dark');
+    });
+
+    /* ===== TEMPLATES ===== */
+    const templates = {
+      blank: '',
+      booking: `<form toolname="book_room" tooldescription="Book a hotel room with check-in and check-out dates, number of guests, and room type preference">
+  <label>Check-in Date
+    <input type="date" name="checkin" toolparamdescription="Check-in date (YYYY-MM-DD)" required>
+  </label>
+  <label>Check-out Date
+    <input type="date" name="checkout" toolparamdescription="Check-out date (YYYY-MM-DD)" required>
+  </label>
+  <label>Guests
+    <input type="number" name="guests" toolparamdescription="Number of guests (1-10)" min="1" max="10" required>
+  </label>
+  <label>Room Type
+    <select name="room_type" toolparamdescription="Type of room to book">
+      <option value="standard">Standard</option>
+      <option value="deluxe">Deluxe</option>
+      <option value="suite">Suite</option>
+    </select>
+  </label>
+  <label>Special Requests
+    <textarea name="special_requests" toolparamdescription="Any special requests or notes for the hotel"></textarea>
+  </label>
+  <button type="submit">Book Now</button>
+</form>`,
+      contact: `<form toolname="send_message" tooldescription="Send a contact message to the website owner with name, email, subject, and message body">
+  <label>Full Name
+    <input type="text" name="full_name" toolparamdescription="Sender's full name" required>
+  </label>
+  <label>Email Address
+    <input type="email" name="email" toolparamdescription="Sender's email address for reply" required>
+  </label>
+  <label>Subject
+    <input type="text" name="subject" toolparamdescription="Message subject line" required>
+  </label>
+  <label>Priority
+    <select name="priority" toolparamdescription="Message priority level">
+      <option value="normal">Normal</option>
+      <option value="high">High</option>
+      <option value="low">Low</option>
+    </select>
+  </label>
+  <label>Message
+    <textarea name="message" toolparamdescription="The full message body" required></textarea>
+  </label>
+  <button type="submit">Send Message</button>
+</form>`,
+      search: `<form toolname="search_content" tooldescription="Search website content by keyword with optional filters for category, date range, and sort order">
+  <label>Search Query
+    <input type="search" name="query" toolparamdescription="Search keywords or phrase" required>
+  </label>
+  <label>Category
+    <select name="category" toolparamdescription="Filter results by content category">
+      <option value="">All Categories</option>
+      <option value="articles">Articles</option>
+      <option value="docs">Documentation</option>
+      <option value="tutorials">Tutorials</option>
+      <option value="api">API Reference</option>
+    </select>
+  </label>
+  <label>From Date
+    <input type="date" name="date_from" toolparamdescription="Filter results published after this date">
+  </label>
+  <label>To Date
+    <input type="date" name="date_to" toolparamdescription="Filter results published before this date">
+  </label>
+  <label>Sort By
+    <select name="sort" toolparamdescription="Sort order for results">
+      <option value="relevance">Relevance</option>
+      <option value="date_desc">Newest First</option>
+      <option value="date_asc">Oldest First</option>
+    </select>
+  </label>
+  <label>Results Per Page
+    <input type="number" name="limit" toolparamdescription="Number of results per page (1-50)" min="1" max="50" value="10">
+  </label>
+  <button type="submit">Search</button>
+</form>`,
+      ecommerce: `<form toolname="add_to_cart" tooldescription="Add a product to the shopping cart with selected size, color, quantity, and optional gift wrapping">
+  <label>Product ID
+    <input type="text" name="product_id" toolparamdescription="Unique product identifier (SKU)" required>
+  </label>
+  <label>Quantity
+    <input type="number" name="quantity" toolparamdescription="Number of items to add" min="1" max="99" value="1" required>
+  </label>
+  <label>Size
+    <select name="size" toolparamdescription="Product size" required>
+      <option value="xs">XS</option>
+      <option value="s">S</option>
+      <option value="m">M</option>
+      <option value="l">L</option>
+      <option value="xl">XL</option>
+      <option value="xxl">XXL</option>
+    </select>
+  </label>
+  <label>Color
+    <select name="color" toolparamdescription="Product color variant">
+      <option value="black">Black</option>
+      <option value="white">White</option>
+      <option value="navy">Navy</option>
+      <option value="red">Red</option>
+    </select>
+  </label>
+  <label>
+    <input type="checkbox" name="gift_wrap" toolparamdescription="Whether to add gift wrapping"> Gift Wrap
+  </label>
+  <label>Gift Message
+    <textarea name="gift_message" toolparamdescription="Optional gift message to include with the item"></textarea>
+  </label>
+  <button type="submit">Add to Cart</button>
+</form>`,
+      newsletter: `<form toolname="subscribe_newsletter" tooldescription="Subscribe to the email newsletter with name, email, and topic preferences">
+  <label>Email Address
+    <input type="email" name="email" toolparamdescription="Email address for newsletter delivery" required>
+  </label>
+  <label>First Name
+    <input type="text" name="first_name" toolparamdescription="Subscriber's first name for personalization">
+  </label>
+  <label>Topics of Interest
+    <select name="topic" toolparamdescription="Primary topic of interest for newsletter content">
+      <option value="all">All Topics</option>
+      <option value="tech">Technology</option>
+      <option value="ai">AI & Machine Learning</option>
+      <option value="web">Web Development</option>
+      <option value="business">Business</option>
+    </select>
+  </label>
+  <label>Frequency
+    <select name="frequency" toolparamdescription="How often to receive the newsletter" required>
+      <option value="weekly">Weekly</option>
+      <option value="biweekly">Bi-weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+  </label>
+  <button type="submit">Subscribe</button>
+</form>`,
+      jsapi: `<!-- JavaScript API: registerTool() -->
+<script>
+if (navigator.modelContext) {
+  navigator.modelContext.registerTool({
+    name: "search_products",
+    description: "Search the product catalog by keyword, category, or price range and return matching items",
+    parameters: {
+      type: "object",
+      properties: {
+        query: {
+          type: "string",
+          description: "Search keywords to match against product names and descriptions"
+        },
+        category: {
+          type: "string",
+          description: "Product category filter (e.g. electronics, clothing, books)"
+        },
+        max_price: {
+          type: "number",
+          description: "Maximum price in USD to filter results"
+        },
+        in_stock: {
+          type: "boolean",
+          description: "Only return items currently in stock"
+        }
+      },
+      required: ["query"]
+    },
+    handler: async (params) => {
+      const results = await fetch(\`/api/search?q=\${params.query}\`);
+      return results.json();
+    }
+  });
+}
+<\/script>`
+    };
+
+    /* ===== PARSER ===== */
+    function parseHTML(html) {
+      const tools = [];
+      const errors = [];
+      const warnings = [];
+      const passes = [];
+
+      // Parse forms from HTML
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const allForms = doc.querySelectorAll('form');
+      const wmcpForms = doc.querySelectorAll('form[toolname]');
+
+      // Check for forms without toolname
+      allForms.forEach((form, i) => {
+        if (!form.hasAttribute('toolname')) {
+          warnings.push('Form #' + (i + 1) + ' is missing toolname attribute');
+        }
+      });
+
+      // Parse WebMCP forms
+      wmcpForms.forEach(form => {
+        const toolname = form.getAttribute('toolname').trim();
+        const tooldescription = (form.getAttribute('tooldescription') || '').trim();
+
+        if (!toolname) {
+          errors.push('Empty toolname attribute found');
+          return;
+        }
+        passes.push('Form has toolname: ' + toolname);
+
+        if (!tooldescription) {
+          errors.push(toolname + ': missing tooldescription');
+        } else if (tooldescription.length <= 10) {
+          warnings.push(toolname + ': tooldescription is too short (< 10 chars)');
+        } else {
+          passes.push(toolname + ': has good tooldescription (' + tooldescription.length + ' chars)');
+        }
+
+        const params = [];
+        const fields = form.querySelectorAll('input, select, textarea');
+        let hasRequired = false;
+        let allHaveDesc = true;
+        let allHaveNames = true;
+        let allHaveProperTypes = true;
+        let genericTextCount = 0;
+        let totalTypeable = 0;
+
+        fields.forEach(field => {
+          if (field.type === 'submit' || field.type === 'button' || field.type === 'hidden') return;
+
+          const name = field.getAttribute('name');
+          const desc = (field.getAttribute('toolparamdescription') || '').trim();
+          const type = field.type || field.tagName.toLowerCase();
+          const isRequired = field.hasAttribute('required');
+
+          if (!name) {
+            allHaveNames = false;
+            warnings.push(toolname + ': field missing name attribute');
+            return;
+          }
+
+          if (!desc) allHaveDesc = false;
+          if (isRequired) hasRequired = true;
+
+          // Check for generic types
+          if (field.tagName === 'INPUT') {
+            totalTypeable++;
+            if (type === 'text') genericTextCount++;
+          }
+
+          // Gather options for select elements
+          let options = null;
+          if (field.tagName === 'SELECT') {
+            options = Array.from(field.querySelectorAll('option'))
+              .map(o => o.value)
+              .filter(v => v);
+          }
+
+          params.push({
+            name: name,
+            type: type === 'textarea' ? 'text (long)' : type,
+            description: desc,
+            required: isRequired,
+            options: options,
+            min: field.getAttribute('min'),
+            max: field.getAttribute('max')
+          });
+        });
+
+        if (allHaveDesc) {
+          passes.push(toolname + ': all fields have toolparamdescription');
+        } else {
+          warnings.push(toolname + ': some fields missing toolparamdescription');
+        }
+
+        if (allHaveNames) {
+          passes.push(toolname + ': all fields have name attributes');
+        }
+
+        if (hasRequired) {
+          passes.push(toolname + ': has required fields');
+        } else {
+          warnings.push(toolname + ': no required fields defined');
+        }
+
+        if (totalTypeable > 0 && genericTextCount === totalTypeable && totalTypeable > 1) {
+          warnings.push(toolname + ': all inputs use type="text" — consider using more specific types');
+          allHaveProperTypes = false;
+        } else if (totalTypeable > 0) {
+          passes.push(toolname + ': uses specific input types');
+        }
+
+        tools.push({
+          name: toolname,
+          description: tooldescription,
+          params: params,
+          source: 'form',
+          hasRequired,
+          allHaveDesc,
+          allHaveNames,
+          allHaveProperTypes
+        });
+      });
+
+      // Parse registerTool() calls from raw text
+      const toolRegex = /registerTool\s*\(\s*(\{[\s\S]*?\})\s*\)/g;
+      let match;
+      while ((match = toolRegex.exec(html)) !== null) {
+        try {
+          // Safely evaluate the object literal
+          const objStr = match[1]
+            .replace(/(\w+)\s*:/g, '"$1":')
+            .replace(/'/g, '"')
+            .replace(/,\s*}/g, '}')
+            .replace(/,\s*]/g, ']')
+            .replace(/async\s*\(.*?\)\s*=>\s*\{[\s\S]*?\}/g, 'null')
+            .replace(/function\s*\(.*?\)\s*\{[\s\S]*?\}/g, 'null')
+            .replace(/\`[^`]*\`/g, '""');
+
+          const toolDef = JSON.parse(objStr);
+          const name = toolDef.name || '(unnamed)';
+          const description = toolDef.description || '';
+
+          passes.push('registerTool found: ' + name);
+
+          if (!description) {
+            errors.push(name + ': missing description in registerTool');
+          } else if (description.length <= 10) {
+            warnings.push(name + ': description is too short');
+          } else {
+            passes.push(name + ': has good description');
+          }
+
+          const params = [];
+          let hasRequired = false;
+          let allHaveDesc = true;
+
+          if (toolDef.parameters && toolDef.parameters.properties) {
+            const props = toolDef.parameters.properties;
+            const required = toolDef.parameters.required || [];
+
+            for (const [pName, pDef] of Object.entries(props)) {
+              const isReq = required.includes(pName);
+              if (isReq) hasRequired = true;
+              if (!pDef.description) allHaveDesc = false;
+
+              params.push({
+                name: pName,
+                type: pDef.type || 'any',
+                description: pDef.description || '',
+                required: isReq,
+                options: pDef.enum || null
+              });
+            }
+          }
+
+          if (hasRequired) passes.push(name + ': has required parameters');
+          else warnings.push(name + ': no required parameters');
+
+          if (allHaveDesc) passes.push(name + ': all params have descriptions');
+          else warnings.push(name + ': some params missing descriptions');
+
+          tools.push({
+            name,
+            description,
+            params,
+            source: 'registerTool',
+            hasRequired,
+            allHaveDesc,
+            allHaveNames: true,
+            allHaveProperTypes: true
+          });
+        } catch (e) {
+          warnings.push('Could not parse registerTool() call — complex JS may not be fully parsed');
+        }
+      }
+
+      return { tools, errors, warnings, passes };
+    }
+
+    /* ===== SCORE ===== */
+    function calcScore(result) {
+      if (result.tools.length === 0) return 0;
+      let score = 0;
+      let checks = 0;
+
+      result.tools.forEach(tool => {
+        // Has toolname: +20
+        score += 20;
+        checks++;
+
+        // Has good description: +20
+        if (tool.description && tool.description.length > 10) score += 20;
+        checks++;
+
+        // All fields have descriptions: +20
+        if (tool.allHaveDesc) score += 20;
+        checks++;
+
+        // Proper types: +15
+        if (tool.allHaveProperTypes) score += 15;
+        checks++;
+
+        // Has required fields: +10
+        if (tool.hasRequired) score += 10;
+        checks++;
+
+        // Has name attributes: +10
+        if (tool.allHaveNames) score += 10;
+        checks++;
+      });
+
+      // Bonus for multiple tools
+      if (result.tools.length > 1) score += 5;
+
+      // Normalize to 100
+      const maxPerTool = 95;
+      const maxTotal = maxPerTool * result.tools.length + (result.tools.length > 1 ? 5 : 0);
+      return Math.min(100, Math.round((score / maxTotal) * 100));
+    }
+
+    /* ===== RENDER ===== */
+    function renderAgentView(result) {
+      const output = document.getElementById('pg-output');
+      const scoreEl = document.getElementById('pg-score');
+      const validationEl = document.getElementById('pg-validation');
+
+      if (result.tools.length === 0) {
+        scoreEl.innerHTML = '';
+        output.innerHTML = '<div class="no-tools"><p>No WebMCP tools detected</p><p>Add <code>toolname</code> and <code>tooldescription</code> attributes to your <code>&lt;form&gt;</code> elements, or use <code>registerTool()</code> in a script.</p></div>';
+      } else {
+        const score = calcScore(result);
+        const scoreClass = score >= 80 ? 'score-high' : score >= 50 ? 'score-mid' : 'score-low';
+        scoreEl.innerHTML = '<span class="pg-score-badge ' + scoreClass + '">' + score + '/100</span>';
+
+        let html = '';
+        result.tools.forEach(tool => {
+          html += '<div class="tool-card">';
+          html += '<div class="tool-card-header">';
+          html += '<span class="tool-name">' + escHtml(tool.name) + '</span>';
+          html += '<span class="tool-source">' + (tool.source === 'form' ? 'HTML Form' : 'JS API') + '</span>';
+          html += '</div>';
+          if (tool.description) {
+            html += '<div class="tool-desc">"' + escHtml(tool.description) + '"</div>';
+          }
+          if (tool.params.length > 0) {
+            html += '<div class="tool-params-title">Parameters (' + tool.params.length + ')</div>';
+            tool.params.forEach(p => {
+              html += '<div class="param-row">';
+              html += '<span class="param-name">' + escHtml(p.name) + '</span>';
+              html += '<span class="param-type">' + escHtml(p.type) + '</span>';
+              if (p.description) html += '<span class="param-desc">' + escHtml(p.description) + '</span>';
+              if (p.required) html += '<span class="param-required">required</span>';
+              if (p.options && p.options.length) {
+                html += '<span class="param-options">enum: [' + p.options.map(o => '"' + escHtml(o) + '"').join(', ') + ']</span>';
+              }
+              if (p.min || p.max) {
+                const range = [];
+                if (p.min) range.push('min: ' + p.min);
+                if (p.max) range.push('max: ' + p.max);
+                html += '<span class="param-options">' + range.join(', ') + '</span>';
+              }
+              html += '</div>';
+            });
+          }
+          html += '</div>';
+        });
+        output.innerHTML = html;
+      }
+
+      // Render validation
+      if (!document.getElementById('pg-input').value.trim()) {
+        validationEl.innerHTML = '<span class="val-empty">Start typing to see validation results</span>';
+        return;
+      }
+
+      let vHtml = '';
+      result.passes.forEach(p => {
+        vHtml += '<span class="val-item val-pass"><span class="val-icon">&#10003;</span> ' + escHtml(p) + '</span>';
+      });
+      result.warnings.forEach(w => {
+        vHtml += '<span class="val-item val-warn"><span class="val-icon">&#9888;</span> ' + escHtml(w) + '</span>';
+      });
+      result.errors.forEach(e => {
+        vHtml += '<span class="val-item val-fail"><span class="val-icon">&#10007;</span> ' + escHtml(e) + '</span>';
+      });
+      if (!vHtml) {
+        vHtml = '<span class="val-empty">No WebMCP attributes found in your HTML</span>';
+      }
+      validationEl.innerHTML = vHtml;
+    }
+
+    function escHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    /* ===== INIT & EVENTS ===== */
+    const input = document.getElementById('pg-input');
+    const templateSelect = document.getElementById('pg-template');
+    const copyBtn = document.getElementById('pg-copy');
+    const resetBtn = document.getElementById('pg-reset');
+
+    function setTemplate(key) {
+      input.value = templates[key] || '';
+      parseAndRender();
+    }
+
+    function parseAndRender() {
+      const result = parseHTML(input.value);
+      renderAgentView(result);
+    }
+
+    // Input handler with debounce
+    let debounceTimer;
+    input.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(parseAndRender, 80);
+    });
+
+    // Tab key support in textarea
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + '  ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 2;
+        parseAndRender();
+      }
+    });
+
+    // Template select
+    templateSelect.addEventListener('change', function() {
+      setTemplate(this.value);
+    });
+
+    // Copy button
+    copyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText(input.value).then(() => {
+        this.classList.add('copied');
+        this.textContent = 'Copied!';
+        setTimeout(() => {
+          this.classList.remove('copied');
+          this.textContent = 'Copy HTML';
+        }, 1500);
+      });
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+      setTemplate(templateSelect.value);
+    });
+
+    // Resizable divider
+    (function initDivider() {
+      const divider = document.getElementById('pg-divider');
+      const editor = document.querySelector('.pg-editor');
+      const left = document.querySelector('.pg-code');
+      const right = document.querySelector('.pg-preview');
+      let dragging = false;
+
+      divider.addEventListener('mousedown', function(e) {
+        dragging = true;
+        divider.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function(e) {
+        if (!dragging) return;
+        const rect = editor.getBoundingClientRect();
+        const pct = ((e.clientX - rect.left) / rect.width) * 100;
+        if (pct < 20 || pct > 80) return;
+        left.style.flex = 'none';
+        right.style.flex = 'none';
+        left.style.width = pct + '%';
+        right.style.width = (100 - pct) + '%';
+      });
+
+      document.addEventListener('mouseup', function() {
+        if (dragging) {
+          dragging = false;
+          divider.classList.remove('dragging');
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    })();
+
+    // Load default template
+    setTemplate('booking');
+  </script>
+</body>
+</html>

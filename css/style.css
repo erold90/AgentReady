@@ -1135,6 +1135,71 @@ input { font-family: var(--font); }
   .compare-cards { grid-template-columns: 1fr; }
 }
 
+/* ===== TOOLS SECTION ===== */
+.tools-section {
+  padding: 80px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.tools-section h2 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.section-desc {
+  text-align: center;
+  color: var(--text-2);
+  margin-bottom: 48px;
+}
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.tool-card {
+  display: block;
+  padding: 32px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.3s;
+  position: relative;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+  border-color: var(--primary);
+}
+.tool-icon {
+  font-size: 36px;
+  margin-bottom: 16px;
+}
+.tool-card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.tool-card p {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.tool-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  text-transform: uppercase;
+}
+
 /* ===== PRICING ===== */
 .pricing-section {
   max-width: 1100px;
@@ -1483,6 +1548,7 @@ input { font-family: var(--font); }
   .problem-grid { grid-template-columns: 1fr; }
   .features-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr 1fr; }
   .results-header { flex-direction: column; align-items: stretch; }
   .score-card { align-self: center; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1496,6 +1562,7 @@ input { font-family: var(--font); }
 }
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
   .tabs { gap: 0; }
   .tab { padding: 10px 14px; font-size: 13px; }
   .header-nav { gap: 8px; }
