@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AgentReady — AI Agent Readiness Scanner",
-  "version": "1.0.0",
+  "version": "2.3.0",
   "description": "Scan any website for AI Agent Readiness. Analyze WebMCP implementation, generate code, and preview how AI agents see your site.",
   "permissions": ["activeTab", "scripting", "offscreen", "storage"],
   "action": {
