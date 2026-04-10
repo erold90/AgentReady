@@ -182,7 +182,8 @@ p { text-wrap: pretty; }
   letter-spacing: -0.02em;
 }
 .logo:hover { color: var(--text); text-decoration: none; }
-.logo-icon { font-size: 1.375rem; }
+.logo-icon { display: flex; align-items: center; color: #6366f1; }
+.logo-icon svg { width: 22px; height: 22px; }
 .header-nav {
   display: flex;
   align-items: center;
@@ -335,6 +336,12 @@ p { text-wrap: pretty; }
   color: var(--text-secondary);
   font-weight: 500;
 }
+.hero-trust span {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.hero-trust svg { flex-shrink: 0; }
 .badge-accent {
   background: var(--primary-light);
   color: var(--primary);
@@ -1518,12 +1525,24 @@ section {
   margin-bottom: 1rem;
   transition: all 0.3s ease;
 }
+/* Alternate feature icon colors */
+.feature-card:nth-child(2) .feature-icon { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+.feature-card:nth-child(3) .feature-icon { background: rgba(16,185,129,0.1); color: #10b981; }
+.feature-card:nth-child(4) .feature-icon { background: rgba(245,158,11,0.1); color: #f59e0b; }
+.feature-card:nth-child(5) .feature-icon { background: rgba(236,72,153,0.1); color: #ec4899; }
+.feature-card:nth-child(6) .feature-icon { background: rgba(14,165,233,0.1); color: #0ea5e9; }
+.feature-card:nth-child(7) .feature-icon { background: rgba(99,102,241,0.1); color: #6366f1; }
 .feature-card:hover .feature-icon {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
-  transform: scale(1.05);
-  box-shadow: 0 0 16px rgba(99,102,241,0.25);
+  transform: scale(1.08);
 }
+.feature-card:nth-child(1):hover .feature-icon { background: #3b82f6; box-shadow: 0 0 16px rgba(59,130,246,0.3); }
+.feature-card:nth-child(2):hover .feature-icon { background: #8b5cf6; box-shadow: 0 0 16px rgba(139,92,246,0.3); }
+.feature-card:nth-child(3):hover .feature-icon { background: #10b981; box-shadow: 0 0 16px rgba(16,185,129,0.3); }
+.feature-card:nth-child(4):hover .feature-icon { background: #f59e0b; box-shadow: 0 0 16px rgba(245,158,11,0.3); }
+.feature-card:nth-child(5):hover .feature-icon { background: #ec4899; box-shadow: 0 0 16px rgba(236,72,153,0.3); }
+.feature-card:nth-child(6):hover .feature-icon { background: #0ea5e9; box-shadow: 0 0 16px rgba(14,165,233,0.3); }
+.feature-card:nth-child(7):hover .feature-icon { background: #6366f1; box-shadow: 0 0 16px rgba(99,102,241,0.3); }
 .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.375rem; }
 .feature-card p { font-size: 0.8125rem; color: var(--text-secondary); line-height: 1.6; }
 .feature-badge {
@@ -1689,27 +1708,26 @@ section {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 .tool-card:hover::before { opacity: 1; }
-.tool-icon {
-  font-size: 2.25rem;
-  margin-bottom: 1rem;
-}
 .tool-icon-wrap {
-  width: 3rem;
-  height: 3rem;
+  width: 3.25rem;
+  height: 3.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius);
-  background: var(--primary-light);
   margin-bottom: 1rem;
   transition: all 0.3s ease;
 }
-.tool-card:hover .tool-icon-wrap {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-  transform: scale(1.05);
-  box-shadow: 0 0 16px rgba(99,102,241,0.25);
-}
+.tool-icon-wrap svg { transition: all 0.3s ease; }
+.tool-icon-blue { background: rgba(59,130,246,0.1); color: #3b82f6; }
+.tool-icon-violet { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+.tool-icon-emerald { background: rgba(16,185,129,0.1); color: #10b981; }
+.tool-icon-amber { background: rgba(245,158,11,0.1); color: #f59e0b; }
+.tool-card:hover .tool-icon-blue { background: #3b82f6; color: white; box-shadow: 0 0 20px rgba(59,130,246,0.3); }
+.tool-card:hover .tool-icon-violet { background: #8b5cf6; color: white; box-shadow: 0 0 20px rgba(139,92,246,0.3); }
+.tool-card:hover .tool-icon-emerald { background: #10b981; color: white; box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+.tool-card:hover .tool-icon-amber { background: #f59e0b; color: white; box-shadow: 0 0 20px rgba(245,158,11,0.3); }
+.tool-card:hover .tool-icon-wrap { transform: scale(1.08); }
 .tool-card h3 {
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
@@ -2033,7 +2051,8 @@ footer {
   flex-direction: column;
   gap: 0.5rem;
 }
-.footer-brand .logo-icon { font-size: 1.25rem; }
+.footer-brand .logo-icon { color: #6366f1; }
+.footer-brand .logo-icon svg { width: 20px; height: 20px; }
 .footer-brand p {
   font-size: 0.875rem;
   font-weight: 400;
