@@ -1508,6 +1508,54 @@ ${c.ret}
     revealEls.forEach(function(el) { observer.observe(el); });
   }
 
+  // === Animated counters ===
+  function initCounters() {
+    var counters = document.querySelectorAll('.trust-counter-value[data-target]');
+    if (!counters.length || !('IntersectionObserver' in window)) return;
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        var target = parseInt(el.dataset.target, 10);
+        var duration = target > 100 ? 2000 : 1200;
+        var start = 0;
+        var startTime = null;
+        function step(ts) {
+          if (!startTime) startTime = ts;
+          var progress = Math.min((ts - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+          el.textContent = Math.round(eased * target).toLocaleString() + (target > 100 ? '+' : '');
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        observer.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+    counters.forEach(function(el) { observer.observe(el); });
+  }
+
+  // === Hero particles ===
+  function initParticles() {
+    var container = document.querySelector('.hero');
+    if (!container || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var particlesDiv = document.createElement('div');
+    particlesDiv.className = 'hero-particles';
+    container.insertBefore(particlesDiv, container.firstChild);
+    for (var i = 0; i < 12; i++) {
+      var p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDuration = (6 + Math.random() * 8) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+      particlesDiv.appendChild(p);
+    }
+  }
+
   // === Start ===
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', function() {
+    init();
+    initCounters();
+    initParticles();
+  });
 })();
