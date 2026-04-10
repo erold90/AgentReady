@@ -1597,14 +1597,14 @@ ${c.ret}
         if (!entry.isIntersecting) return;
         var el = entry.target;
         var target = parseInt(el.dataset.target, 10);
-        var duration = target > 100 ? 2000 : 1200;
+        var duration = 1200;
         var start = 0;
         var startTime = null;
         function step(ts) {
           if (!startTime) startTime = ts;
           var progress = Math.min((ts - startTime) / duration, 1);
           var eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-          el.textContent = Math.round(eased * target).toLocaleString() + (target > 100 ? '+' : '');
+          el.textContent = Math.round(eased * target);
           if (progress < 1) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
