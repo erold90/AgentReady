@@ -407,9 +407,13 @@ p { text-wrap: pretty; }
   font-size: 0.8125rem;
   line-height: 1.7;
   color: #a9b1d6;
-  min-height: 220px;
-  overflow: hidden;
+  height: 320px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
 }
+/* Hide scrollbar but keep scroll */
+.terminal-body::-webkit-scrollbar { width: 0; }
+.terminal-body { scrollbar-width: none; }
 .terminal-line {
   white-space: pre;
   opacity: 0;

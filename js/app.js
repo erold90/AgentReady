@@ -1533,6 +1533,10 @@ ${c.ret}
       var lines = buildLines(scan);
       var i = 0;
 
+      function scrollToBottom() {
+        body.scrollTop = body.scrollHeight;
+      }
+
       function addLine() {
         if (i >= lines.length) {
           // Cursor
@@ -1540,6 +1544,7 @@ ${c.ret}
           cursor.className = 'terminal-line';
           cursor.innerHTML = '<span class="t-prompt">$</span> <span class="t-cursor"></span>';
           body.appendChild(cursor);
+          scrollToBottom();
           // Stats bar
           var stats = document.createElement('div');
           stats.className = 'terminal-stats';
@@ -1554,6 +1559,7 @@ ${c.ret}
         el.className = 'terminal-line';
         el.innerHTML = line.html || '&nbsp;';
         body.appendChild(el);
+        scrollToBottom();
         i++;
         animationTimer = setTimeout(addLine, line.delay);
       }
