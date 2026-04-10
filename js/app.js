@@ -1435,60 +1435,134 @@ ${c.ret}
   // === Hero Terminal Animation ===
   function initTerminalAnimation() {
     var body = document.getElementById('terminal-body');
-    if (!body) return;
+    var terminal = document.getElementById('hero-terminal');
+    if (!body || !terminal) return;
 
-    var lines = [
-      { delay: 800, html: '' },
-      { delay: 200, html: '<span class="t-dim">Scanning stripe.com...</span>' },
-      { delay: 600, html: '' },
-      { delay: 300, html: '<span class="t-pass">✓</span> <span class="t-bold">WebMCP Compliance</span>      <span class="t-pass">18</span><span class="t-dim">/20</span>' },
-      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">AI Discovery</span>           <span class="t-pass">15</span><span class="t-dim">/15</span>' },
-      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">Structured Data</span>        <span class="t-pass">12</span><span class="t-dim">/15</span>' },
-      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">robots.txt</span>             <span class="t-pass">10</span><span class="t-dim">/10</span>' },
-      { delay: 200, html: '<span class="t-warn">⚠</span> <span class="t-bold">Accessibility</span>           <span class="t-warn">8</span><span class="t-dim">/10</span>' },
-      { delay: 200, html: '<span class="t-fail">✗</span> <span class="t-bold">MCP Discovery</span>           <span class="t-fail">0</span><span class="t-dim">/15</span>' },
-      { delay: 200, html: '<span class="t-fail">✗</span> <span class="t-bold">llms.txt</span>                <span class="t-fail">0</span><span class="t-dim">/15</span>' },
-      { delay: 400, html: '' },
-      { delay: 100, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' },
-      { delay: 300, html: '  <span class="t-score">Score: 63/100</span> <span class="t-dim">—</span> <span class="t-warn">Needs Work</span>' },
-      { delay: 100, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' },
-      { delay: 400, html: '' },
-      { delay: 200, html: '<span class="t-dim">→</span> <span class="t-pass">3</span> forms detected, <span class="t-pass">1</span> WebMCP-ready' },
-      { delay: 200, html: '<span class="t-dim">→</span> <span class="t-pass">4</span> AI protocols found' },
-      { delay: 200, html: '<span class="t-dim">→</span> Run <span class="t-cmd">agentready fix</span> to generate missing files' },
+    // Multiple scan scenarios for the loop
+    var scans = [
+      {
+        url: 'https://stripe.com',
+        time: '1.2s',
+        categories: [
+          { name: 'WebMCP Compliance', score: 18, max: 20, status: 'pass' },
+          { name: 'AI Discovery',      score: 15, max: 15, status: 'pass' },
+          { name: 'Structured Data',   score: 12, max: 15, status: 'pass' },
+          { name: 'robots.txt',        score: 10, max: 10, status: 'pass' },
+          { name: 'Accessibility',     score: 8,  max: 10, status: 'warn' },
+          { name: 'MCP Discovery',     score: 0,  max: 15, status: 'fail' },
+          { name: 'llms.txt',          score: 0,  max: 15, status: 'fail' },
+        ],
+        total: 63, verdict: 'Needs Work', verdictClass: 'warn',
+        summary: ['<span class="t-pass">3</span> forms detected, <span class="t-pass">1</span> WebMCP-ready', '<span class="t-pass">4</span> AI protocols found', 'Run <span class="t-cmd">agentready fix</span> to generate missing files']
+      },
+      {
+        url: 'https://github.com',
+        time: '0.9s',
+        categories: [
+          { name: 'WebMCP Compliance', score: 20, max: 20, status: 'pass' },
+          { name: 'AI Discovery',      score: 15, max: 15, status: 'pass' },
+          { name: 'Structured Data',   score: 15, max: 15, status: 'pass' },
+          { name: 'robots.txt',        score: 10, max: 10, status: 'pass' },
+          { name: 'Accessibility',     score: 9,  max: 10, status: 'pass' },
+          { name: 'MCP Discovery',     score: 12, max: 15, status: 'pass' },
+          { name: 'llms.txt',          score: 10, max: 15, status: 'warn' },
+        ],
+        total: 91, verdict: 'Excellent', verdictClass: 'pass',
+        summary: ['<span class="t-pass">12</span> forms detected, <span class="t-pass">12</span> WebMCP-ready', '<span class="t-pass">5</span> AI protocols found', 'Site is fully agent-ready!']
+      },
+      {
+        url: 'https://booking.com',
+        time: '1.8s',
+        categories: [
+          { name: 'WebMCP Compliance', score: 5,  max: 20, status: 'fail' },
+          { name: 'AI Discovery',      score: 8,  max: 15, status: 'warn' },
+          { name: 'Structured Data',   score: 14, max: 15, status: 'pass' },
+          { name: 'robots.txt',        score: 7,  max: 10, status: 'warn' },
+          { name: 'Accessibility',     score: 6,  max: 10, status: 'warn' },
+          { name: 'MCP Discovery',     score: 0,  max: 15, status: 'fail' },
+          { name: 'llms.txt',          score: 0,  max: 15, status: 'fail' },
+        ],
+        total: 40, verdict: 'Poor', verdictClass: 'fail',
+        summary: ['<span class="t-pass">8</span> forms detected, <span class="t-fail">0</span> WebMCP-ready', '<span class="t-warn">2</span> AI protocols found', 'Run <span class="t-cmd">agentready fix</span> to generate missing files']
+      }
     ];
 
-    var i = 0;
-    function addLine() {
-      if (i >= lines.length) {
-        // Add cursor at the end
-        var cursor = document.createElement('div');
-        cursor.className = 'terminal-line';
-        cursor.style.animationDelay = '0s';
-        cursor.innerHTML = '<span class="t-prompt">$</span> <span class="t-cursor"></span>';
-        body.appendChild(cursor);
+    var scanIndex = 0;
+    var animationTimer = null;
 
-        // Add stats bar
-        var terminal = document.getElementById('hero-terminal');
-        if (terminal && !terminal.querySelector('.terminal-stats')) {
-          var stats = document.createElement('div');
-          stats.className = 'terminal-stats';
-          stats.innerHTML = '<span>7 categories · 5 protocols</span><span class="stat-highlight">Scanned in 1.2s</span>';
-          terminal.appendChild(stats);
-        }
-        return;
-      }
-      var line = lines[i];
-      var el = document.createElement('div');
-      el.className = 'terminal-line';
-      el.innerHTML = line.html || '&nbsp;';
-      body.appendChild(el);
-      i++;
-      setTimeout(addLine, lines[i - 1].delay);
+    function padRight(str, len) {
+      while (str.length < len) str += ' ';
+      return str;
     }
 
-    // Start after hero entrance animations
-    setTimeout(addLine, 1800);
+    function buildLines(scan) {
+      var icon = { pass: '✓', warn: '⚠', fail: '✗' };
+      var lines = [
+        { delay: 600, html: '<span class="t-dim">Scanning ' + scan.url.replace('https://', '') + '...</span>' },
+        { delay: 500, html: '' }
+      ];
+      scan.categories.forEach(function(cat) {
+        var name = padRight(cat.name, 20);
+        lines.push({
+          delay: 180,
+          html: '<span class="t-' + cat.status + '">' + icon[cat.status] + '</span> <span class="t-bold">' + name + '</span> <span class="t-' + cat.status + '">' + (cat.score < 10 ? ' ' : '') + cat.score + '</span><span class="t-dim">/' + cat.max + '</span>'
+        });
+      });
+      lines.push({ delay: 350, html: '' });
+      lines.push({ delay: 80, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' });
+      lines.push({ delay: 250, html: '  <span class="t-score">Score: ' + scan.total + '/100</span> <span class="t-dim">—</span> <span class="t-' + scan.verdictClass + '">' + scan.verdict + '</span>' });
+      lines.push({ delay: 80, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' });
+      lines.push({ delay: 300, html: '' });
+      scan.summary.forEach(function(s) {
+        lines.push({ delay: 150, html: '<span class="t-dim">→</span> ' + s });
+      });
+      return lines;
+    }
+
+    function runScan() {
+      var scan = scans[scanIndex % scans.length];
+      scanIndex++;
+
+      // Clear body
+      body.innerHTML = '<div class="terminal-line"><span class="t-prompt">$</span> <span class="t-cmd">npx webmcp-scanner</span> <span class="t-url">' + scan.url + '</span></div>';
+
+      // Remove old stats bar
+      var oldStats = terminal.querySelector('.terminal-stats');
+      if (oldStats) oldStats.remove();
+
+      var lines = buildLines(scan);
+      var i = 0;
+
+      function addLine() {
+        if (i >= lines.length) {
+          // Cursor
+          var cursor = document.createElement('div');
+          cursor.className = 'terminal-line';
+          cursor.innerHTML = '<span class="t-prompt">$</span> <span class="t-cursor"></span>';
+          body.appendChild(cursor);
+          // Stats bar
+          var stats = document.createElement('div');
+          stats.className = 'terminal-stats';
+          stats.innerHTML = '<span>7 categories · 5 protocols</span><span class="stat-highlight">Scanned in ' + scan.time + '</span>';
+          terminal.appendChild(stats);
+          // Wait then loop
+          animationTimer = setTimeout(runScan, 4000);
+          return;
+        }
+        var line = lines[i];
+        var el = document.createElement('div');
+        el.className = 'terminal-line';
+        el.innerHTML = line.html || '&nbsp;';
+        body.appendChild(el);
+        i++;
+        animationTimer = setTimeout(addLine, line.delay);
+      }
+
+      animationTimer = setTimeout(addLine, 800);
+    }
+
+    // Start after hero entrance
+    animationTimer = setTimeout(runScan, 1200);
   }
 
   // === Scroll Reveal ===
