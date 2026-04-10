@@ -328,6 +328,40 @@ p { text-wrap: pretty; }
   margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
+/* Hero extension bar */
+.hero-extension {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.hero-extension-label {
+  font-size: 0.8125rem;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.hero-ext-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.hero-ext-link:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  background: var(--primary-light);
+  text-decoration: none;
+}
+.hero-ext-link img { flex-shrink: 0; }
+
 .hero-trust {
   display: grid;
   grid-template-columns: 1fr 1fr;
