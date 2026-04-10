@@ -1494,7 +1494,9 @@ ${c.ret}
   // === Scroll Reveal ===
   function initScrollReveal() {
     var revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
-    if (!revealEls.length) return;
+    if (!revealEls.length || !('IntersectionObserver' in window)) return;
+    // Activate reveal system — without this class, content stays visible
+    document.body.classList.add('js-reveal');
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
@@ -1502,7 +1504,7 @@ ${c.ret}
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
     revealEls.forEach(function(el) { observer.observe(el); });
   }
 
