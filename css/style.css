@@ -295,9 +295,9 @@ p { text-wrap: pretty; }
   letter-spacing: 0.02em;
 }
 .hero h1 {
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
   font-weight: 800;
-  line-height: 1.08;
+  line-height: 1.12;
   letter-spacing: -0.04em;
   margin-bottom: 1.25rem;
 }
@@ -328,10 +328,9 @@ p { text-wrap: pretty; }
   flex-wrap: wrap;
 }
 .hero-trust {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1rem;
   font-size: 0.8125rem;
   color: var(--text-secondary);
   font-weight: 500;
