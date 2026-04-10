@@ -1,0 +1,7 @@
+node_modules/
+screenshots/
+.memsearch/
+SESSION_RESUME.md
+package-lock.json
+package.json
+*.log
