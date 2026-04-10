@@ -68,6 +68,9 @@
     // Scroll reveal animations (IntersectionObserver)
     initScrollReveal();
 
+    // Hero terminal typing animation
+    initTerminalAnimation();
+
     // Handle bookmarklet data via URL param
     const params = new URLSearchParams(window.location.search);
     const scanParam = params.get('scan');
@@ -1427,6 +1430,65 @@ ${c.ret}
     tabs.forEach(function(t, i) { t.classList.toggle('active', i === index); });
     $('#codegen-path').textContent = codeGenFiles[index].path;
     $('#codegen-code').textContent = codeGenFiles[index].code;
+  }
+
+  // === Hero Terminal Animation ===
+  function initTerminalAnimation() {
+    var body = document.getElementById('terminal-body');
+    if (!body) return;
+
+    var lines = [
+      { delay: 800, html: '' },
+      { delay: 200, html: '<span class="t-dim">Scanning stripe.com...</span>' },
+      { delay: 600, html: '' },
+      { delay: 300, html: '<span class="t-pass">✓</span> <span class="t-bold">WebMCP Compliance</span>      <span class="t-pass">18</span><span class="t-dim">/20</span>' },
+      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">AI Discovery</span>           <span class="t-pass">15</span><span class="t-dim">/15</span>' },
+      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">Structured Data</span>        <span class="t-pass">12</span><span class="t-dim">/15</span>' },
+      { delay: 200, html: '<span class="t-pass">✓</span> <span class="t-bold">robots.txt</span>             <span class="t-pass">10</span><span class="t-dim">/10</span>' },
+      { delay: 200, html: '<span class="t-warn">⚠</span> <span class="t-bold">Accessibility</span>           <span class="t-warn">8</span><span class="t-dim">/10</span>' },
+      { delay: 200, html: '<span class="t-fail">✗</span> <span class="t-bold">MCP Discovery</span>           <span class="t-fail">0</span><span class="t-dim">/15</span>' },
+      { delay: 200, html: '<span class="t-fail">✗</span> <span class="t-bold">llms.txt</span>                <span class="t-fail">0</span><span class="t-dim">/15</span>' },
+      { delay: 400, html: '' },
+      { delay: 100, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' },
+      { delay: 300, html: '  <span class="t-score">Score: 63/100</span> <span class="t-dim">—</span> <span class="t-warn">Needs Work</span>' },
+      { delay: 100, html: '<span class="t-separator">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>' },
+      { delay: 400, html: '' },
+      { delay: 200, html: '<span class="t-dim">→</span> <span class="t-pass">3</span> forms detected, <span class="t-pass">1</span> WebMCP-ready' },
+      { delay: 200, html: '<span class="t-dim">→</span> <span class="t-pass">4</span> AI protocols found' },
+      { delay: 200, html: '<span class="t-dim">→</span> Run <span class="t-cmd">agentready fix</span> to generate missing files' },
+    ];
+
+    var i = 0;
+    function addLine() {
+      if (i >= lines.length) {
+        // Add cursor at the end
+        var cursor = document.createElement('div');
+        cursor.className = 'terminal-line';
+        cursor.style.animationDelay = '0s';
+        cursor.innerHTML = '<span class="t-prompt">$</span> <span class="t-cursor"></span>';
+        body.appendChild(cursor);
+
+        // Add stats bar
+        var terminal = document.getElementById('hero-terminal');
+        if (terminal && !terminal.querySelector('.terminal-stats')) {
+          var stats = document.createElement('div');
+          stats.className = 'terminal-stats';
+          stats.innerHTML = '<span>7 categories · 5 protocols</span><span class="stat-highlight">Scanned in 1.2s</span>';
+          terminal.appendChild(stats);
+        }
+        return;
+      }
+      var line = lines[i];
+      var el = document.createElement('div');
+      el.className = 'terminal-line';
+      el.innerHTML = line.html || '&nbsp;';
+      body.appendChild(el);
+      i++;
+      setTimeout(addLine, lines[i - 1].delay);
+    }
+
+    // Start after hero entrance animations
+    setTimeout(addLine, 1800);
   }
 
   // === Scroll Reveal ===
